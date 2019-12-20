@@ -1,0 +1,56 @@
+.mai-grid-standard {
+	display: grid;
+	grid-template-columns: repeat( calc( 2 * var(--mai-grid-columns) ), 1fr );
+	grid-gap: var(--mai-grid-gutter);
+}
+
+.mai-grid-standard .mai-grid__entry {
+	grid-column: span 2;
+	margin-bottom: var(--mai-grid-gutter);
+}
+
+/* offset first item of last row */
+.mai-grid-standard .mai-grid[style*="--mai-grid-columns: 1;"] .mai-grid__entry:nth-child(1n+1):nth-last-child(-n+1),
+.mai-grid-standard .mai-grid[style*="--mai-grid-columns: 2;"] .mai-grid__entry:nth-child(2n+1):nth-last-child(-n+2),
+.mai-grid-standard .mai-grid[style*="--mai-grid-columns: 3;"] .mai-grid__entry:nth-child(3n+1):nth-last-child(-n+3),
+.mai-grid-standard .mai-grid[style*="--mai-grid-columns: 4;"] .mai-grid__entry:nth-child(4n+1):nth-last-child(-n+4),
+.mai-grid-standard .mai-grid[style*="--mai-grid-columns: 5;"] .mai-grid__entry:nth-child(5n+1):nth-last-child(-n+5),
+.mai-grid-standard .mai-grid[style*="--mai-grid-columns: 6;"] .mai-grid__entry:nth-child(6n+1):nth-last-child(-n+6) {
+	grid-column: calc(var(--mai-grid-empty) + 1) / span 2;
+}
+
+.mai-grid-standard .mai-grid__entry > * + * {
+	margin-top: 16px;
+}
+
+.mai-grid-standard .mai-grid__link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.mai-grid-standard .mai-grid__link--image {
+	display: block;
+}
+
+.mai-grid-standard .mai-grid__title {
+	margin-bottom: 0;
+}
+
+.mai-grid-standard .mai__grid-image {
+	display: block;
+	width: 100%;
+}
+
+.mai-grid-standard .mai-grid__content > p:last-of-type {
+	margin-bottom: 0;
+}
+
+.mai-grid-standard .mai-grid__link--more {
+	display: inline-block;
+	background-color: #e8e8e8;
+	color: rgba(0,0,0,.5);
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	padding: 8px 16px;
+}

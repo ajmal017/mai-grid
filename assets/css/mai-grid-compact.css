@@ -1,0 +1,76 @@
+.mai-grid-compact {
+	display: grid;
+	grid-template-columns: repeat( calc( 2 * var(--mai-grid-columns) ), 1fr );
+	grid-gap: var(--mai-grid-gutter);
+}
+
+.mai-grid-compact .mai-grid__entry {
+	grid-column: span 2;
+	display: grid;
+	grid-gap: var(--mai-grid-gutter);
+	grid-template-columns: auto 1fr;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	padding: 24px;
+}
+
+/* offset first item of last row */
+.mai-grid-compact .mai-grid[style*="--mai-grid-columns: 1;"] .mai-grid__entry:nth-child(1n+1):nth-last-child(-n+1),
+.mai-grid-compact .mai-grid[style*="--mai-grid-columns: 2;"] .mai-grid__entry:nth-child(2n+1):nth-last-child(-n+2),
+.mai-grid-compact .mai-grid[style*="--mai-grid-columns: 3;"] .mai-grid__entry:nth-child(3n+1):nth-last-child(-n+3),
+.mai-grid-compact .mai-grid[style*="--mai-grid-columns: 4;"] .mai-grid__entry:nth-child(4n+1):nth-last-child(-n+4),
+.mai-grid-compact .mai-grid[style*="--mai-grid-columns: 5;"] .mai-grid__entry:nth-child(5n+1):nth-last-child(-n+5),
+.mai-grid-compact .mai-grid[style*="--mai-grid-columns: 6;"] .mai-grid__entry:nth-child(6n+1):nth-last-child(-n+6) {
+	grid-column: calc(var(--mai-grid-empty) + 1) / span 2;
+}
+
+.mai-grid-compact .mai-grid__link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.mai-grid-compact .mai__grid-image {
+	display: block;
+}
+
+.mai-grid-compact .mai-grid__entry-content {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	-ms-flex-direction: column;
+	flex-direction: column;
+}
+
+.mai-grid-compact .mai-grid__entry-content > * + * {
+	margin-top: 8px;
+}
+
+.mai-grid-compact .mai-grid__title {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	margin-bottom: 0;
+	overflow: hidden;
+}
+
+.mai-grid-compact .mai-grid__link--more {
+	display: inline-block;
+	background-color: #e8e8e8;
+	color: rgba(0,0,0,.5);
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	padding: 8px 16px;
+}
+
+/* boxed */
+.mai-grid-compact .mai-grid__entry {
+	border: 1px solid rgba(0,0,0,.04);
+	border-radius: 3px;
+}
+
+.mai-grid-compact .mai-grid__entry .mai-grid__content {
+}
