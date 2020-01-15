@@ -4,6 +4,13 @@ jQuery(document).ready(function($) {
 		return
 	}
 
+
+	/**
+	 * TODO:
+	 * On change of Template, change some Show, image size, etc. value defaults.
+	 */
+
+
 	// var instance = new acf.Model({
 	// 	events: {
 	// 		'change': 'onChange',
