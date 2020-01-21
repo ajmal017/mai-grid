@@ -307,14 +307,21 @@ class Mai_Grid_Block {
 		// Show.
 		foreach( $this->get_show_fields() as $name => $key ) {
 			add_filter( "acf/load_field/key={$key}", function( $field ) {
+				// Keep admin clean.
+				if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+					return $field;
+				}
+				$field = $this->add_conditional_logic( $field );
 				$field['label'] = '';
+				// TODO: JS to get template value and set defaults? Too aggressive?
+				// $field['default'] = '';
 				return $field;
 			});
 		}
-		add_filter( "acf/load_field/key={$this->fields['show_image']}",     array( $this, 'load_show_image' ) );
-		add_filter( "acf/load_field/key={$this->fields['show_title']}",     array( $this, 'load_show_title' ) );
-		add_filter( "acf/load_field/key={$this->fields['show_date']}",      array( $this, 'load_show_date' ) );
-		add_filter( "acf/load_field/key={$this->fields['show_author']}",    array( $this, 'load_show_author' ) );
+		// add_filter( "acf/load_field/key={$this->fields['show_image']}",     array( $this, 'load_show_image' ) );
+		// add_filter( "acf/load_field/key={$this->fields['show_title']}",     array( $this, 'load_show_title' ) );
+		// add_filter( "acf/load_field/key={$this->fields['show_date']}",      array( $this, 'load_show_date' ) );
+		// add_filter( "acf/load_field/key={$this->fields['show_author']}",    array( $this, 'load_show_author' ) );
 		// Image Size.
 		add_filter( "acf/load_field/key={$this->fields['image_size']}",     array( $this, 'load_image_sizes' ) );
 		// More Link Text.
@@ -541,7 +548,7 @@ class Mai_Grid_Block {
 	}
 
 	/**
-	 * TODO: Show options should be individual fields.
+	 * DONE?: Show options should be individual fields.
 	 * 1. We can have conditional fields like image size right under Image checkbox, content limit under content/excerpt, and more link text under more link.
 	 * 2. We can use a grid template config to decide which fields are enabled/allowed.
 	 */
@@ -555,56 +562,38 @@ class Mai_Grid_Block {
 	/**
 	 * Load Show Image.
 	 */
-	function load_show_image( $field ) {
-		// TODO: Make this a helper method.
-		$field['default_value'] = true;
-		$conditions = array();
-		foreach( $this->get_templates() as $name => $values ) {
-			// Bail if this field is supported.
-			if ( in_array( $field['name'], $values['supports'] ) ) {
-				continue;
-			}
-			$conditions[] = array(
-				'field'    => $this->fields[ $field['name'] ],
-				'operator' => '!=',
-				'value'    => $name,
-			);
-		}
-		// If existing conditional logic.
-		if ( $field['conditional_logic'] ) {
-			// Loop through and add this condition to each.
-			foreach( $field['conditional_logic'] as $cl_index => $cl_values ) {
-				$field['conditional_logic'][$cl_index] = array_merge( $field['conditional_logic'][$cl_index], $conditions );
-			}
-		}
-		// No existing conditions.
-		else {
-			$field['conditional_logic'] = array( $conditions );
-		}
-		// vdd( $field );
-		return $field;
-	}
+	// function load_show_image( $field ) {
+	// 	$field = $this->add_conditional_logic( $field );
+	// 	$field['default_value'] = true;
+	// 	return $field;
+	// }
+
 	/**
 	 * Load Show Title.
 	 */
-	function load_show_title( $field ) {
-		$field['default_value'] = true;
-		return $field;
-	}
+	// function load_show_title( $field ) {
+	// 	$field = $this->add_conditional_logic( $field );
+	// 	$field['default_value'] = true;
+	// 	return $field;
+	// }
+
 	/**
 	 * Load Show Date.
 	 */
-	function load_show_date( $field ) {
-		$field['default_value'] = false;
-		return $field;
-	}
+	// function load_show_date( $field ) {
+	// 	$field = $this->add_conditional_logic( $field );
+	// 	$field['default_value'] = false;
+	// 	return $field;
+	// }
+
 	/**
 	 * Load Show Author.
 	 */
-	function load_show_author( $field ) {
-		$field['default_value'] = false;
-		return $field;
-	}
+	// function load_show_author( $field ) {
+	// 	$field = $this->add_conditional_logic( $field );
+	// 	$field['default_value'] = false;
+	// 	return $field;
+	// }
 
 	/**
 	 * Load image sizes.
@@ -757,19 +746,64 @@ class Mai_Grid_Block {
 
 		if ( is_admin() ) {
 
-			wp_enqueue_script( 'mai-acf-wp-query', "{$this->base_url}/js/mai-acf-wp-query{$this->suffix}.js", array(), $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/js/mai-acf-wp-query{$this->suffix}.js" ) ), true );
+			wp_enqueue_style( 'mai-grid-entries-admin', "{$this->base_url}/css/mai-grid-admin{$this->suffix}.css", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/css/mai-grid-admin{$this->suffix}.css" ) ) );
+
+			wp_enqueue_script( 'mai-acf-wp-query', "{$this->base_url}/js/mai-acf-wp-query{$this->suffix}.js", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/js/mai-acf-wp-query{$this->suffix}.js" ) ), true );
 			wp_localize_script( 'mai-acf-wp-query', 'maiACFWPQueryVars', array(
 				'fields' => $this->get_wp_query_fields(),
 				'keys'   => array_values( $this->get_wp_query_fields() ),
 			) );
 
-			wp_enqueue_script( 'mai-grid-entries-admin', "{$this->base_url}/js/mai-grid-admin{$this->suffix}.js", array(), $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/js/mai-grid-admin{$this->suffix}.js" ) ), true );
+			wp_enqueue_script( 'mai-grid-entries-admin', "{$this->base_url}/js/mai-grid-admin{$this->suffix}.js", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/js/mai-grid-admin{$this->suffix}.js" ) ), true );
 			wp_localize_script( 'mai-grid-entries-admin', 'maiGridVars', $this->get_templates() );
 		}
 
 		// wp_enqueue_style( 'mai-grid', "{$this->base_url}/css/mai-grid-entries{$this->suffix}.css", array(), $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/css/mai-grid-entries{$this->suffix}.css" ) ) );
 	}
 
+	function add_conditional_logic( $field ) {
+
+		$conditions = array();
+		foreach( $this->get_templates() as $template_name => $template_values ) {
+			// Bail if this field is supported.
+			if ( in_array( $field['name'], $template_values['supports'] ) ) {
+				continue;
+			}
+			// Add condition to hide field.
+			$conditions[] = array(
+				'field'    => $this->fields['template'],
+				'operator' => '!=',
+				'value'    => $template_name,
+			);
+		}
+
+		// Bail if no new conditions on this field.
+		if ( empty( $conditions ) ) {
+			return $field;
+		}
+
+		// If existing conditional logic.
+		if ( $field['conditional_logic'] ) {
+			// Loop through and add this condition to each.
+			foreach( $field['conditional_logic'] as $logic_index => $logic_values ) {
+				$field['conditional_logic'][ $logic_index ][] = $conditions;
+			}
+		}
+		// No existing conditions.
+		else {
+			$field['conditional_logic'] = array( $conditions );
+		}
+
+		// Send it.
+		return $field;
+	}
+
+	/**
+	 *
+	 * TODO: defaults won't work with PHP. Needs to be JS, but that would change the actual values, not the default.
+	 * Maybe we don't do this.
+	 *
+	 */
 	function get_templates() {
 		return array(
 			'standard' => array(
@@ -786,6 +820,10 @@ class Mai_Grid_Block {
 					'show_entry_meta_footer',
 					'show_more_link',
 				),
+				'defaults' => array(
+					'show_image' => true,
+					'show_title' => true,
+				),
 			),
 			'background' => array(
 				'label'    => __( 'Background', 'mai-grid' ),
@@ -793,6 +831,10 @@ class Mai_Grid_Block {
 					// 'show_image',
 					'show_title',
 					// 'show_more_link',
+				),
+				'defaults' => array(
+					'show_image' => true,
+					'show_title' => true,
 				),
 			),
 			'compact' => array(
@@ -865,6 +907,7 @@ class Mai_Grid_Block {
 
 	function get_display_fields() {
 		return array(
+			'template'               => 'field_5de9b96fb69b0',
 			'content_limit'  => 'field_5bd51ac107244',
 			'image_size'     => 'field_5bd50e580d1e9',
 			'more_link_text' => 'field_5c85465018395',
@@ -873,7 +916,6 @@ class Mai_Grid_Block {
 
 	function get_layout_fields() {
 		return array(
-			'template'   => 'field_5de9b96fb69b0',
 			'columns'    => 'field_5c854069d358c',
 			'align_cols' => 'field_5c853e6672972',
 			'align_text' => 'field_5c853f84eacd6',
