@@ -1,17 +1,15 @@
 .mai-grid {
 	display: grid;
 	grid-template-columns: repeat( calc( 2 * var(--mai-grid-columns) ), 1fr );
-	grid-gap: var(--mai-grid-gutter);
+	grid-gap: var(--mai-grid-gutter, 24px);
 }
 
 .mai-grid__entry {
 	grid-column: span 2;
 	display: -webkit-box;
-	display: -ms-flexbox;
 	display: flex;
 	-webkit-box-orient: vertical;
 	-webkit-box-direction: normal;
-	-ms-flex-direction: column;
 	flex-direction: column;
 	margin-bottom: calc( var(--mai-grid-gutter) + var(--mai-grid-gutter) );
 }

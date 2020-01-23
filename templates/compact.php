@@ -1,7 +1,4 @@
 <?php
-
-// vd( $data->more_link );
-
 printf( '<div class="mai-grid__entry">', '' );
 	// Image.
 	if ( $data->image ) {

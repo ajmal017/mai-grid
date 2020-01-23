@@ -159,10 +159,9 @@ class Mai_Grid_Block {
 			$rows    = absint( ceil( $items / $columns ) );
 			$empty   = ( $columns * $rows ) - $items;
 
-			printf( '<div class="mai-grid mai-grid-%s" style="--mai-grid-columns: %s;--mai-grid-gutter: %s;--mai-grid-empty: %s;">',
+			printf( '<div class="mai-grid mai-grid-%s" style="--mai-grid-columns: %s;--mai-grid-empty: %s;">',
 				sanitize_html_class( $this->values['template'] ),
 				$this->values['columns'],
-				'16px',
 				$empty
 			);
 
@@ -828,7 +827,7 @@ class Mai_Grid_Block {
 			'background' => array(
 				'label'    => __( 'Background', 'mai-grid' ),
 				'supports' => array(
-					// 'show_image',
+					'show_image',
 					'show_title',
 					// 'show_more_link',
 				),

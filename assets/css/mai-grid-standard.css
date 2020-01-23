@@ -1,7 +1,7 @@
 .mai-grid-standard {
 	display: grid;
 	grid-template-columns: repeat( calc( 2 * var(--mai-grid-columns) ), 1fr );
-	grid-gap: var(--mai-grid-gutter);
+	grid-gap: var(--mai-grid-gutter, 24px);
 }
 
 .mai-grid-standard .mai-grid__entry {
@@ -33,6 +33,7 @@
 }
 
 .mai-grid-standard .mai-grid__title {
+	font-size: 22px;
 	margin-bottom: 0;
 }
 
