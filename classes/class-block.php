@@ -60,19 +60,19 @@ class Mai_Grid_Block {
 		// Get the values.
 		$this->values = array(
 			// Query.
-			'post_type'      => get_field( 'post_type' ),
-			'posts_per_page' => get_field( 'posts_per_page' ),
-			'offset'         => get_field( 'offset' ),
-			'query_by'       => get_field( 'query_by' ),
-			'post__in'       => get_field( 'post__in' ),
-			'taxonomies'     => get_field( 'taxonomies' ),
-			'relation'       => get_field( 'relation' ),
-			'parent'         => get_field( 'parent' ),
-			'orderby'        => get_field( 'orderby' ),
-			'meta_key'       => get_field( 'meta_key' ),
-			'order'          => get_field( 'order' ),
-			'exclude'        => get_field( 'exclude' ),
-			'load_more'      => get_field( 'load_more' ),
+			'post_type'              => get_field( 'post_type' ),
+			'posts_per_page'         => get_field( 'posts_per_page' ),
+			'offset'                 => get_field( 'offset' ),
+			'query_by'               => get_field( 'query_by' ),
+			'post__in'               => get_field( 'post__in' ),
+			'taxonomies'             => get_field( 'taxonomies' ),
+			'relation'               => get_field( 'relation' ),
+			'post_parent__in'        => get_field( 'post_parent__in' ),
+			'orderby'                => get_field( 'orderby' ),
+			'meta_key'               => get_field( 'meta_key' ),
+			'order'                  => get_field( 'order' ),
+			'exclude'                => get_field( 'exclude' ),
+			'load_more'              => get_field( 'load_more' ),
 			// Display.
 			'show_image'             => get_field( 'show_image' ),
 			'show_title'             => get_field( 'show_title' ),
@@ -83,64 +83,70 @@ class Mai_Grid_Block {
 			'show_entry_meta_header' => get_field( 'show_entry_meta_header' ),
 			'show_entry_meta_footer' => get_field( 'show_entry_meta_footer' ),
 			'show_more_link'         => get_field( 'show_more_link' ),
+			'boxed'                  => get_field( 'boxed' ),
 
-			'content_limit'  => get_field( 'content_limit' ),
-			'image_size'     => get_field( 'image_size' ),
-			'more_link_text' => get_field( 'more_link_text' ),
+			'content_limit'          => get_field( 'content_limit' ),
+			'image_size'             => get_field( 'image_size' ),
+			'more_link_text'         => get_field( 'more_link_text' ),
 			// Layout.
-			'template'       => get_field( 'template' ),
-			'columns'        => get_field( 'columns' ),
-			'align_cols'     => get_field( 'align_cols' ),
-			'align_text'     => get_field( 'align_text' ),
-			'gutter'         => get_field( 'gutter' ),
+			'template'               => get_field( 'template' ),
+			'columns'                => get_field( 'columns' ),
+			'align_cols'             => get_field( 'align_cols' ),
+			'align_text'             => get_field( 'align_text' ),
+			'grid_column_gap'        => get_field( 'grid_column_gap' ),
+			'grid_row_gap'           => get_field( 'grid_row_gap' ),
 		);
 
 		// Sanitize.
 		$this->values = array(
 			// Query.
-			'post_type'      => array_map( 'esc_attr', (array) $this->values[ 'post_type' ] ),
-			'posts_per_page' => absint( $this->values[ 'posts_per_page' ] ),
-			'offset'         => absint( $this->values[ 'offset' ] ),
-			'query_by'       => $this->values[ 'query_by' ],
-			'post__in'       => $this->values[ 'post__in' ],
-			'taxonomies'     => $this->values[ 'taxonomies' ],
-			'relation'       => $this->values[ 'relation' ],
-			'parent'         => $this->values[ 'parent' ],
-			'orderby'        => $this->values[ 'orderby' ],
-			'meta_key'       => $this->values[ 'meta_key' ],
-			'order'          => $this->values[ 'order' ],
-			'exclude'        => $this->values[ 'exclude' ],
-			'load_more'      => (bool) $this->values[ 'load_more' ],
+			'post_type'              => array_map( 'esc_attr', (array) $this->values['post_type'] ),
+			'posts_per_page'         => absint( $this->values['posts_per_page'] ),
+			'offset'                 => absint( $this->values['offset'] ),
+			'query_by'               => $this->values['query_by'],
+			'post__in'               => $this->values['post__in'],
+			'taxonomies'             => $this->values['taxonomies'],
+			'relation'               => $this->values['relation'],
+			'post_parent__in'        => $this->values['post_parent__in'],
+			'orderby'                => $this->values['orderby'],
+			'meta_key'               => $this->values['meta_key'],
+			'order'                  => $this->values['order'],
+			'exclude'                => $this->values['exclude'],
+			'load_more'              => (bool) $this->values['load_more'],
 			// Display.
-			// 'show'           => array_map( 'esc_attr', (array) $this->values[ 'show' ] ),
-			'show_image'             => (bool) $this->values[ 'show_image' ],
-			'show_title'             => (bool) $this->values[ 'show_title' ],
-			'show_date'              => (bool) $this->values[ 'show_date' ],
-			'show_author'            => (bool) $this->values[ 'show_author' ],
-			'show_excerpt'           => (bool) $this->values[ 'show_excerpt' ],
-			'show_content'           => (bool) $this->values[ 'show_content' ],
-			'show_entry_meta_header' => (bool) $this->values[ 'show_entry_meta_header' ],
-			'show_entry_meta_footer' => (bool) $this->values[ 'show_entry_meta_footer' ],
-			'show_more_link'         => (bool) $this->values[ 'show_more_link' ],
-			'content_limit'  => absint( $this->values[ 'content_limit' ] ),
-			'image_size'     => esc_attr( $this->values[ 'image_size' ] ),
-			'more_link_text' => esc_attr( $this->values[ 'more_link_text' ] ),
+			// 'show'                => array_map( 'esc_attr', (array) $this->values['show'] ),
+			'show_image'             => (bool) $this->values['show_image'],
+			'show_title'             => (bool) $this->values['show_title'],
+			'show_date'              => (bool) $this->values['show_date'],
+			'show_author'            => (bool) $this->values['show_author'],
+			'show_excerpt'           => (bool) $this->values['show_excerpt'],
+			'show_content'           => (bool) $this->values['show_content'],
+			'show_entry_meta_header' => (bool) $this->values['show_entry_meta_header'],
+			'show_entry_meta_footer' => (bool) $this->values['show_entry_meta_footer'],
+			'show_more_link'         => (bool) $this->values['show_more_link'],
+			'boxed'                  => (bool) $this->values['boxed'],
+			'content_limit'          => absint( $this->values['content_limit'] ),
+			'image_size'             => esc_attr( $this->values['image_size'] ),
+			'more_link_text'         => esc_attr( $this->values['more_link_text'] ),
 			// Layout.
-			'template'       => $this->values[ 'template' ],
-			'columns'        => $this->values[ 'columns' ],
-			'align_cols'     => $this->values[ 'align_cols' ],
-			'align_text'     => $this->values[ 'align_text' ],
-			'gutter'         => $this->values[ 'gutter' ],
+			'template'               => $this->values['template'],
+			'columns'                => $this->values['columns'],
+			'align_cols'             => $this->values['align_cols'],
+			'align_text'             => $this->values['align_text'],
+			'grid_column_gap'        => $this->get_gap( esc_attr( $this->values['grid_column_gap'] ) ),
+			'grid_row_gap'           => $this->get_gap( esc_attr( $this->values['grid_row_gap'] ) ),
 		);
 
 		// Defaults.
-		$this->values['more_link_text'] = $this->values[ 'more_link_text' ] ?: __( 'Read More', 'mai-grid' );
+		$this->values['more_link_text'] = $this->values['more_link_text'] ?: __( 'Read More', 'mai-grid' );
 
 		$loader = new Mai_Grid_Template_Loader;
 
 		$posts = new WP_Query( $this->get_query_args() );
 
 		if ( $posts->have_posts() ):
+
+			// TODO: This ony enqueues the style as set in the template on initial page load. Need to figure something else out.
 
 			// Template.
 			if ( file_exists( "{$this->base_dir}/css/mai-grid-{$this->values['template']}{$this->suffix}.css" ) ) {
@@ -159,9 +165,11 @@ class Mai_Grid_Block {
 			$rows    = absint( ceil( $items / $columns ) );
 			$empty   = ( $columns * $rows ) - $items;
 
-			printf( '<div class="mai-grid mai-grid-%s" style="--mai-grid-columns: %s;--mai-grid-empty: %s;">',
+			printf( '<div class="mai-grid mai-grid-%s" style="--mai-grid-columns: %s;--mai-grid-column-gap: %s;--mai-grid-row-gap: %s;--mai-grid-empty: %s;">',
 				sanitize_html_class( $this->values['template'] ),
 				$this->values['columns'],
+				$this->values['grid_column_gap'],
+				$this->values['grid_row_gap'],
 				$empty
 			);
 
@@ -177,6 +185,7 @@ class Mai_Grid_Block {
 						'content'        => '',
 						'more_link'      => '',
 						'more_link_text' => '',
+						'boxed'          => false,
 					);
 					// Image.
 					if ( $this->values['show_image'] ) {
@@ -220,6 +229,10 @@ class Mai_Grid_Block {
 					if ( $this->values['show_more_link'] ) {
 						$data['more_link'] = $this->values['more_link_text'];
 					}
+					// Boxed.
+					if ( $this->values['boxed'] ) {
+						$data['boxed'] = true;
+					}
 					// Template.
 					$loader->set_template_data( $data );
 					$loader->get_template_part( $this->values['template'] );
@@ -238,10 +251,11 @@ class Mai_Grid_Block {
 	function get_query_args() {
 
 		$args = array(
-			'post_type'      => $this->values['post_type'],
-			'posts_per_page' => $this->values['posts_per_page'],
-			'post_status'    => 'publish',
-			'offset'         => $this->values['offset'],
+			'post_type'           => $this->values['post_type'],
+			'posts_per_page'      => $this->values['posts_per_page'],
+			'post_status'         => 'publish',
+			'offset'              => $this->values['offset'],
+			'ignore_sticky_posts' => true,
 		);
 
 		// Handle query_by.
@@ -250,7 +264,7 @@ class Mai_Grid_Block {
 				// $args = 'else';
 				// break;
 			case 'parent':
-				$args['parent'] = $this->values['parent'];
+				$args['post_parent__in'] = $this->values['post_parent__in'];
 				break;
 			case 'title':
 				$args['post__in'] = $this->values['post__in'];
@@ -270,9 +284,39 @@ class Mai_Grid_Block {
 				break;
 		}
 
-		// vd( $this->values );
+		// vd( $args );
 
 		return apply_filters( 'mai_post_grid_args', $args, $this->block );
+	}
+
+	function get_gap( $value ) {
+		if ( is_numeric( $value ) ) {
+			return sprintf( '%spx', intval( $value ) );
+		}
+		return trim( $value );
+		// switch ( $value ) {
+		// 	case 'none':
+		// 		$gap = '0';
+		// 		break;
+		// 	case 'xs':
+		// 		$gap = '8px';
+		// 		break;
+		// 	case 'sm':
+		// 		$gap = '16px';
+		// 		break;
+		// 	case 'md':
+		// 		$gap = '24px';
+		// 		break;
+		// 	case 'lg':
+		// 		$gap = '36px';
+		// 		break;
+		// 	case 'xl':
+		// 		$gap = '52px';
+		// 		break;
+		// 	default:
+		// 		$gap = '0';
+		// }
+		// return $gap;
 	}
 
 	function filters() {
@@ -293,6 +337,7 @@ class Mai_Grid_Block {
 		add_filter( "acf/load_field/key={$this->fields['operator']}", array( $this, 'load_operators' ) );
 		// Parent.
 		add_filter( "acf/fields/post_object/query/key={$this->fields['parent']}", array( $this, 'get_parents' ), 10, 1 );
+		// add_filter( "acf/load_field/key={$this->fields['parent']}", array( $this, 'load_parents' ) );
 		// Exclude Content.
 		add_filter( "acf/load_field/key={$this->fields['exclude']}", array( $this, 'load_exclude' ) );
 		// Order By.
@@ -311,7 +356,10 @@ class Mai_Grid_Block {
 					return $field;
 				}
 				$field = $this->add_conditional_logic( $field );
-				$field['label'] = '';
+				// Clear label on all but boxed.
+				if ( 'boxed' !== $field['name'] ) {
+					$field['label'] = '';
+				}
 				// TODO: JS to get template value and set defaults? Too aggressive?
 				// $field['default'] = '';
 				return $field;
@@ -337,8 +385,9 @@ class Mai_Grid_Block {
 		add_filter( "acf/load_field/key={$this->fields['align_cols']}", array( $this, 'load_align_columns' ) );
 		// Align Text.
 		add_filter( "acf/load_field/key={$this->fields['align_text']}", array( $this, 'load_align_text' ) );
-		// Gutter.
-		add_filter( "acf/load_field/key={$this->fields['gutter']}", array( $this, 'load_gutter' ) );
+		// Gaps.
+		// add_filter( "acf/load_field/key={$this->fields['grid_column_gap']}", array( $this, 'load_gap' ) );
+		// add_filter( "acf/load_field/key={$this->fields['grid_row_gap']}", array( $this, 'load_gap' ) );
 	}
 
 	function load_templates( $field ) {
@@ -481,6 +530,39 @@ class Mai_Grid_Block {
 			$args['post_type'] = $_REQUEST['post_type'];
 		}
 		return $args;
+	}
+
+	function load_parents( $field ) {
+
+		// Start empty.
+		$field['choices'] = array();
+
+		// Keep admin clean.
+		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+			return $field;
+		}
+
+		// Bail if no post type.
+		if ( ! ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) ) {
+			return $field;
+		}
+
+		$posts = acf_get_grouped_posts( array(
+			'post_type'   => $_REQUEST['post_type'],
+			'post_status' => 'publish',
+		) );
+
+		if ( ! $posts ) {
+			return $field;
+		}
+
+		$field['choices'] = $posts;
+
+		// foreach( $posts as $post ) {
+			// $field['choices'][ $post->ID ] = acf_get_post_title( $post->ID );
+		// }
+
+		return $field;
 	}
 
 	function load_exclude( $field ) {
@@ -705,36 +787,32 @@ class Mai_Grid_Block {
 		return $field;
 	}
 
-	/**
-	 * TODO: Should we have a bottom margin setting? xs/sm/md/etc or px value?
-	 */
+	// function load_gap( $field ) {
 
-	function load_gutter( $field ) {
+	// 	// Start empty.
+	// 	$field['choices'] = array();
 
-		// Start empty.
-		$field['choices'] = array();
+	// 	// Keep admin clean.
+	// 	// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+	// 		// return $field;
+	// 	// }
 
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
+	// 	$field['choices'] = array(
+	// 		'none' => __( 'None', 'mai-grid' ),
+	// 		// 'xxxs' => __( 'XXX-Small', 'mai-grid' ),
+	// 		// 'xxs'  => __( 'XX-Small', 'mai-grid' ),
+	// 		'xs'   => __( 'XS', 'mai-grid' ),
+	// 		'sm'   => __( 'S', 'mai-grid' ),
+	// 		'md'   => __( 'M', 'mai-grid' ),
+	// 		'lg'   => __( 'L', 'mai-grid' ),
+	// 		'xl'   => __( 'XL', 'mai-grid' ),
+	// 		// 'xxl'  => __( 'XX-Large', 'mai-grid' ),
+	// 	);
 
-		$field['choices'] = array(
-			'none' => __( 'None', 'mai-grid' ),
-			// 'xxxs' => __( 'XXX-Small', 'mai-grid' ),
-			// 'xxs'  => __( 'XX-Small', 'mai-grid' ),
-			'xs'   => __( 'XS', 'mai-grid' ),
-			'sm'   => __( 'S', 'mai-grid' ),
-			'md'   => __( 'M', 'mai-grid' ),
-			'lg'   => __( 'L', 'mai-grid' ),
-			'xl'   => __( 'XL', 'mai-grid' ),
-			// 'xxl'  => __( 'XX-Large', 'mai-grid' ),
-		);
+	// 	$field['default_value'] = 'md';
 
-		$field['default_value'] = 'md';
-
-		return $field;
-	}
+	// 	return $field;
+	// }
 
 	function load_more_link_text( $field ) {
 		$field['placeholder'] = __( 'Read More', 'mai-grid' );
@@ -818,6 +896,7 @@ class Mai_Grid_Block {
 					'show_entry_meta_header',
 					'show_entry_meta_footer',
 					'show_more_link',
+					'boxed',
 				),
 				'defaults' => array(
 					'show_image' => true,
@@ -901,12 +980,13 @@ class Mai_Grid_Block {
 			'show_entry_meta_header' => 'field_5e1e680ce988d',
 			'show_entry_meta_footer' => 'field_5e1e6835e988e',
 			'show_more_link'         => 'field_5e1e6843e988f',
+			'boxed'                  => 'field_5e2a08a182c2c',
 		);
 	}
 
 	function get_display_fields() {
 		return array(
-			'template'               => 'field_5de9b96fb69b0',
+			'template'       => 'field_5de9b96fb69b0',
 			'content_limit'  => 'field_5bd51ac107244',
 			'image_size'     => 'field_5bd50e580d1e9',
 			'more_link_text' => 'field_5c85465018395',
@@ -915,10 +995,11 @@ class Mai_Grid_Block {
 
 	function get_layout_fields() {
 		return array(
-			'columns'    => 'field_5c854069d358c',
-			'align_cols' => 'field_5c853e6672972',
-			'align_text' => 'field_5c853f84eacd6',
-			'gutter'     => 'field_5c8542d6a67c5',
+			'columns'         => 'field_5c854069d358c',
+			'align_cols'      => 'field_5c853e6672972',
+			'align_text'      => 'field_5c853f84eacd6',
+			'grid_column_gap' => 'field_5c8542d6a67c5',
+			'grid_row_gap'    => 'field_5e29f1785bcb6',
 		);
 	}
 

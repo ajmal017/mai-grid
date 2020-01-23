@@ -8,7 +8,8 @@
 	/* grid-template-columns: repeat( calc( 2 * var(--mai-grid-columns) ), 240px ); */
 	/* grid-template-columns: repeat( auto-fill, minmax( 240px, 1fr ) ); */
 	/* grid-template-columns: repeat( calc( 2 * var(--mai-grid-columns) ), minmax( 240px, 25% ) ); */
-	grid-gap: var(--mai-grid-gutter, 24px);
+	grid-column-gap: var(--mai-grid-column-gap, 24px);
+	grid-row-gap: var(--mai-grid-row-gap, 24px);
 }
 
 .mai-grid-compact .mai-grid__entry {

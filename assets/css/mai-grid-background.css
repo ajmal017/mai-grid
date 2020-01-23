@@ -1,14 +1,16 @@
 .mai-grid-background {
 	display: grid;
 	grid-template-columns: repeat( calc( 2 * var(--mai-grid-columns) ), 1fr );
-	grid-gap: var(--mai-grid-gutter, 24px);
+	/* grid-template-columns: repeat( auto-fit, minmax( 240px, 2fr ) ); */
+	/* grid-template-columns: repeat( calc( 2 * var(--mai-grid-columns) ), minmax(1fr, 300px) ); */
+	grid-column-gap: var(--mai-grid-column-gap, 24px);
+	grid-row-gap: var(--mai-grid-row-gap, 24px);
 }
 
 .mai-grid-background .mai-grid__entry {
 	display: -webkit-box;
 	display: flex;
 	grid-column: span 2;
-	margin-bottom: var(--mai-grid-gutter);
 	text-decoration: none;
 }
 
