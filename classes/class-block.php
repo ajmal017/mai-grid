@@ -44,13 +44,69 @@ class Mai_Grid_Block {
 			// 'mode'            => 'auto',
 			// 'mode'            => 'edit',
 			'mode'            => 'preview',
-			'render_callback' => array( $this, 'do_grid_entries' ),
 			'enqueue_assets'  => array( $this, 'enqueue_assets'),
+			'render_callback' => array( $this, 'do_grid_entries' ),
 			'supports'        => array(
 				'align'  => array( 'wide' ),
 				'ancher' => true,
 			),
 		) );
+	}
+
+	function enqueue_assets( $block ) {
+
+		if ( is_admin() ) {
+
+			// We can't dynamically load assets via ajax so we need them all available in the backend.
+			foreach( array_keys( $this->get_templates() ) as $template ) {
+				$this->enqueue_asset( $template, 'css' );
+			}
+
+			$this->enqueue_asset( 'admin', 'css' );
+
+			// wp_enqueue_style( 'mai-grid-admin', "{$this->base_url}/css/admin{$this->suffix}.css", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/css/mai-grid-admin{$this->suffix}.css" ) ) );
+
+			// $this->enqueue_asset( 'admin', 'js' );
+
+			// wp_enqueue_script( 'mai-acf-wp-query', "{$this->base_url}/js/mai-acf-wp-query{$this->suffix}.js", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/js/mai-acf-wp-query{$this->suffix}.js" ) ), true );
+			$this->enqueue_asset( 'wp-query', 'js' );
+			wp_localize_script( 'mai-grid-wp-query', 'maiGridWPQueryVars', array(
+				'fields' => $this->get_wp_query_fields(),
+				'keys'   => array_values( $this->get_wp_query_fields() ),
+			) );
+
+			// wp_enqueue_script( 'mai-grid-entries-admin', "{$this->base_url}/js/mai-grid-admin{$this->suffix}.js", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/js/mai-grid-admin{$this->suffix}.js" ) ), true );
+			// wp_localize_script( 'mai-grid-entries-admin', 'maiGridVars', $this->get_templates() );
+		} else {
+
+			$this->enqueue_asset( $block['data']['template'], 'css' );
+		}
+
+		// wp_enqueue_style( 'mai-grid', "{$this->base_url}/css/mai-grid-entries{$this->suffix}.css", array(), $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/css/mai-grid-entries{$this->suffix}.css" ) ) );
+	}
+
+	/**
+	 * Enqueue an asset.
+	 *
+	 * @param   string  $name  The asset name.
+	 * @param   string  $type  The type. Typically js or css.
+	 *
+	 * @return  void
+	 */
+	function enqueue_asset( $name, $type ) {
+		if ( ! file_exists( "{$this->base_dir}/{$type}/{$name}{$this->suffix}.{$type}" ) ) {
+			return;
+		}
+		$url     = sprintf( '%s/%s/%s%s.%s', $this->base_url, $type, $name, $this->suffix, $type );
+		$version = $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/{$type}/{$name}{$this->suffix}.{$type}" ) );
+		switch ( $type ) {
+			case 'css':
+				wp_enqueue_style( "mai-grid-{$name}", $url, array(), $version );
+				break;
+			case 'js':
+				wp_enqueue_script( "mai-grid-{$name}", $url, array(), $version, true );
+				break;
+		}
 	}
 
 	function do_grid_entries( $block, $content = '', $is_preview = false ) {
@@ -76,18 +132,18 @@ class Mai_Grid_Block {
 			// Display.
 			'show_image'             => get_field( 'show_image' ),
 			'show_title'             => get_field( 'show_title' ),
-			'show_date'              => get_field( 'show_date' ),
-			'show_author'            => get_field( 'show_author' ),
+			'show_header_meta'       => get_field( 'show_header_meta' ),
 			'show_excerpt'           => get_field( 'show_excerpt' ),
 			'show_content'           => get_field( 'show_content' ),
-			'show_entry_meta_header' => get_field( 'show_entry_meta_header' ),
-			'show_entry_meta_footer' => get_field( 'show_entry_meta_footer' ),
 			'show_more_link'         => get_field( 'show_more_link' ),
+			'show_footer_meta'       => get_field( 'show_footer_meta' ),
 			'boxed'                  => get_field( 'boxed' ),
 
 			'content_limit'          => get_field( 'content_limit' ),
 			'image_size'             => get_field( 'image_size' ),
 			'more_link_text'         => get_field( 'more_link_text' ),
+			'header_meta'            => get_field( 'header_meta' ),
+			'footer_meta'            => get_field( 'footer_meta' ),
 			// Layout.
 			'template'               => get_field( 'template' ),
 			'columns'                => get_field( 'columns' ),
@@ -117,17 +173,17 @@ class Mai_Grid_Block {
 			// 'show'                => array_map( 'esc_attr', (array) $this->values['show'] ),
 			'show_image'             => (bool) $this->values['show_image'],
 			'show_title'             => (bool) $this->values['show_title'],
-			'show_date'              => (bool) $this->values['show_date'],
-			'show_author'            => (bool) $this->values['show_author'],
+			'show_header_meta'       => (bool) $this->values['show_header_meta'],
 			'show_excerpt'           => (bool) $this->values['show_excerpt'],
 			'show_content'           => (bool) $this->values['show_content'],
-			'show_entry_meta_header' => (bool) $this->values['show_entry_meta_header'],
-			'show_entry_meta_footer' => (bool) $this->values['show_entry_meta_footer'],
 			'show_more_link'         => (bool) $this->values['show_more_link'],
+			'show_footer_meta'       => (bool) $this->values['show_footer_meta'],
 			'boxed'                  => (bool) $this->values['boxed'],
 			'content_limit'          => absint( $this->values['content_limit'] ),
 			'image_size'             => esc_attr( $this->values['image_size'] ),
 			'more_link_text'         => esc_attr( $this->values['more_link_text'] ),
+			'header_meta'            => esc_attr( $this->values['header_meta'] ),
+			'footer_meta'            => esc_attr( $this->values['footer_meta'] ),
 			// Layout.
 			'template'               => $this->values['template'],
 			'columns'                => $this->values['columns'],
@@ -145,15 +201,6 @@ class Mai_Grid_Block {
 		$posts = new WP_Query( $this->get_query_args() );
 
 		if ( $posts->have_posts() ):
-
-			// TODO: This ony enqueues the style as set in the template on initial page load. Need to figure something else out.
-
-			// Template.
-			if ( file_exists( "{$this->base_dir}/css/mai-grid-{$this->values['template']}{$this->suffix}.css" ) ) {
-				wp_enqueue_style( "mai-grid-{$this->values['template']}", "{$this->base_url}/css/mai-grid-{$this->values['template']}{$this->suffix}.css", array(), $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/css/mai-grid-{$this->values['template']}{$this->suffix}.css" ) ) );
-			}
-
-			// vd( $this->values );
 
 			// Load More.
 			// if ( $this->values['load_more'] ) {
@@ -180,8 +227,8 @@ class Mai_Grid_Block {
 						'link'           => get_permalink(),
 						'image'          => '',
 						'title'          => '',
-						'date'           => '',
-						'author'         => '',
+						'header_meta'    => '',
+						'footer_meta'    => '',
 						'content'        => '',
 						'more_link'      => '',
 						'more_link_text' => '',
@@ -200,13 +247,9 @@ class Mai_Grid_Block {
 					if ( $this->values['show_title'] ) {
 						$data['title'] = get_the_title();
 					}
-					// Date.
-					if ( $this->values['show_date'] ) {
-						$data['date'] = '';
-					}
-					// Author.
-					if ( $this->values['show_author'] ) {
-						$data['author'] = '';
+					// Header Meta.
+					if ( $this->values['show_header_meta'] ) {
+						$data['header_meta'] = do_shortcode( $this->values['header_meta'] );
 					}
 					// Excerpt.
 					if ( $this->values['show_excerpt'] ) {
@@ -218,16 +261,24 @@ class Mai_Grid_Block {
 					}
 					// Content Limit.
 					if ( $this->values['content_limit'] > 0 ) {
+						/**
+						 * OLD WAY: Word count. Do we want this instead?
+						 */
 						// Reset the variable while trimming the content. wp_trim_words runs wp_strip_all_tags so we need to do this before re-processing.
-						$data['content'] = wp_trim_words( $data['content'], $this->values['content_limit'], '&hellip;' );
-					}
-					// Entry Meta.
-					if ( $this->values['show_entry_meta_footer'] ) {
-						$data['entry_meta_footer'] = '';
+						// $data['content'] = wp_trim_words( $data['content'], $this->values['content_limit'], '&hellip;' );
+
+						/**
+						 * NEW WAY: Character count. This matches Genesis content limit setting for archives, but I feel like word count makes more sense?
+						 */
+						$data['content'] = $this->get_the_content_limit( $data['content'], $this->values['content_limit'] );
 					}
 					// More Link.
 					if ( $this->values['show_more_link'] ) {
 						$data['more_link'] = $this->values['more_link_text'];
+					}
+					// Footer Meta.
+					if ( $this->values['show_footer_meta'] ) {
+						$data['footer_meta'] = do_shortcode( $this->values['footer_meta'] );
 					}
 					// Boxed.
 					if ( $this->values['boxed'] ) {
@@ -246,6 +297,33 @@ class Mai_Grid_Block {
 
 		// $template->get_template_part( 'standard' );
 		// echo $this->get_grid_entries( $block );
+	}
+
+	/**
+	 * Get the content, limited by max character count.
+	 * Most of this was taking from Genesis get_the_content_limit() function.
+	 *
+	 * @param   string  $content         The existing content.
+	 * @param   int     $max_characters  The character limit.
+	 *
+	 * @return  string  The limited content.
+	 */
+	function get_the_content_limit( $content, $max_characters ) {
+
+		// Strip tags and shortcodes so the content truncation count is done correctly.
+		$content = strip_tags( strip_shortcodes( $content ), apply_filters( 'get_the_content_limit_allowedtags', '<script>,<style>' ) );
+
+		// Remove inline styles / scripts.
+		$content = trim( preg_replace( '#<(s(cript|tyle)).*?</\1>#si', '', $content ) );
+
+		// Truncate $content to $max_char.
+		$content = genesis_truncate_phrase( $content, $max_characters );
+
+		// $output = sprintf( '<p>%s</p>', $content );
+		$output = wpautop( $content . '&hellip;' );
+		$link   = '';
+
+		return apply_filters( 'get_the_content_limit', $output, $content, $link, $max_characters );
 	}
 
 	function get_query_args() {
@@ -733,9 +811,9 @@ class Mai_Grid_Block {
 
 		$field['choices'] = array(
 			''       => __( 'None', 'mai-grid' ),
-			'left'   => __( 'Left', 'mai-grid' ),
-			'center' => __( 'Center', 'mai-grid' ),
-			'right'  => __( 'Right', 'mai-grid' ),
+			'left'   => '<span class="dashicons dashicons-editor-alignleft"></span>',
+			'center' => '<span class="dashicons dashicons-editor-aligncenter"></span>',
+			'right'  => '<span class="dashicons dashicons-editor-alignright"></span>',
 		);
 
 		return $field;
@@ -753,11 +831,18 @@ class Mai_Grid_Block {
 
 		// TODO: If 'background' is the layout, can we do vertical alignment here too?!?!
 
+		// $field['choices'] = array(
+		// 	''       => __( 'None', 'mai-grid' ),
+		// 	'left'   => __( 'Left', 'mai-grid' ),
+		// 	'center' => __( 'Center', 'mai-grid' ),
+		// 	'right'  => __( 'Right', 'mai-grid' ),
+		// );
+
 		$field['choices'] = array(
 			''       => __( 'None', 'mai-grid' ),
-			'left'   => __( 'Left', 'mai-grid' ),
-			'center' => __( 'Center', 'mai-grid' ),
-			'right'  => __( 'Right', 'mai-grid' ),
+			'left'   => '<span class="dashicons dashicons-editor-alignleft"></span>',
+			'center' => '',
+			'right'  => '',
 		);
 
 		return $field;
@@ -819,25 +904,6 @@ class Mai_Grid_Block {
 		return $field;
 	}
 
-	function enqueue_assets() {
-
-		if ( is_admin() ) {
-
-			wp_enqueue_style( 'mai-grid-entries-admin', "{$this->base_url}/css/mai-grid-admin{$this->suffix}.css", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/css/mai-grid-admin{$this->suffix}.css" ) ) );
-
-			wp_enqueue_script( 'mai-acf-wp-query', "{$this->base_url}/js/mai-acf-wp-query{$this->suffix}.js", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/js/mai-acf-wp-query{$this->suffix}.js" ) ), true );
-			wp_localize_script( 'mai-acf-wp-query', 'maiACFWPQueryVars', array(
-				'fields' => $this->get_wp_query_fields(),
-				'keys'   => array_values( $this->get_wp_query_fields() ),
-			) );
-
-			wp_enqueue_script( 'mai-grid-entries-admin', "{$this->base_url}/js/mai-grid-admin{$this->suffix}.js", array(), $this->version . '.' . date( 'njYHi', filemtime( "{$this->base_dir}/js/mai-grid-admin{$this->suffix}.js" ) ), true );
-			wp_localize_script( 'mai-grid-entries-admin', 'maiGridVars', $this->get_templates() );
-		}
-
-		// wp_enqueue_style( 'mai-grid', "{$this->base_url}/css/mai-grid-entries{$this->suffix}.css", array(), $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/css/mai-grid-entries{$this->suffix}.css" ) ) );
-	}
-
 	function add_conditional_logic( $field ) {
 
 		$conditions = array();
@@ -889,12 +955,12 @@ class Mai_Grid_Block {
 				'supports' => array(
 					'show_image',
 					'show_title',
-					'show_date',
-					'show_author',
+					// 'show_date',
+					// 'show_author',
 					'show_excerpt',
 					'show_content',
-					'show_entry_meta_header',
-					'show_entry_meta_footer',
+					'show_header_meta',
+					'show_footer_meta',
 					'show_more_link',
 					'boxed',
 				),
@@ -971,16 +1037,14 @@ class Mai_Grid_Block {
 
 	function get_show_fields() {
 		return array(
-			'show_image'             => 'field_5e1e665ffc7e5',
-			'show_title'             => 'field_5e1e6693fc7e6',
-			'show_date'              => 'field_5e1e67c0e9889',
-			'show_author'            => 'field_5e1e67d7e988a',
-			'show_excerpt'           => 'field_5e1e67e7e988b',
-			'show_content'           => 'field_5e1e67fce988c',
-			'show_entry_meta_header' => 'field_5e1e680ce988d',
-			'show_entry_meta_footer' => 'field_5e1e6835e988e',
-			'show_more_link'         => 'field_5e1e6843e988f',
-			'boxed'                  => 'field_5e2a08a182c2c',
+			'show_image'       => 'field_5e1e665ffc7e5',
+			'show_title'       => 'field_5e1e6693fc7e6',
+			'show_excerpt'     => 'field_5e1e67e7e988b',
+			'show_content'     => 'field_5e1e67fce988c',
+			'show_header_meta' => 'field_5e1e680ce988d',
+			'show_footer_meta' => 'field_5e1e6835e988e',
+			'show_more_link'   => 'field_5e1e6843e988f',
+			'boxed'            => 'field_5e2a08a182c2c',
 		);
 	}
 
@@ -990,8 +1054,16 @@ class Mai_Grid_Block {
 			'content_limit'  => 'field_5bd51ac107244',
 			'image_size'     => 'field_5bd50e580d1e9',
 			'more_link_text' => 'field_5c85465018395',
+			'footer_meta'    => 'field_5e2b563a7c6cf',
+			'more_link'      => 'field_5e2b567e7c6d0',
 		);
 	}
+
+	/**
+	 * TODO: Move boxed to a new "Style" heading.
+	 * Add Overlay for background.
+	 * Any others we need? Content fade in for background template? Too specific, and should be CSS in the theme?
+	 */
 
 	function get_layout_fields() {
 		return array(

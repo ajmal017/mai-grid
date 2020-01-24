@@ -39,6 +39,7 @@
 
 .mai-grid-standard .mai-grid__link--image {
 	display: block;
+	margin-bottom: 22px;
 }
 
 .mai-grid-standard .mai__grid-image {
@@ -60,6 +61,10 @@
 	margin-bottom: 0;
 }
 
+.mai-grid-standard .mai-grid__entry p {
+	margin-top: 0;
+}
+
 .mai-grid-standard .mai-grid__link--more {
 	display: inline-block;
 	background-color: #e8e8e8;
@@ -70,12 +75,12 @@
 	padding: 8px 16px;
 }
 
-.mai-grid-standard .mai-grid__entry > * + * {
-	/* margin-top: 16px; */
-}
-
 .mai-grid-standard .mai-grid__entry > *:not(:last-child) {
 	margin-bottom: 16px;
+}
+
+.mai-grid-standard .mai-grid__entry > *:last-child {
+	margin-bottom: 0;
 }
 
 /**

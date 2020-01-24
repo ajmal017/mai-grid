@@ -23,12 +23,12 @@ jQuery(document).ready(function($) {
 	// 	}
 	// });
 
-	var fields = maiACFWPQueryVars.fields;
+	var fields = maiGridWPQueryVars.fields;
 
 	acf.addFilter( 'select2_ajax_data', function( data, args, $input, field, instance ) {
 
 		// Bail if not our fields.
-		if ( -1 === $.inArray( data.field_key, maiACFWPQueryVars.keys ) ) {
+		if ( -1 === $.inArray( data.field_key, maiGridWPQueryVars.keys ) ) {
 			return data;
 		}
 

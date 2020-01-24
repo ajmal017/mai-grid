@@ -1,0 +1,13 @@
+.acf-block-preview .mai-grid a:hover,
+.acf-block-preview .mai-grid a:focus {
+	/* pointer-events: none !important; */
+}
+
+.acf-block-fields div.acf-field.acf-field-5de9b96fb69b0 ~ div.acf-field-message {
+	padding-bottom: 0;
+	margin-bottom: -28px;
+}
+.acf-block-fields div.acf-field.acf-field-5de9b96fb69b0 ~ div.acf-field-true-false + div.acf-field-true-false:not(.acf-field-5e2a08a182c2c) {
+	padding-top: 0;
+	margin-top: -16px;
+}
