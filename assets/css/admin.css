@@ -1,13 +1,57 @@
-.acf-block-preview .mai-grid a:hover,
-.acf-block-preview .mai-grid a:focus {
-	/* pointer-events: none !important; */
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e272ae04c5ba {
+	padding-bottom: 0;
 }
 
-.acf-block-fields div.acf-field.acf-field-5de9b96fb69b0 ~ div.acf-field-message {
-	padding-bottom: 0;
-	margin-bottom: -28px;
-}
-.acf-block-fields div.acf-field.acf-field-5de9b96fb69b0 ~ div.acf-field-true-false + div.acf-field-true-false:not(.acf-field-5e2a08a182c2c) {
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e665ffc7e5,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e6693fc7e6,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e680ce988d,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e67e7e988b,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e67fce988c,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e6843e988f,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e6835e988e {
 	padding-top: 0;
-	margin-top: -16px;
+	padding-bottom: 8px;
+	margin-top: 0;
+}
+
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd50e580d1e9,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b563a7c6cf,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd51ac107244,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5c85465018395,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b567e7c6d0 {
+	margin-left: calc( 28px + .25rem );
+	padding-top: 8px;
+	padding-bottom: 12px;
+}
+
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd50e580d1e9 .acf-label,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b563a7c6cf .acf-label,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd51ac107244 .acf-label,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5c85465018395 .acf-label,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b567e7c6d0 .acf-label {
+	position: relative;
+}
+
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd50e580d1e9 .acf-label::before,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b563a7c6cf .acf-label::before,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd51ac107244 .acf-label::before,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5c85465018395 .acf-label::before,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b567e7c6d0 .acf-label::before {
+	content: '';
+	position: absolute;
+	top: -12px;
+	left: -25px;
+	height: 23px;
+	width: 18px;
+	border-left: 1px solid #ccd0d4;
+	border-bottom: 1px solid #ccd0d4;
+}
+
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd50e580d1e9 .acf-label label,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b563a7c6cf .acf-label label,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd51ac107244 .acf-label label,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5c85465018395 .acf-label label,
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b567e7c6d0 .acf-label label {
+	font-weight: normal;
+	margin: 0;
 }

@@ -284,6 +284,12 @@ class Mai_Grid_Block {
 					if ( $this->values['boxed'] ) {
 						$data['boxed'] = true;
 					}
+
+					/**
+					 * TODO: This is not loading correctly when you add a new grid block.
+					 * The grid is empty until you toggle Show things.
+					 */
+
 					// Template.
 					$loader->set_template_data( $data );
 					$loader->get_template_part( $this->values['template'] );
@@ -712,48 +718,6 @@ class Mai_Grid_Block {
 	 * 2. We can use a grid template config to decide which fields are enabled/allowed.
 	 */
 
-
-	/**
-	 * TODO:
-	 * These "show" fields should set defaults based on Template field.
-	 */
-
-	/**
-	 * Load Show Image.
-	 */
-	// function load_show_image( $field ) {
-	// 	$field = $this->add_conditional_logic( $field );
-	// 	$field['default_value'] = true;
-	// 	return $field;
-	// }
-
-	/**
-	 * Load Show Title.
-	 */
-	// function load_show_title( $field ) {
-	// 	$field = $this->add_conditional_logic( $field );
-	// 	$field['default_value'] = true;
-	// 	return $field;
-	// }
-
-	/**
-	 * Load Show Date.
-	 */
-	// function load_show_date( $field ) {
-	// 	$field = $this->add_conditional_logic( $field );
-	// 	$field['default_value'] = false;
-	// 	return $field;
-	// }
-
-	/**
-	 * Load Show Author.
-	 */
-	// function load_show_author( $field ) {
-	// 	$field = $this->add_conditional_logic( $field );
-	// 	$field['default_value'] = false;
-	// 	return $field;
-	// }
-
 	/**
 	 * Load image sizes.
 	 * Much of the code take from genesis_get_image_sizes().
@@ -929,7 +893,8 @@ class Mai_Grid_Block {
 		if ( $field['conditional_logic'] ) {
 			// Loop through and add this condition to each.
 			foreach( $field['conditional_logic'] as $logic_index => $logic_values ) {
-				$field['conditional_logic'][ $logic_index ][] = $conditions;
+				// $field['conditional_logic'][ $logic_index ][] = $conditions;
+				$field['conditional_logic'][ $logic_index ] = array_merge( $logic_values, $conditions );
 			}
 		}
 		// No existing conditions.
