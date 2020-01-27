@@ -141,6 +141,7 @@ class Mai_Grid_Block {
 
 			'content_limit'          => get_field( 'content_limit' ),
 			'image_size'             => get_field( 'image_size' ),
+			'image_alignment'        => get_field( 'image_alignment' ),
 			'more_link_text'         => get_field( 'more_link_text' ),
 			'header_meta'            => get_field( 'header_meta' ),
 			'footer_meta'            => get_field( 'footer_meta' ),
@@ -181,6 +182,7 @@ class Mai_Grid_Block {
 			'boxed'                  => (bool) $this->values['boxed'],
 			'content_limit'          => absint( $this->values['content_limit'] ),
 			'image_size'             => esc_attr( $this->values['image_size'] ),
+			'image_alignment'        => esc_attr( $this->values['image_alignment'] ),
 			'more_link_text'         => esc_attr( $this->values['more_link_text'] ),
 			'header_meta'            => esc_attr( $this->values['header_meta'] ),
 			'footer_meta'            => esc_attr( $this->values['footer_meta'] ),
@@ -239,7 +241,8 @@ class Mai_Grid_Block {
 						$image_id = get_post_thumbnail_id();
 						if ( $image_id ) {
 							// TODO: If 'default', find an actual image size.
-							$image_size = ( 'default' == $this->values['image_size'] ) ? 'thumbnail' : $this->values['image_size'];
+							$image_size  = ( 'default' == $this->values['image_size'] ) ? 'thumbnail' : $this->values['image_size'];
+							$image_align = 'none';
 							$data['image'] = wp_get_attachment_image( $image_id, $image_size, false, array( 'class' => 'mai__grid-image' ) );
 						}
 					}
@@ -432,29 +435,14 @@ class Mai_Grid_Block {
 		/**
 		 * Display.
 		 */
-		// Show.
-		foreach( $this->get_show_fields() as $name => $key ) {
-			add_filter( "acf/load_field/key={$key}", function( $field ) {
-				// Keep admin clean.
-				if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-					return $field;
-				}
-				$field = $this->add_conditional_logic( $field );
-				// Clear label on all but boxed.
-				if ( 'boxed' !== $field['name'] ) {
-					$field['label'] = '';
-				}
-				// TODO: JS to get template value and set defaults? Too aggressive?
-				// $field['default'] = '';
-				return $field;
-			});
-		}
 		// add_filter( "acf/load_field/key={$this->fields['show_image']}",     array( $this, 'load_show_image' ) );
 		// add_filter( "acf/load_field/key={$this->fields['show_title']}",     array( $this, 'load_show_title' ) );
 		// add_filter( "acf/load_field/key={$this->fields['show_date']}",      array( $this, 'load_show_date' ) );
 		// add_filter( "acf/load_field/key={$this->fields['show_author']}",    array( $this, 'load_show_author' ) );
 		// Image Size.
 		add_filter( "acf/load_field/key={$this->fields['image_size']}",     array( $this, 'load_image_sizes' ) );
+		// Image Alignment.
+		add_filter( "acf/load_field/key={$this->fields['image_align']}",    array( $this, 'load_image_align' ) );
 		// More Link Text.
 		add_filter( "acf/load_field/key={$this->fields['more_link_text']}", array( $this, 'load_more_link_text' ) );
 
@@ -472,6 +460,34 @@ class Mai_Grid_Block {
 		// Gaps.
 		// add_filter( "acf/load_field/key={$this->fields['grid_column_gap']}", array( $this, 'load_gap' ) );
 		// add_filter( "acf/load_field/key={$this->fields['grid_row_gap']}", array( $this, 'load_gap' ) );
+
+		// Labels.
+		foreach( $this->get_display_fields() as $name => $key ) {
+			// Skip if name does not contain 'show_'.
+			if ( false === strpos ( $name, 'show_' ) ) {
+				continue;
+			}
+			add_filter( "acf/load_field/key={$key}", function( $field ) {
+				// Keep admin clean.
+				if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+					return $field;
+				}
+				// TODO: JS to get template value and set defaults? Too aggressive?
+				// $field['default'] = '';
+				return $field;
+			});
+		}
+		// Conditionals.
+		foreach( $this->get_fields() as $name => $key ) {
+			add_filter( "acf/load_field/key={$key}", function( $field ) {
+				// Keep admin clean.
+				if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+					return $field;
+				}
+				$field = $this->add_conditional_logic( $field );
+				return $field;
+			});
+		}
 	}
 
 	function load_templates( $field ) {
@@ -763,6 +779,26 @@ class Mai_Grid_Block {
 		return $field;
 	}
 
+	function load_image_align( $field ) {
+
+		// Start empty.
+		$field['choices'] = array();
+
+		// Keep admin clean.
+		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+			return $field;
+		}
+
+		$field['choices'] = array(
+			''       => __( 'Full Width', 'mai-grid' ),
+			'left'   => __( 'Left', 'mai-grid' ),
+			'center' => __( 'Center', 'mai-grid' ),
+			'right'  => __( 'Right', 'mai-grid' ),
+		);
+
+		return $field;
+	}
+
 	function load_align_columns( $field ) {
 
 		// Start empty.
@@ -776,7 +812,7 @@ class Mai_Grid_Block {
 		$field['choices'] = array(
 			''       => __( 'None', 'mai-grid' ),
 			'left'   => '<span class="dashicons dashicons-editor-alignleft"></span>',
-			'center' => '<span class="dashicons dashicons-editor-aligncenter"></span>',
+			'center' => $this->get_align_cols_center(),
 			'right'  => '<span class="dashicons dashicons-editor-alignright"></span>',
 		);
 
@@ -803,10 +839,10 @@ class Mai_Grid_Block {
 		// );
 
 		$field['choices'] = array(
-			''       => __( 'None', 'mai-grid' ),
-			'left'   => '<span class="dashicons dashicons-editor-alignleft"></span>',
-			'center' => '',
-			'right'  => '',
+			''       => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M634 471L36 3.5A16 16 0 0 0 13.49 6l-10 12.5A16 16 0 0 0 6 41l598 467.5a16 16 0 0 0 22.5-2.5l10-12.5A16 16 0 0 0 634 471zM528 296h-39.94l52.69 41.19A15.6 15.6 0 0 0 544 328v-16a16 16 0 0 0-16-16zm16-112a16 16 0 0 0-16-16H324.34l61.39 48H528a16 16 0 0 0 16-16zm-16-96a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16H160.61L222 88zM112 424a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h367.37L418 424zm0-80h203.65l-61.39-48H112a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16z"/></svg>',
+			'left'   => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M12.83 344h262.34A12.82 12.82 0 0 0 288 331.17v-22.34A12.82 12.82 0 0 0 275.17 296H12.83A12.82 12.82 0 0 0 0 308.83v22.34A12.82 12.82 0 0 0 12.83 344zm0-256h262.34A12.82 12.82 0 0 0 288 75.17V52.83A12.82 12.82 0 0 0 275.17 40H12.83A12.82 12.82 0 0 0 0 52.83v22.34A12.82 12.82 0 0 0 12.83 88zM432 168H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16zm0 256H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16z"/></svg>',
+			'center' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M108.1 88h231.81A12.09 12.09 0 0 0 352 75.9V52.09A12.09 12.09 0 0 0 339.91 40H108.1A12.09 12.09 0 0 0 96 52.09V75.9A12.1 12.1 0 0 0 108.1 88zM432 424H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16zm0-256H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16zm-92.09 176A12.09 12.09 0 0 0 352 331.9v-23.81A12.09 12.09 0 0 0 339.91 296H108.1A12.09 12.09 0 0 0 96 308.09v23.81a12.1 12.1 0 0 0 12.1 12.1z"/></svg>',
+			'right'  => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M16 216h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16zm416 208H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16zm3.17-384H172.83A12.82 12.82 0 0 0 160 52.83v22.34A12.82 12.82 0 0 0 172.83 88h262.34A12.82 12.82 0 0 0 448 75.17V52.83A12.82 12.82 0 0 0 435.17 40zm0 256H172.83A12.82 12.82 0 0 0 160 308.83v22.34A12.82 12.82 0 0 0 172.83 344h262.34A12.82 12.82 0 0 0 448 331.17v-22.34A12.82 12.82 0 0 0 435.17 296z"/></svg>',
 		);
 
 		return $field;
@@ -870,10 +906,15 @@ class Mai_Grid_Block {
 
 	function add_conditional_logic( $field ) {
 
+		// Build conditions.
 		$conditions = array();
 		foreach( $this->get_templates() as $template_name => $template_values ) {
-			// Bail if this field is supported.
-			if ( in_array( $field['name'], $template_values['supports'] ) ) {
+			// Skip if not removing anything.
+			if ( ! isset( $template_values['remove_support'] ) || empty( $template_values['remove_support'] ) ) {
+				continue;
+			}
+			// Skip if not a field we are removing.
+			if ( ! in_array( $field['name'], $template_values['remove_support'] ) ) {
 				continue;
 			}
 			// Add condition to hide field.
@@ -907,7 +948,7 @@ class Mai_Grid_Block {
 	}
 
 	/**
-	 *
+	 * TODO: explicitely declare support for every setting in Display tab. It's too confusing to guess right now.
 	 * TODO: defaults won't work with PHP. Needs to be JS, but that would change the actual values, not the default.
 	 * Maybe we don't do this.
 	 *
@@ -915,13 +956,15 @@ class Mai_Grid_Block {
 	function get_templates() {
 		return array(
 			'standard' => array(
-				'label'    => __( 'Standard', 'mai-grid' ),
-				// 'style'    => "{$this->base_url}/js/mai-acf-wp-query{$this->suffix}.js",
-				'supports' => array(
-					'show_image',
-					'show_title',
-					// 'show_date',
-					// 'show_author',
+				'label'          => __( 'Standard', 'mai-grid' ),
+				'remove_support' => array(
+					'align_text_vertical',
+				),
+			),
+			'background' => array(
+				'label'          => __( 'Background Image', 'mai-grid' ),
+				'remove_support' => array(
+					'image_align',
 					'show_excerpt',
 					'show_content',
 					'show_header_meta',
@@ -929,46 +972,33 @@ class Mai_Grid_Block {
 					'show_more_link',
 					'boxed',
 				),
-				'defaults' => array(
-					'show_image' => true,
-					'show_title' => true,
-				),
-			),
-			'background' => array(
-				'label'    => __( 'Background', 'mai-grid' ),
-				'supports' => array(
-					'show_image',
-					'show_title',
-					// 'show_more_link',
-				),
-				'defaults' => array(
-					'show_image' => true,
-					'show_title' => true,
-				),
 			),
 			'compact' => array(
-				'label'    => __( 'Compact', 'mai-grid' ),
-				'supports' => array(
-					'show_image',
-					'show_title',
-					// 'show_more_link',
+				'label'          => __( 'Compact', 'mai-grid' ),
+				'remove_support' => array(
+					'image_align',
+					'show_excerpt',
+					'show_content',
+					'show_header_meta',
+					'show_footer_meta',
+					'show_more_link',
+					'boxed',
 				),
-				'defaults' => array(
-					'show_image' => true,
-					'image_size' => 'tiny',
-					'show_title' => true,
-				),
+				// 'defaults' => array(
+				// 	'show_image' => true,
+				// 	'image_size' => 'tiny',
+				// 	'show_title' => true,
+				// ),
 			),
 		);
 	}
 
 	function get_fields() {
 		return array_merge(
-			$this->get_wp_query_fields(),
-			$this->get_wp_term_query_fields(),
-			$this->get_show_fields(),
 			$this->get_display_fields(),
 			$this->get_layout_fields(),
+			$this->get_wp_query_fields(),
+			$this->get_wp_term_query_fields(),
 		);
 	}
 
@@ -1000,27 +1030,25 @@ class Mai_Grid_Block {
 		);
 	}
 
-	function get_show_fields() {
-		return array(
-			'show_image'       => 'field_5e1e665ffc7e5',
-			'show_title'       => 'field_5e1e6693fc7e6',
-			'show_excerpt'     => 'field_5e1e67e7e988b',
-			'show_content'     => 'field_5e1e67fce988c',
-			'show_header_meta' => 'field_5e1e680ce988d',
-			'show_footer_meta' => 'field_5e1e6835e988e',
-			'show_more_link'   => 'field_5e1e6843e988f',
-			'boxed'            => 'field_5e2a08a182c2c',
-		);
-	}
-
 	function get_display_fields() {
 		return array(
-			'template'       => 'field_5de9b96fb69b0',
-			'content_limit'  => 'field_5bd51ac107244',
-			'image_size'     => 'field_5bd50e580d1e9',
-			'more_link_text' => 'field_5c85465018395',
-			'footer_meta'    => 'field_5e2b563a7c6cf',
-			'more_link'      => 'field_5e2b567e7c6d0',
+			'template'            => 'field_5de9b96fb69b0',
+			'show_image'          => 'field_5e1e665ffc7e5',
+			'image_size'          => 'field_5bd50e580d1e9',
+			'image_align'         => 'field_5e2f3adf82130',
+			'show_title'          => 'field_5e1e6693fc7e6',
+			'show_header_meta'    => 'field_5e1e680ce988d',
+			'header_meta'         => 'field_5e2b563a7c6cf',
+			'show_excerpt'        => 'field_5e1e67e7e988b',
+			'show_content'        => 'field_5e1e67fce988c',
+			'content_limit'       => 'field_5bd51ac107244',
+			'show_more_link'      => 'field_5e1e6843e988f',
+			'more_link_text'      => 'field_5c85465018395',
+			'show_footer_meta'    => 'field_5e1e6835e988e',
+			'footer_meta'         => 'field_5e2b563a7c6cf',
+			'boxed'               => 'field_5e2a08a182c2c',
+			'align_text'          => 'field_5c853f84eacd6',
+			'align_text_vertical' => 'field_5e2f519edc912',
 		);
 	}
 
@@ -1034,10 +1062,51 @@ class Mai_Grid_Block {
 		return array(
 			'columns'         => 'field_5c854069d358c',
 			'align_cols'      => 'field_5c853e6672972',
-			'align_text'      => 'field_5c853f84eacd6',
 			'grid_column_gap' => 'field_5c8542d6a67c5',
 			'grid_row_gap'    => 'field_5e29f1785bcb6',
 		);
+	}
+
+	function get_align_cols_icon() {
+		ob_start();
+		?>
+		<svg xmlns:x="http://ns.adobe.com/Extensibility/1.0/" xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/"
+			xmlns:graph="http://ns.adobe.com/Graphs/1.0/" xmlns="http://www.w3.org/2000/svg"
+			xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125"
+			enable-background="new 0 0 100 100" xml:space="preserve">
+			<switch>
+				<foreignObject requiredExtensions="http://ns.adobe.com/AdobeIllustrator/10.0/" x="0" y="0" width="1" height="1" />
+				<g i:extraneous="self">
+					<g>
+						<rect x="38" y="20" fill="#000000" width="23" height="16.6" />
+						<rect x="66" y="20" fill="#000000" width="24" height="16.6" />
+						<rect x="10" y="41.6" fill="#000000" width="23" height="16.6" />
+						<rect x="66" y="41.6" fill="#000000" width="24" height="16.6" />
+						<rect x="10" y="20" fill="#000000" width="23" height="16.6" />
+						<rect x="10" y="63.1" fill="#000000" width="23" height="16.9" />
+						<rect x="38" y="41.6" fill="#000000" width="23" height="16.6" />
+						<rect x="38" y="63.1" fill="#000000" width="23" height="16.9" />
+						<rect x="66" y="63.1" fill="#000000" width="24" height="16.9" />
+					</g>
+				</g>
+			</switch>
+		</svg>
+		<?php
+		return ob_get_clean();
+	}
+
+	function get_align_cols_center() {
+		ob_start();
+		?>
+		<svg viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg">
+			<rect x="0" y="0" width="20" height="20" rx="1" style="fill:#000;" />
+			<rect x="22" y="0" width="20" height="20" rx="1" style="fill:#000;" />
+			<rect x="44" y="0" width="20" height="20" rx="1" style="fill:#000;" />
+			<rect x="11" y="22" width="20" height="20" rx="1" style="fill:#000;" />
+			<rect x="33" y="22" width="20" height="20" rx="1" style="fill:#000;" />
+		</svg>
+		<?php
+		return ob_get_clean();
 	}
 
 }
