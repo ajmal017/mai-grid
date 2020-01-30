@@ -1,8 +1,9 @@
 <?php
-printf( '<div class="mai-grid__entry%s%s">',
-	$data->boxed ? ' mai-grid__entry--boxed' : '',
-	$data->more_link ? ' has-more-link' : ''
-);
+// printf( '<div class="mai-grid__entry%s%s">',
+// 	$data->boxed ? ' mai-grid__entry--boxed' : '',
+// 	$data->more_link ? ' has-more-link' : ''
+// );
+echo '<div class="mai-grid__entry>';
 	// Image.
 	echo $data->image ? sprintf( '<a class="mai-grid__link mai-grid__link--image" href="%s">%s</a>', $data->link, $data->image ) : '';
 	// Title.

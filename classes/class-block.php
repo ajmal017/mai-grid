@@ -1,5 +1,9 @@
 <?php
 
+// add_action( 'genesis_before_loop', function() {
+// 	vd( is_numeric( '0' ) );
+// });
+
 // Get it started.
 add_action( 'plugins_loaded', function() {
 	new Mai_Grid_Block;
@@ -25,7 +29,9 @@ class Mai_Grid_Block {
 		$this->values   = array();
 
 		add_action( 'acf/init', array( $this, 'register_block' ), 10, 3 );
-		$this->filters();
+		if ( is_admin() ) {
+			$this->filters();
+		}
 	}
 
 	function register_block() {
@@ -54,6 +60,9 @@ class Mai_Grid_Block {
 	}
 
 	function enqueue_assets( $block ) {
+
+		// Default layout CSS.
+		$this->enqueue_asset( 'entries', 'css' );
 
 		if ( is_admin() ) {
 
@@ -117,7 +126,7 @@ class Mai_Grid_Block {
 		$this->values = array(
 			// Query.
 			'post_type'              => get_field( 'post_type' ),
-			'posts_per_page'         => get_field( 'posts_per_page' ),
+			'number'                 => get_field( 'number' ),
 			'offset'                 => get_field( 'offset' ),
 			'query_by'               => get_field( 'query_by' ),
 			'post__in'               => get_field( 'post__in' ),
@@ -147,18 +156,26 @@ class Mai_Grid_Block {
 			'footer_meta'            => get_field( 'footer_meta' ),
 			// Layout.
 			'template'               => get_field( 'template' ),
+			'columns_responsive'     => get_field( 'columns_responsive' ),
 			'columns'                => get_field( 'columns' ),
-			'align_cols'             => get_field( 'align_cols' ),
+			// 'columns_lg'             => get_field( 'columns_lg' ),
+			'columns_md'             => get_field( 'columns_md' ),
+			'columns_sm'             => get_field( 'columns_sm' ),
+			'columns_xs'             => get_field( 'columns_xs' ),
+			'column_min_width'       => get_field( 'column_min_width' ),
+			'align_columns'          => get_field( 'align_columns' ),
+			'align_columns_vertical' => get_field( 'align_columns_vertical' ),
 			'align_text'             => get_field( 'align_text' ),
-			'grid_column_gap'        => get_field( 'grid_column_gap' ),
-			'grid_row_gap'           => get_field( 'grid_row_gap' ),
+			'align_text_vertical'    => get_field( 'align_text_vertical' ),
+			'column_gap'             => get_field( 'column_gap' ),
+			'row_gap'                => get_field( 'row_gap' ),
 		);
 
 		// Sanitize.
 		$this->values = array(
 			// Query.
 			'post_type'              => array_map( 'esc_attr', (array) $this->values['post_type'] ),
-			'posts_per_page'         => absint( $this->values['posts_per_page'] ),
+			'number'                 => absint( $this->values['number'] ),
 			'offset'                 => absint( $this->values['offset'] ),
 			'query_by'               => $this->values['query_by'],
 			'post__in'               => $this->values['post__in'],
@@ -187,12 +204,20 @@ class Mai_Grid_Block {
 			'header_meta'            => esc_attr( $this->values['header_meta'] ),
 			'footer_meta'            => esc_attr( $this->values['footer_meta'] ),
 			// Layout.
-			'template'               => $this->values['template'],
-			'columns'                => $this->values['columns'],
-			'align_cols'             => $this->values['align_cols'],
-			'align_text'             => $this->values['align_text'],
-			'grid_column_gap'        => $this->get_gap( esc_attr( $this->values['grid_column_gap'] ) ),
-			'grid_row_gap'           => $this->get_gap( esc_attr( $this->values['grid_row_gap'] ) ),
+			'template'               => esc_attr( $this->values['template'] ),
+			'columns_responsive'     => (bool) $this->values['columns_responsive'],
+			'columns'                => absint( $this->values['columns'] ),
+			// 'columns_lg'             => is_null( $this->values['columns_lg'] ) ? null : absint( $this->values['columns_lg'] ),
+			'columns_md'             => is_null( $this->values['columns_md'] ) ? null : absint( $this->values['columns_md'] ),
+			'columns_sm'             => is_null( $this->values['columns_sm'] ) ? null : absint( $this->values['columns_sm'] ),
+			'columns_xs'             => is_null( $this->values['columns_xs'] ) ? null : absint( $this->values['columns_xs'] ),
+			'column_min_width'       => absint( $this->values['column_min_width'] ),
+			'align_columns'          => $this->get_flex_align( esc_attr( $this->values['align_columns'] ) ),
+			'align_columns_vertical' => $this->get_flex_align( esc_attr( $this->values['align_columns_vertical'] ) ),
+			'align_text'             => esc_attr( $this->values['align_text'] ),
+			'align_text_vertical'    => $this->get_flex_align( esc_attr( $this->values['align_text_vertical'] ) ),
+			'column_gap'             => $this->get_gap( esc_attr( $this->values['column_gap'] ) ),
+			'row_gap'                => $this->get_gap( esc_attr( $this->values['row_gap'] ) ),
 		);
 
 		// Defaults.
@@ -209,42 +234,62 @@ class Mai_Grid_Block {
 				// wp_enqueue_script( 'mai-grid-more', "{$this->base_url}/js/mai-grid-more{$this->suffix}.js", array(), $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/js/mai-grid-more{$this->suffix}.js" ) ) );
 			// }
 
-			$items   = $posts->post_count;
-			$columns = absint( $this->values['columns'] );
-			$rows    = absint( ceil( $items / $columns ) );
-			$empty   = ( $columns * $rows ) - $items;
+			$params = $this->values;
+			$params['number'] = $posts->post_count;
 
-			printf( '<div class="mai-grid mai-grid-%s" style="--mai-grid-columns: %s;--mai-grid-column-gap: %s;--mai-grid-row-gap: %s;--mai-grid-empty: %s;">',
-				sanitize_html_class( $this->values['template'] ),
-				$this->values['columns'],
-				$this->values['grid_column_gap'],
-				$this->values['grid_row_gap'],
-				$empty
-			);
+			// Main wrap open.
+			genesis_markup( array(
+				'open'    => '<div %s>',
+				'context' => 'mai-grid',
+				'params'  => $params,
+				'atts'    => $this->get_attributes(),
+			) );
+
+				genesis_markup( array(
+					'open'    => '<div %s>',
+					'context' => 'mai-grid__wrap',
+				) );
 
 				while ( $posts->have_posts() ) : $posts->the_post();
 
-					// Start them empty so we don't need isset() checks in the template.
+					// Start data array so we don't need isset() in template.
 					$data = array(
-						'link'           => get_permalink(),
-						'image'          => '',
-						'title'          => '',
-						'header_meta'    => '',
-						'footer_meta'    => '',
-						'content'        => '',
-						'more_link'      => '',
-						'more_link_text' => '',
-						'boxed'          => false,
+						'args'                => $this->values,
+						'link'                => get_permalink(),
+						'image_id'            => '',
+						'image_size'          => '',
+						'image_align'         => '',
+						'title'               => '',
+						'header_meta'         => '',
+						'footer_meta'         => '',
+						'content'             => '',
+						'more_link'           => '',
+						'more_link_text'      => '',
+						'align_text'          => '',
+						'align_text_vertical' => '',
+						'boxed'               => false,
 					);
+
 					// Image.
 					if ( $this->values['show_image'] ) {
-						$image_id = get_post_thumbnail_id();
-						if ( $image_id ) {
+						// TODO: If 'default', find an actual image size, or maybe this is from template config?
+						// TODO: Image Align.
+						$image_id      = get_post_thumbnail_id();
+						$data['image_id']   = $image_id;
+						$data['image_size'] = ( 'default' == $this->values['image_size'] ) ? 'thumbnail' : $this->values['image_size'];
+						// if ( $image_id ) {
 							// TODO: If 'default', find an actual image size.
-							$image_size  = ( 'default' == $this->values['image_size'] ) ? 'thumbnail' : $this->values['image_size'];
-							$image_align = 'none';
-							$data['image'] = wp_get_attachment_image( $image_id, $image_size, false, array( 'class' => 'mai__grid-image' ) );
-						}
+							// $image_size    = ( 'default' == $this->values['image_size'] ) ? 'thumbnail' : $this->values['image_size'];
+							// $image_align   = 'none';
+							// $data['image'] = wp_get_attachment_image( $image_id, $image_size, false, array( 'class' => 'mai-grid__image' ) );
+							// $image       = wp_get_attachment_image_src( $attachment_id, $image_size );
+							// TODO: Do responsive image stuff via picture/source.
+							// $data['image'] = array(
+							// 	'html'   => wp_get_attachment_image( $image_id, $image_size, false, array( 'class' => 'mai-grid__image' ) ),
+							// 	'width'  => $image['width'],
+							// 	'height' => $image['height'],
+							// );
+						// }
 					}
 					// Title.
 					if ( $this->values['show_title'] ) {
@@ -283,6 +328,15 @@ class Mai_Grid_Block {
 					if ( $this->values['show_footer_meta'] ) {
 						$data['footer_meta'] = do_shortcode( $this->values['footer_meta'] );
 					}
+					// Align Text.
+					if ( $this->values['align_text'] ) {
+						$data['align_text'] = $this->values['align_text'] ;
+					}
+					// Align Text Vertical
+					if ( $this->values['align_text_vertical'] ) {
+
+						$data['align_text_vertical'] = $this->values['align_text_vertical'] ;
+					}
 					// Boxed.
 					if ( $this->values['boxed'] ) {
 						$data['boxed'] = true;
@@ -299,7 +353,16 @@ class Mai_Grid_Block {
 
 				endwhile;
 
-			echo '</div>';
+				genesis_markup( array(
+					'close'   => '</div>',
+					'context' => 'mai-grid__wrap',
+				) );
+
+			genesis_markup( array(
+				'close'   => '</div>',
+				'context' => 'mai-grid',
+				'params'  => $this->values,
+			) );
 
 		endif;
 		wp_reset_postdata();
@@ -328,18 +391,17 @@ class Mai_Grid_Block {
 		// Truncate $content to $max_char.
 		$content = genesis_truncate_phrase( $content, $max_characters );
 
-		// $output = sprintf( '<p>%s</p>', $content );
+		// Autop. Do we really need this?
 		$output = wpautop( $content . '&hellip;' );
-		$link   = '';
 
-		return apply_filters( 'get_the_content_limit', $output, $content, $link, $max_characters );
+		return apply_filters( 'get_the_content_limit', $output, $content, $link = '', $max_characters );
 	}
 
 	function get_query_args() {
 
 		$args = array(
 			'post_type'           => $this->values['post_type'],
-			'posts_per_page'      => $this->values['posts_per_page'],
+			'posts_per_page'      => $this->values['number'],
 			'post_status'         => 'publish',
 			'offset'              => $this->values['offset'],
 			'ignore_sticky_posts' => true,
@@ -376,34 +438,127 @@ class Mai_Grid_Block {
 		return apply_filters( 'mai_post_grid_args', $args, $this->block );
 	}
 
+	function get_attributes() {
+		$attributes = array(
+			'class' => sprintf( 'mai-grid mai-grid-%s', sanitize_html_class( $this->values['template'] ) ),
+			'style' => '',
+		);
+		if ( $this->values['boxed'] ) {
+			$attributes['class'] .= ' has-boxed';
+		}
+		$attributes['style'] .= sprintf( '--columns:%s;', $this->values['columns'] );
+		// $attributes['style'] .= sprintf( '--columns-lg:%s;', $this->get_responsive_columns( $this->values['columns_lg'], $this->values['columns'], $this->values['columns'] ) );
+		// $attributes['style'] .= sprintf( '--columns-md:%s;', $this->get_responsive_columns( $this->values['columns_md'], $this->values['columns_lg'], $this->values['columns'] ) );
+		$attributes['style'] .= sprintf( '--columns-md:%s;', $this->get_responsive_columns( $this->values['columns_md'], $this->values['columns'], $this->values['columns'] ) );
+		$attributes['style'] .= sprintf( '--columns-sm:%s;', $this->get_responsive_columns( $this->values['columns_sm'], $this->values['columns_md'], $this->values['columns'] ) );
+		$attributes['style'] .= sprintf( '--columns-xs:%s;', $this->get_responsive_columns( $this->values['columns_xs'], $this->values['columns_sm'], $this->values['columns'] ) );
+		$attributes['style'] .= sprintf( '--column-gap:%s;', $this->values['column_gap'] );
+		$attributes['style'] .= sprintf( '--row-gap:%s;', $this->values['row_gap'] );
+		$attributes['style'] .= sprintf( '--align-columns:%s;', $this->values['align_columns'] );
+		$attributes['style'] .= sprintf( '--align-columns-vertical:%s;', $this->values['align_columns_vertical'] );
+		$attributes['style'] .= sprintf( '--align-text:%s;', $this->values['align_text'] );
+		$attributes['style'] .= sprintf( '--align-text-vertical:%s;', $this->values['align_text_vertical'] );
+		$attributes['style'] .= sprintf( '--aspect-ratio:%s;', $this->values['show_image'] ? $this->get_aspect_ratio( $this->values['image_size'] ) : '4/3' );
+		return $attributes;
+	}
+
+	/**
+	 *
+	 * TODO: Will this break if more than one grid on a page?
+	 */
+	function get_responsive_columns( $value, $previous_value, $original_value ) {
+		static $current_columns;
+		// Set the current column.
+		if ( ! isset( $current_columns ) ) {
+			$current_columns = $original_value;
+		}
+		// If using responsive settings, and have a value.
+		if ( $this->values['columns_responsive'] && is_numeric( $value ) ) {
+			$current_columns = $value;
+			return $current_columns;
+		}
+		$compare = is_numeric( $previous_value ) ? $previous_value : $current_columns;
+		switch ( $compare ) {
+			case 6:
+				$current_columns = 4;
+			break;
+			case 5:
+				$current_columns = 3;
+			break;
+			case 4:
+				$current_columns = 2;
+			break;
+			case 3:
+				$current_columns = 2;
+			break;
+			case 2:
+				$current_columns = 1;
+			break;
+			case 1:
+				$current_columns = 1;
+			break;
+			case 0:
+				$current_columns = 0;
+			break;
+		}
+		return absint( $current_columns );
+	}
+
+	function get_aspect_ratio( $image_size ) {
+		$sizes = $this->get_image_sizes( $image_size );
+		return sprintf( '%s/%s', $sizes[0], $sizes[1] );
+	}
+
+	/**
+	 * Get an image width and height.
+	 *
+	 * @return  array  An array with [0] being width and [1] being height.
+	 */
+	function get_image_sizes( $image_size ) {
+		global $_wp_additional_image_sizes;
+		// Get width/height from global image sizes.
+		if ( isset( $_wp_additional_image_sizes[ $image_size ] ) ) {
+			$registered_image = $_wp_additional_image_sizes[ $image_size ];
+			$width  = $registered_image['width'];
+			$height = $registered_image['height'];
+		}
+		// Fallback.
+		else {
+			$width  = 4;
+			$height = 3;
+		}
+		return array( $width, $height );
+	}
+
+	function get_flex_align( $value ) {
+		switch ( $value ) {
+			case 'start':
+			case 'top':
+				$return = 'flex-start';
+				break;
+			case 'center':
+			case 'middle':
+				$return = 'center';
+				break;
+			case 'right':
+			case 'bottom':
+				$return = 'flex-end';
+				break;
+			default:
+				$return = 'unset';
+		}
+		return $return;
+	}
+
+	/**
+	 * Get the gap value.
+	 * If only a number value, force to pixels.
+	 */
 	function get_gap( $value ) {
-		if ( is_numeric( $value ) ) {
+		if ( empty( $value ) || is_numeric( $value ) ) {
 			return sprintf( '%spx', intval( $value ) );
 		}
 		return trim( $value );
-		// switch ( $value ) {
-		// 	case 'none':
-		// 		$gap = '0';
-		// 		break;
-		// 	case 'xs':
-		// 		$gap = '8px';
-		// 		break;
-		// 	case 'sm':
-		// 		$gap = '16px';
-		// 		break;
-		// 	case 'md':
-		// 		$gap = '24px';
-		// 		break;
-		// 	case 'lg':
-		// 		$gap = '36px';
-		// 		break;
-		// 	case 'xl':
-		// 		$gap = '52px';
-		// 		break;
-		// 	default:
-		// 		$gap = '0';
-		// }
-		// return $gap;
 	}
 
 	function filters() {
@@ -452,14 +607,20 @@ class Mai_Grid_Block {
 		// Template.
 		add_filter( "acf/load_field/key={$this->fields['template']}", array( $this, 'load_templates' ) );
 		// Columns.
-		add_filter( "acf/load_field/key={$this->fields['columns']}", array( $this, 'load_columns' ) );
+		add_filter( "acf/load_field/key={$this->fields['columns']}",    array( $this, 'load_columns' ) );
+		// add_filter( "acf/load_field/key={$this->fields['columns_lg']}", array( $this, 'load_columns_responsive' ) );
+		add_filter( "acf/load_field/key={$this->fields['columns_md']}", array( $this, 'load_columns_responsive' ) );
+		add_filter( "acf/load_field/key={$this->fields['columns_sm']}", array( $this, 'load_columns_responsive' ) );
+		add_filter( "acf/load_field/key={$this->fields['columns_xs']}", array( $this, 'load_columns_responsive' ) );
 		// Align Columns.
-		add_filter( "acf/load_field/key={$this->fields['align_cols']}", array( $this, 'load_align_columns' ) );
+		add_filter( "acf/load_field/key={$this->fields['align_columns']}", array( $this, 'load_align_columns' ) );
+		add_filter( "acf/load_field/key={$this->fields['align_columns_vertical']}", array( $this, 'load_align_columns_vertical' ) );
 		// Align Text.
 		add_filter( "acf/load_field/key={$this->fields['align_text']}", array( $this, 'load_align_text' ) );
+		add_filter( "acf/load_field/key={$this->fields['align_text_vertical']}", array( $this, 'load_align_text_vertical' ) );
 		// Gaps.
-		// add_filter( "acf/load_field/key={$this->fields['grid_column_gap']}", array( $this, 'load_gap' ) );
-		// add_filter( "acf/load_field/key={$this->fields['grid_row_gap']}", array( $this, 'load_gap' ) );
+		// add_filter( "acf/load_field/key={$this->fields['column_gap']}", array( $this, 'load_gap' ) );
+		// add_filter( "acf/load_field/key={$this->fields['row_gap']}", array( $this, 'load_gap' ) );
 
 		// Labels.
 		foreach( $this->get_display_fields() as $name => $key ) {
@@ -472,13 +633,20 @@ class Mai_Grid_Block {
 				if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
 					return $field;
 				}
+				// Clear label.
+				$field['label'] = '';
 				// TODO: JS to get template value and set defaults? Too aggressive?
 				// $field['default'] = '';
 				return $field;
 			});
 		}
 		// Conditionals.
-		foreach( $this->get_fields() as $name => $key ) {
+		foreach( $this->get_display_fields() as $name => $key ) {
+			// Skip template field.
+			if ( 'template' === $name ) {
+				continue;
+			}
+			// Add filter.
 			add_filter( "acf/load_field/key={$key}", function( $field ) {
 				// Keep admin clean.
 				if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
@@ -805,16 +973,40 @@ class Mai_Grid_Block {
 		$field['choices'] = array();
 
 		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
+		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+			return $field;
+		}
 
 		$field['choices'] = array(
-			''       => __( 'None', 'mai-grid' ),
-			'left'   => '<span class="dashicons dashicons-editor-alignleft"></span>',
-			'center' => $this->get_align_cols_center(),
-			'right'  => '<span class="dashicons dashicons-editor-alignright"></span>',
+			''       => __( 'Clear', 'mai-grid' ),
+			'left'   => __( 'Left', 'mai-grid' ),
+			'center' => __( 'Center', 'mai-grid' ),
+			'right'  => __( 'Right', 'mai-grid' ),
 		);
+
+		$field['default'] = '';
+
+		return $field;
+	}
+
+	function load_align_columns_vertical( $field ) {
+
+		// Start empty.
+		$field['choices'] = array();
+
+		// Keep admin clean.
+		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+			return $field;
+		}
+
+		$field['choices'] = array(
+			''       => __( 'Clear', 'mai-grid' ),
+			'top'    => __( 'Top', 'mai-grid' ),
+			'middle' => __( 'Middle', 'mai-grid' ),
+			'bottom' => __( 'Bottom', 'mai-grid' ),
+		);
+
+		$field['default'] = '';
 
 		return $field;
 	}
@@ -825,25 +1017,38 @@ class Mai_Grid_Block {
 		$field['choices'] = array();
 
 		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		// TODO: If 'background' is the layout, can we do vertical alignment here too?!?!
-
-		// $field['choices'] = array(
-		// 	''       => __( 'None', 'mai-grid' ),
-		// 	'left'   => __( 'Left', 'mai-grid' ),
-		// 	'center' => __( 'Center', 'mai-grid' ),
-		// 	'right'  => __( 'Right', 'mai-grid' ),
-		// );
+		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+			return $field;
+		}
 
 		$field['choices'] = array(
-			''       => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M634 471L36 3.5A16 16 0 0 0 13.49 6l-10 12.5A16 16 0 0 0 6 41l598 467.5a16 16 0 0 0 22.5-2.5l10-12.5A16 16 0 0 0 634 471zM528 296h-39.94l52.69 41.19A15.6 15.6 0 0 0 544 328v-16a16 16 0 0 0-16-16zm16-112a16 16 0 0 0-16-16H324.34l61.39 48H528a16 16 0 0 0 16-16zm-16-96a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16H160.61L222 88zM112 424a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h367.37L418 424zm0-80h203.65l-61.39-48H112a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16z"/></svg>',
-			'left'   => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M12.83 344h262.34A12.82 12.82 0 0 0 288 331.17v-22.34A12.82 12.82 0 0 0 275.17 296H12.83A12.82 12.82 0 0 0 0 308.83v22.34A12.82 12.82 0 0 0 12.83 344zm0-256h262.34A12.82 12.82 0 0 0 288 75.17V52.83A12.82 12.82 0 0 0 275.17 40H12.83A12.82 12.82 0 0 0 0 52.83v22.34A12.82 12.82 0 0 0 12.83 88zM432 168H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16zm0 256H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16z"/></svg>',
-			'center' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M108.1 88h231.81A12.09 12.09 0 0 0 352 75.9V52.09A12.09 12.09 0 0 0 339.91 40H108.1A12.09 12.09 0 0 0 96 52.09V75.9A12.1 12.1 0 0 0 108.1 88zM432 424H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16zm0-256H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16zm-92.09 176A12.09 12.09 0 0 0 352 331.9v-23.81A12.09 12.09 0 0 0 339.91 296H108.1A12.09 12.09 0 0 0 96 308.09v23.81a12.1 12.1 0 0 0 12.1 12.1z"/></svg>',
-			'right'  => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M16 216h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16zm416 208H16a16 16 0 0 0-16 16v16a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-16a16 16 0 0 0-16-16zm3.17-384H172.83A12.82 12.82 0 0 0 160 52.83v22.34A12.82 12.82 0 0 0 172.83 88h262.34A12.82 12.82 0 0 0 448 75.17V52.83A12.82 12.82 0 0 0 435.17 40zm0 256H172.83A12.82 12.82 0 0 0 160 308.83v22.34A12.82 12.82 0 0 0 172.83 344h262.34A12.82 12.82 0 0 0 448 331.17v-22.34A12.82 12.82 0 0 0 435.17 296z"/></svg>',
+			'left'   => __( 'Left', 'mai-grid' ),
+			'center' => __( 'Center', 'mai-grid' ),
+			'right'  => __( 'Right', 'mai-grid' ),
 		);
+
+		$field['default'] = 'center';
+
+		return $field;
+	}
+
+	function load_align_text_vertical( $field ) {
+
+		// Start empty.
+		$field['choices'] = array();
+
+		// Keep admin clean.
+		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+			return $field;
+		}
+
+		$field['choices'] = array(
+			'top'    => __( 'Top', 'mai-grid' ),
+			'middle' => __( 'Middle', 'mai-grid' ),
+			'bottom' => __( 'Bottom', 'mai-grid' ),
+		);
+
+		$field['default'] = 'middle';
 
 		return $field;
 	}
@@ -859,15 +1064,43 @@ class Mai_Grid_Block {
 		// }
 
 		$field['choices'] = array(
-			1 => __( 'None', 'mai-grid' ),
+			1 => __( '1', 'mai-grid' ),
 			2 => __( '2', 'mai-grid' ),
 			3 => __( '3', 'mai-grid' ),
 			4 => __( '4', 'mai-grid' ),
 			5 => __( '5', 'mai-grid' ),
 			6 => __( '6', 'mai-grid' ),
+			0 => __( 'Auto', 'mai-grid' ),
 		);
 
 		$field['default_value'] = 3;
+
+		return $field;
+	}
+
+
+	function load_columns_responsive( $field ) {
+
+		// Start empty.
+		$field['choices'] = array();
+
+		// Keep admin clean.
+		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+			// return $field;
+		// }
+
+		$field['choices'] = array(
+			'' => __( 'Clear', 'mai-grid' ),
+			1  => __( '1', 'mai-grid' ),
+			2  => __( '2', 'mai-grid' ),
+			3  => __( '3', 'mai-grid' ),
+			4  => __( '4', 'mai-grid' ),
+			5  => __( '5', 'mai-grid' ),
+			6  => __( '6', 'mai-grid' ),
+			0  => __( 'Auto', 'mai-grid' ),
+		);
+
+		$field['default_value'] = '';
 
 		return $field;
 	}
@@ -909,12 +1142,8 @@ class Mai_Grid_Block {
 		// Build conditions.
 		$conditions = array();
 		foreach( $this->get_templates() as $template_name => $template_values ) {
-			// Skip if not removing anything.
-			if ( ! isset( $template_values['remove_support'] ) || empty( $template_values['remove_support'] ) ) {
-				continue;
-			}
-			// Skip if not a field we are removing.
-			if ( ! in_array( $field['name'], $template_values['remove_support'] ) ) {
+			// Skip if field is supported.
+			if ( isset( $template_values['supports'][ $field['name'] ] ) ) {
 				continue;
 			}
 			// Add condition to hide field.
@@ -956,39 +1185,45 @@ class Mai_Grid_Block {
 	function get_templates() {
 		return array(
 			'standard' => array(
-				'label'          => __( 'Standard', 'mai-grid' ),
-				'remove_support' => array(
-					'align_text_vertical',
+				'label'    => __( 'Standard', 'mai-grid' ),
+				'supports' => array(
+					'show_image'          => 'field_5e1e665ffc7e5',
+					'image_size'          => 'field_5bd50e580d1e9',
+					'image_align'         => 'field_5e2f3adf82130',
+					'show_title'          => 'field_5e1e6693fc7e6',
+					'show_header_meta'    => 'field_5e1e680ce988d',
+					'header_meta'         => 'field_5e2b563a7c6cf',
+					'show_excerpt'        => 'field_5e1e67e7e988b',
+					'show_content'        => 'field_5e1e67fce988c',
+					'content_limit'       => 'field_5bd51ac107244',
+					'show_more_link'      => 'field_5e1e6843e988f',
+					'more_link_text'      => 'field_5c85465018395',
+					'show_footer_meta'    => 'field_5e1e6835e988e',
+					'footer_meta'         => 'field_5e2b563a7c6cf',
+					'boxed'               => 'field_5e2a08a182c2c',
+					'align_text'          => 'field_5c853f84eacd6',
+					'align_text_vertical' => 'field_5e2f519edc912',
 				),
 			),
 			'background' => array(
-				'label'          => __( 'Background Image', 'mai-grid' ),
-				'remove_support' => array(
-					'image_align',
-					'show_excerpt',
-					'show_content',
-					'show_header_meta',
-					'show_footer_meta',
-					'show_more_link',
-					'boxed',
+				'label'    => __( 'Background Image', 'mai-grid' ),
+				'supports' => array(
+					'show_image'          => 'field_5e1e665ffc7e5',
+					'image_size'          => 'field_5bd50e580d1e9',
+					'show_title'          => 'field_5e1e6693fc7e6',
+					'align_text'          => 'field_5c853f84eacd6',
+					'align_text_vertical' => 'field_5e2f519edc912',
 				),
 			),
 			'compact' => array(
-				'label'          => __( 'Compact', 'mai-grid' ),
-				'remove_support' => array(
-					'image_align',
-					'show_excerpt',
-					'show_content',
-					'show_header_meta',
-					'show_footer_meta',
-					'show_more_link',
-					'boxed',
+				'label'    => __( 'Compact', 'mai-grid' ),
+				'supports' => array(
+					'show_image'  => 'field_5e1e665ffc7e5',
+					// 'image_size'  => 'field_5bd50e580d1e9',
+					'image_align' => 'field_5e2f3adf82130',
+					'show_title'  => 'field_5e1e6693fc7e6',
+					'boxed'               => 'field_5e2a08a182c2c',
 				),
-				// 'defaults' => array(
-				// 	'show_image' => true,
-				// 	'image_size' => 'tiny',
-				// 	'show_title' => true,
-				// ),
 			),
 		);
 	}
@@ -1005,7 +1240,7 @@ class Mai_Grid_Block {
 	function get_wp_query_fields() {
 		return array(
 			'post_type'      => 'field_5df1053632ca2',
-			'posts_per_page' => 'field_5df1053632ca8',
+			'number'         => 'field_5df1053632ca8',
 			'offset'         => 'field_5df1bf01ea1de',
 			'query_by'       => 'field_5df1053632cad',
 			'post__in'       => 'field_5df1053632cbc',
@@ -1054,80 +1289,114 @@ class Mai_Grid_Block {
 
 	/**
 	 * TODO: Move boxed to a new "Style" heading.
-	 * Add Overlay for background.
-	 * Any others we need? Content fade in for background template? Too specific, and should be CSS in the theme?
 	 */
 
 	function get_layout_fields() {
 		return array(
-			'columns'         => 'field_5c854069d358c',
-			'align_cols'      => 'field_5c853e6672972',
-			'grid_column_gap' => 'field_5c8542d6a67c5',
-			'grid_row_gap'    => 'field_5e29f1785bcb6',
+			'columns_responsive'     => 'field_5e334124b905d',
+			'columns'                => 'field_5c854069d358c',
+			// 'columns_lg'             => 'field_5e332a8b7fe09',
+			'columns_md'             => 'field_5e3305dff9d8b',
+			'columns_sm'             => 'field_5e3305f1f9d8c',
+			'columns_xs'             => 'field_5e332a5f7fe08',
+			'align_columns'          => 'field_5c853e6672972',
+			'align_columns_vertical' => 'field_5e31d5f0e2867',
+			'column_gap'             => 'field_5c8542d6a67c5',
+			'row_gap'                => 'field_5e29f1785bcb6',
 		);
 	}
 
-	function get_align_cols_icon() {
-		ob_start();
-		?>
-		<svg xmlns:x="http://ns.adobe.com/Extensibility/1.0/" xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/"
-			xmlns:graph="http://ns.adobe.com/Graphs/1.0/" xmlns="http://www.w3.org/2000/svg"
-			xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125"
-			enable-background="new 0 0 100 100" xml:space="preserve">
-			<switch>
-				<foreignObject requiredExtensions="http://ns.adobe.com/AdobeIllustrator/10.0/" x="0" y="0" width="1" height="1" />
-				<g i:extraneous="self">
-					<g>
-						<rect x="38" y="20" fill="#000000" width="23" height="16.6" />
-						<rect x="66" y="20" fill="#000000" width="24" height="16.6" />
-						<rect x="10" y="41.6" fill="#000000" width="23" height="16.6" />
-						<rect x="66" y="41.6" fill="#000000" width="24" height="16.6" />
-						<rect x="10" y="20" fill="#000000" width="23" height="16.6" />
-						<rect x="10" y="63.1" fill="#000000" width="23" height="16.9" />
-						<rect x="38" y="41.6" fill="#000000" width="23" height="16.6" />
-						<rect x="38" y="63.1" fill="#000000" width="23" height="16.9" />
-						<rect x="66" y="63.1" fill="#000000" width="24" height="16.9" />
-					</g>
+	function get_align_left() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" version="1.1" x="0" y="0" style="transform:rotate(-90deg)">
+			<g stroke="currentColor" stroke-width="1.5">
+				<g transform="translate(-180.000000, -90.000000)" fill="currentColor">
+					<path d="M199.767767,101.656854 L200.474874,100.949747 L195.525126,96 L190.575379,100.949747 L191.282486,101.656854 L195,97.9393398 L195,116 L196,116 L196,97.8890873 L199.767767,101.656854 Z M184,94 L207,94 L207,95 L184,95 L184,94 L184,94 Z" />
 				</g>
-			</switch>
-		</svg>
-		<?php
-		return ob_get_clean();
+			</g>
+		</svg>';
 	}
 
-	function get_align_cols_center() {
-		ob_start();
-		?>
-		<svg viewBox="0 0 64 42" xmlns="http://www.w3.org/2000/svg">
-			<rect x="0" y="0" width="20" height="20" rx="1" style="fill:#000;" />
-			<rect x="22" y="0" width="20" height="20" rx="1" style="fill:#000;" />
-			<rect x="44" y="0" width="20" height="20" rx="1" style="fill:#000;" />
-			<rect x="11" y="22" width="20" height="20" rx="1" style="fill:#000;" />
-			<rect x="33" y="22" width="20" height="20" rx="1" style="fill:#000;" />
-		</svg>
-		<?php
-		return ob_get_clean();
+	function get_align_center() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" version="1.1" x="0" y="0" style="transform:rotate(90deg)">
+			<g stroke="currentColor" stroke-width="1.5">
+				<g transform="translate(-270.000000, -90.000000)" fill="currentColor">
+					<path d="M289.767767,97.3480183 L290.474874,98.055125 L285.525126,103.004873 L280.575379,98.055125 L281.282486,97.3480183 L285,101.065533 L285,93 L286,93 L286,101.115785 L289.767767,97.3480183 Z M289.767767,111.656854 L290.474874,110.949747 L285.525126,106 L280.575379,110.949747 L281.282486,111.656854 L285,107.93934 L285,116 L286,116 L286,107.889087 L289.767767,111.656854 Z M274,105 L297,105 L297,104 L274,104 L274,105 L274,105 Z" />
+				</g>
+			</g>
+		</svg>';
 	}
 
-}
-
-
-function mai_grid_write_to_file( $value ) {
-	/**
-	 * This function for testing & debuggin only.
-	 * Do not leave this function working on your site.
-	 */
-	$file   = dirname( __FILE__ ) . '/__data.txt';
-	$handle = fopen( $file, 'a' );
-	ob_start();
-	if ( is_array( $value ) || is_object( $value ) ) {
-		print_r( $value );
-	} elseif ( is_bool( $value ) ) {
-		var_dump( $value );
-	} else {
-		echo $value;
+	function get_align_right() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" version="1.1" x="0" y="0" style="transform:rotate(90deg)">
+			<g stroke="currentColor" stroke-width="1.5">
+				<g transform="translate(-180.000000, -90.000000)" fill="currentColor">
+					<path d="M199.767767,101.656854 L200.474874,100.949747 L195.525126,96 L190.575379,100.949747 L191.282486,101.656854 L195,97.9393398 L195,116 L196,116 L196,97.8890873 L199.767767,101.656854 Z M184,94 L207,94 L207,95 L184,95 L184,94 L184,94 Z" />
+				</g>
+			</g>
+		</svg>';
 	}
-	echo "\r\n\r\n";
-	fwrite( $handle, ob_get_clean() );
-	fclose( $handle );
+
+	function get_align_top() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" version="1.1" x="0" y="0">
+			<g stroke="currentColor" stroke-width="1.5">
+				<g transform="translate(-180.000000, -90.000000)" fill="currentColor">
+					<path d="M199.767767,101.656854 L200.474874,100.949747 L195.525126,96 L190.575379,100.949747 L191.282486,101.656854 L195,97.9393398 L195,116 L196,116 L196,97.8890873 L199.767767,101.656854 Z M184,94 L207,94 L207,95 L184,95 L184,94 L184,94 Z" />
+				</g>
+			</g>
+		</svg>';
+	}
+
+	function get_align_middle() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" version="1.1" x="0" y="0">
+			<g stroke="currentColor" stroke-width="1.5">
+				<g transform="translate(-270.000000, -90.000000)" fill="currentColor">
+					<path d="M289.767767,97.3480183 L290.474874,98.055125 L285.525126,103.004873 L280.575379,98.055125 L281.282486,97.3480183 L285,101.065533 L285,93 L286,93 L286,101.115785 L289.767767,97.3480183 Z M289.767767,111.656854 L290.474874,110.949747 L285.525126,106 L280.575379,110.949747 L281.282486,111.656854 L285,107.93934 L285,116 L286,116 L286,107.889087 L289.767767,111.656854 Z M274,105 L297,105 L297,104 L274,104 L274,105 L274,105 Z" />
+				</g>
+			</g>
+		</svg>';
+	}
+
+	function get_align_bottom() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" version="1.1" x="0" y="0" style="transform:rotate(180deg)">>
+			<g stroke="currentColor" stroke-width="1.5">
+				<g transform="translate(-180.000000, -90.000000)" fill="currentColor">
+					<path d="M199.767767,101.656854 L200.474874,100.949747 L195.525126,96 L190.575379,100.949747 L191.282486,101.656854 L195,97.9393398 L195,116 L196,116 L196,97.8890873 L199.767767,101.656854 Z M184,94 L207,94 L207,95 L184,95 L184,94 L184,94 Z" />
+				</g>
+			</g>
+		</svg>';
+	}
+
+	// No longer needed.
+	function get_align_columns_left() {
+		return '<svg viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg">
+			<rect x="0" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="6" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="12" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="0" y="6" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="6" y="6" width="4" height="4" rx="1" style="fill:currentColor;" />
+		</svg>';
+	}
+
+	// No longer needed.
+	function get_align_columns_center() {
+		return '<svg viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg">
+			<rect x="0" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="6" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="12" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="3" y="6" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="9" y="6" width="4" height="4" rx="1" style="fill:currentColor;" />
+		</svg>';
+	}
+
+	// No longer needed.
+	function get_align_columns_right() {
+		return '<svg viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg">
+			<rect x="0" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="6" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="12" y="0" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="6" y="6" width="4" height="4" rx="1" style="fill:currentColor;" />
+			<rect x="12" y="6" width="4" height="4" rx="1" style="fill:currentColor;" />
+		</svg>';
+	}
+
 }

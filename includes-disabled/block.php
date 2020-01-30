@@ -43,7 +43,7 @@ class Mai_Grid_Entries_Block {
 			// Layout.
 			'template'        => 'field_5de9b96fb69b0',
 			'columns'         => 'field_5c854069d358c',
-			'align_cols'      => 'field_5c853e6672972',
+			'align_columns'      => 'field_5c853e6672972',
 			'align_text'      => 'field_5c853f84eacd6',
 			'gutter'          => 'field_5c8542d6a67c5',
 		);
@@ -102,7 +102,7 @@ class Mai_Grid_Entries_Block {
 			$rows    = absint( ceil( $items / $columns ) );
 			$empty   = ( $columns * $rows ) - $items;
 
-			printf( '<div class="mai-grid mai-grid-%s" style="--mai-grid-columns: %s;--mai-grid-gutter: %s;--mai-grid-empty: %s;">',
+			printf( '<div class="mai-grid mai-grid-%s" style="--columns: %s;--mai-grid-gutter: %s;--empty: %s;">',
 				sanitize_html_class( $data['template'] ),
 				$data['columns'],
 				'16px',
