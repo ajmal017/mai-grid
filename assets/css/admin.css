@@ -6,13 +6,7 @@
 
 /* Show fields. */
 
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e665ffc7e5,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e6693fc7e6,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e680ce988d,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e67e7e988b,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e67fce988c,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e6843e988f,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e1e6835e988e {
+.acf-block-component .acf-block-fields div.acf-field.mai-grid-show {
 	padding-top: 0;
 	padding-bottom: 8px;
 	margin-top: 0;
@@ -20,77 +14,64 @@
 
 /* Conditional fields under Show fields. */
 
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd50e580d1e9,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2f3adf82130,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b563a7c6cf,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd51ac107244,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5c85465018395,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b567e7c6d0 {
+.acf-block-component .acf-block-fields div.acf-field.mai-grid-show-conditional {
 	position: relative;
 	margin-left: calc( 28px + .25rem );
 	padding-top: 8px;
 	padding-bottom: 12px;
 }
 
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd50e580d1e9::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2f3adf82130::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b563a7c6cf::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd51ac107244::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5c85465018395::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b567e7c6d0::before {
+.acf-block-component .acf-block-fields div.acf-field.mai-grid-show-conditional::before {
 	content: '';
 	position: absolute;
 	bottom: calc( 100% - 19px );
-	left: -9px;
 	width: 18px;
 	border-left: 1px solid #ccd0d4;
 	border-bottom: 1px solid #ccd0d4;
 }
 
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd50e580d1e9::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b563a7c6cf::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd51ac107244::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5c85465018395::before,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b567e7c6d0::before {
+.acf-block-component:not(.acf-block-panel) .acf-block-fields div.acf-field.mai-grid-show-conditional::before {
+	left: -5px;
+}
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-show-conditional::before {
+	left: -9px;
+}
+
+.acf-block-component .acf-block-fields div.acf-field.mai-grid-show-conditional::before {
 	height: 23px;
 }
 
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2f3adf82130::before {
+.acf-block-component .acf-block-fields div.acf-field.mai-grid-show-conditional + .mai-grid-show-conditional::before {
 	height: 100%;
 }
 
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd50e580d1e9 .acf-label label,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2f3adf82130 .acf-label label,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b563a7c6cf .acf-label label,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5bd51ac107244 .acf-label label,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5c85465018395 .acf-label label,
-.acf-block-component .acf-block-fields div.acf-field.acf-field-5e2b567e7c6d0 .acf-label label {
+.acf-block-component .acf-block-fields div.acf-field.mai-grid-show-conditional .acf-label label {
 	font-weight: normal;
 	margin: 0;
 }
 
-/* block panel only */
-
 /* responsive settings adjustment */
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c854069d358c {
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5c854069d358c {
 	padding-bottom: 8px;
 }
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e334124b905d {
+.acf-block-component .acf-block-fields div.acf-field.acf-field-5e334124b905d {
 	padding-top: 0;
 }
-
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 {
-	margin-left: 16px;
+.acf-block-component .acf-block-fields div.acf-field.mai-grid-nested-columns {
 	border-left: 1px solid #ccd0d4 !important;
 }
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b {
+.acf-block-component:not(.acf-block-panel) .acf-block-fields div.acf-field.mai-grid-nested-columns {
+	margin-left: 20px;
+}
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-nested-columns {
+	margin-left: 16px;
+}
+.acf-block-component .acf-block-fields > div.acf-field.mai-grid-nested-columns-first {
 	position: relative;
 	border-top: 1px solid #ccd0d4 !important;
 	border-radius: 3px 0 0 0;
 }
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b::before {
+.acf-block-component .acf-block-fields > div.acf-field.mai-grid-nested-columns-first::before {
 	content: '';
 	display: block;
 	height: 16px;
@@ -100,57 +81,55 @@
 	bottom: 100%;
 	border-left: 1px solid #ccd0d4 !important;
 }
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 {
+.acf-block-component .acf-block-fields > div.acf-field.mai-grid-nested-columns-last {
 	border-bottom: 1px solid #e2e4e7 !important;
 	border-radius: 0 0 0 3px;
 }
 
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853f84eacd6 .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e2f519edc912 .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c854069d358c .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a8b7fe09 .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853e6672972 .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e31d5f0e2867 .acf-button-group {
+/* block panel only */
+
+/* .acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-nested-columns {
+	margin-left: 16px;
+	border-left: 1px solid #ccd0d4 !important;
+}
+.acf-block-component.acf-block-panel .acf-block-fields > div.acf-field.mai-grid-nested-columns-first {
+	position: relative;
+	border-top: 1px solid #ccd0d4 !important;
+	border-radius: 3px 0 0 0;
+}
+.acf-block-component.acf-block-panel .acf-block-fields > div.acf-field.mai-grid-nested-columns-first::before {
+	content: '';
+	display: block;
+	height: 16px;
+	width: 0;
+	position: absolute;
+	left: 6px;
+	bottom: 100%;
+	border-left: 1px solid #ccd0d4 !important;
+}
+.acf-block-component.acf-block-panel .acf-block-fields > div.acf-field.mai-grid-nested-columns-last {
+	border-bottom: 1px solid #e2e4e7 !important;
+	border-radius: 0 0 0 3px;
+} */
+
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group .acf-button-group {
 	display: -webkit-box;
 	display: flex;
 }
 
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a8b7fe09,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853e6672972,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e31d5f0e2867 {
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear {
 	position: relative;
 }
 
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a8b7fe09 .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853e6672972 .acf-button-group,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e31d5f0e2867 .acf-button-group {
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear .acf-button-group {
 	flex-wrap: wrap;
 }
 
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a8b7fe09 .acf-button-group > .acf-label,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b .acf-button-group > .acf-label,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c .acf-button-group > .acf-label,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 .acf-button-group > .acf-label,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853e6672972 .acf-button-group > .acf-label,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e31d5f0e2867 .acf-button-group > .acf-label {
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear .acf-button-group > .acf-label {
 	padding-right: 54px;
 }
 
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a8b7fe09 .acf-button-group label:first-child,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b .acf-button-group label:first-child,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c .acf-button-group label:first-child,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 .acf-button-group label:first-child,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853e6672972 .acf-button-group label:first-child,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e31d5f0e2867 .acf-button-group label:first-child {
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear .acf-button-group label:first-child {
 	position: absolute;
 	bottom: calc( 100% + 3px);
 	right: 0;
@@ -162,28 +141,13 @@
 	border-radius: 3px;
 }
 
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a8b7fe09 .acf-button-group label:first-child:hover,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a8b7fe09 .acf-button-group label:first-child:focus,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b .acf-button-group label:first-child:hover,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b .acf-button-group label:first-child:focus,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c .acf-button-group label:first-child:hover,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c .acf-button-group label:first-child:focus,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 .acf-button-group label:first-child:hover,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 .acf-button-group label:first-child:focus,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853e6672972 .acf-button-group label:first-child:hover,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853e6672972 .acf-button-group label:first-child:focus,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e31d5f0e2867 .acf-button-group label:first-child:hover,
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e31d5f0e2867 .acf-button-group label:first-child:focus {
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear .acf-button-group label:first-child:hover,
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear .acf-button-group label:first-child:focus {
 	color: #016087;
 	background: #f3f5f6;
 	border-color: #0071a1;
 }
 
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a8b7fe09 .acf-button-group label:nth-child(2),
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305dff9d8b .acf-button-group label:nth-child(2),
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e3305f1f9d8c .acf-button-group label:nth-child(2),
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e332a5f7fe08 .acf-button-group label:nth-child(2),
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5c853e6672972 .acf-button-group label:nth-child(2),
-.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.acf-field-5e31d5f0e2867 .acf-button-group label:nth-child(2) {
+.acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear .acf-button-group label:nth-child(2) {
 	border-radius: 3px 0 0 3px;
 }

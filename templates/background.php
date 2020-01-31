@@ -1,6 +1,13 @@
 <?php
 
-echo '<div class="mai-grid__entry">';
+$entry_classes = 'mai-grid__entry';
+if ( $data->args['show_image'] && $data->image_id ) {
+	$entry_classes .= ' has-background';
+}
+if ( $data->args['show_title'] ) {
+	$entry_classes .= ' has-content';
+}
+echo sprintf( '<div class="%s">', $entry_classes );
 
 	// Aspect ratio outer.
 	// printf( '<a href="%s" class="mai-grid__entry-outer">', $data->link );
@@ -18,7 +25,7 @@ echo '<div class="mai-grid__entry">';
 			}
 
 			// Title.
-			echo $data->args['show_title'] && $data->title ? sprintf( '<h3 class="mai-grid__title">%s</h3>', $data->title ) : '';
+			echo ( $data->args['show_title'] && $data->title ) ? sprintf( '<h3 class="mai-grid__title">%s</h3>', $data->title ) : '';
 
 		echo '</a>';
 

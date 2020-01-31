@@ -1,13 +1,19 @@
 <?php
-// printf( '<div class="mai-grid__entry%s%s">',
-// 	$data->boxed ? ' mai-grid__entry--boxed' : '',
-// 	$data->more_link ? ' has-more-link' : ''
-// );
-echo '<div class="mai-grid__entry>';
+
+echo '<div class="mai-grid__entry">';
 	// Image.
-	echo $data->image ? sprintf( '<a class="mai-grid__link mai-grid__link--image" href="%s">%s</a>', $data->link, $data->image ) : '';
+	if ( $data->args['show_image'] && $data->image_id ) {
+		$image_size  = ( empty( $data->image_size ) || ( 'default' == $data->image_size ) ) ? 'thumbnail' : $data->image_size;
+		$image_align = $data->image_align ? sprintf( 'align%s', $data->image_align ) : 'alignnone';
+		$image_class = sprintf( 'mai-grid__image %s', $image_align );
+		$image_html  = wp_get_attachment_image( $data->image_id, $image_size, false, array( 'class' => $image_class ) );
+		printf( '<a class="mai-grid__link mai-grid__link--image has-%s" href="%s">%s</a>', $image_align, $data->link, $image_html );
+	}
 	// Title.
-	echo $data->title ? sprintf( '<h3 class="mai-grid__title"><a class="mai-grid__link mai-grid__link--title" href="%s">%s</a></h3>', $data->link, $data->title ) : '';
+	echo ( $data->args['show_title'] && $data->title ) ? sprintf( '<h3 class="mai-grid__title"><a class="mai-grid__link mai-grid__link--title" href="%s">%s</a></h3>', $data->link, $data->title ) : '';
+
+	// TODO: Check show_%s parameters here.
+
 	// Header Meta.
 	echo $data->header_meta ? sprintf( '<p class="mai-grid__header-meta entry-meta">%s</p>', $data->header_meta ) : '';
 	// Content.

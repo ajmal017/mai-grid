@@ -1,6 +1,6 @@
 .mai-grid-compact .mai-grid__entry {
 	display: grid;
-	grid-template-columns: 80px 1fr;
+	grid-template-columns: auto 1fr;
 }
 
 .mai-grid-compact:not(.has-boxed) .mai-grid__entry {
@@ -16,6 +16,10 @@
 .mai-grid-compact .mai-grid__image {
 	display: block;
 	font-size: 0;
+}
+
+.mai-grid-compact .mai-grid__link--image {
+	width: 80px;
 }
 
 .mai-grid-compact .mai-grid__content {
@@ -47,6 +51,7 @@
 }
 
 /* boxed */
+
 .mai-grid-compact.has-boxed .mai-grid__entry {
 	border: 1px solid rgba(0,0,0,.04);
 	border-radius: 3px;
