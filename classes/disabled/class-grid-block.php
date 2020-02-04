@@ -15,18 +15,20 @@ class Mai_Grid_Block {
 	protected $base_dir;
 	protected $version;
 	protected $suffix;
+	protected $templates;
 	protected $fields;
 	protected $values;
 	protected $block;
 
 	function __construct() {
 
-		$this->base_url = MAI_GRID_PLUGIN_URL . 'assets';
-		$this->base_dir = MAI_GRID_PLUGIN_DIR . 'assets';
-		$this->version  = MAI_GRID_VERSION;
-		$this->suffix   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
-		$this->fields   = $this->get_fields();
-		$this->values   = array();
+		$this->base_url  = MAI_GRID_PLUGIN_URL . 'assets';
+		$this->base_dir  = MAI_GRID_PLUGIN_DIR . 'assets';
+		$this->version   = MAI_GRID_VERSION;
+		$this->suffix    = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
+		$this->templates = $this->get_templates();
+		$this->fields    = $this->get_fields();
+		$this->values    = array();
 
 		add_action( 'acf/init', array( $this, 'register_block' ), 10, 3 );
 
@@ -68,7 +70,7 @@ class Mai_Grid_Block {
 		if ( is_admin() ) {
 
 			// We can't dynamically load assets via ajax when the template select field changes, so we need them all available in the backend.
-			foreach( array_keys( $this->get_templates() ) as $template ) {
+			foreach( array_keys( $this->templates ) as $template ) {
 				$this->enqueue_asset( $template, 'css' );
 			}
 
@@ -114,6 +116,41 @@ class Mai_Grid_Block {
 	}
 
 	/**
+	 * Get escaped field from ACF.
+	 *
+	 * @param   string  $field_key
+	 * @param   string  $function    The function to use for escaping.
+	 * @param   bool    $allow_null  Wether to return or escape if the value is.
+	 *
+	 * @return  mixed
+	 */
+	function get_field( $field_key, $function = 'esc_html', $allow_null = false ) {
+
+		// Get the field, via ACF.
+		$data = get_field( $field_key );
+
+		// Return null if allowing null.
+		if ( is_null( $data ) && $allow_null ) {
+			return $data;
+		}
+
+		// If array, escape and return it.
+		if ( is_array( $data ) ) {
+			$escaped = array();
+			foreach( $data as $index => $value ) {
+				$value = trim( $value );
+				$escaped[ $index ] = $function( $value );
+			}
+			return $escaped;
+		}
+
+		// Return single value.
+		$value   = trim( $data );
+		$escaped = $function( $value );
+		return $escaped;
+	}
+
+	/**
 	 * TODO: Make a query class that does the loop stuff.
 	 * Should this be the post vs term stuff?
 	 */
@@ -124,59 +161,61 @@ class Mai_Grid_Block {
 		// Get the values.
 		$this->values = array(
 			// Query.
-			'post_type'              => get_field( 'post_type' ),
-			'number'                 => get_field( 'number' ),
-			'offset'                 => get_field( 'offset' ),
-			'query_by'               => get_field( 'query_by' ),
-			'post__in'               => get_field( 'post__in' ),
-			'taxonomies'             => get_field( 'taxonomies' ),
-			'relation'               => get_field( 'relation' ),
-			'post_parent__in'        => get_field( 'post_parent__in' ),
-			'orderby'                => get_field( 'orderby' ),
-			'meta_key'               => get_field( 'meta_key' ),
-			'order'                  => get_field( 'order' ),
-			'exclude'                => get_field( 'exclude' ),
-			'load_more'              => get_field( 'load_more' ),
+			'post_type'              => (array) $this->get_field( 'post_type', 'esc_html' ),
+			'number'                 => $this->get_field( 'number', 'absint' ),
+			'offset'                 => $this->get_field( 'offset', 'absint' ),
+			'query_by'               => $this->get_field( 'query_by', 'esc_html' ),
+			'post__in'               => (array) $this->get_field( 'post__in', 'absint' ),
+			'post__not_in'           => (array) $this->get_field( 'post__not_in', 'absint' ),
+			'taxonomies'             => $this->get_field( 'taxonomies', 'esc_html' ),
+			'relation'               => $this->get_field( 'relation', 'esc_html' ),
+			'post_parent__in'        => $this->get_field( 'post_parent__in', 'esc_html' ),
+			'orderby'                => $this->get_field( 'orderby', 'esc_html' ),
+			'meta_key'               => $this->get_field( 'meta_key', 'esc_html' ),
+			'order'                  => $this->get_field( 'order', 'esc_html' ),
+			'exclude'                => (array) $this->get_field( 'exclude', 'esc_html' ),
+			// 'load_more'              => $this->get_field( 'load_more', 'esc_html' ),
+		// TODO: Finish correct sanitization and typecasting.
 			// Display.
-			'show_image'             => get_field( 'show_image' ),
-			'show_title'             => get_field( 'show_title' ),
-			'show_header_meta'       => get_field( 'show_header_meta' ),
-			'show_excerpt'           => get_field( 'show_excerpt' ),
-			'show_content'           => get_field( 'show_content' ),
-			'show_more_link'         => get_field( 'show_more_link' ),
-			'show_footer_meta'       => get_field( 'show_footer_meta' ),
-			'boxed'                  => get_field( 'boxed' ),
+			'show_image'             => $this->get_field( 'show_image', 'esc_html' ),
+			'show_title'             => $this->get_field( 'show_title', 'esc_html' ),
+			'show_header_meta'       => $this->get_field( 'show_header_meta', 'esc_html' ),
+			'show_excerpt'           => $this->get_field( 'show_excerpt', 'esc_html' ),
+			'show_content'           => $this->get_field( 'show_content', 'esc_html' ),
+			'show_more_link'         => $this->get_field( 'show_more_link', 'esc_html' ),
+			'show_footer_meta'       => $this->get_field( 'show_footer_meta', 'esc_html' ),
+			'boxed'                  => $this->get_field( 'boxed', 'esc_html' ),
 
-			'content_limit'          => get_field( 'content_limit' ),
-			'image_size'             => get_field( 'image_size' ),
-			'image_align'            => get_field( 'image_align' ),
-			'more_link_text'         => get_field( 'more_link_text' ),
-			'header_meta'            => get_field( 'header_meta' ),
-			'footer_meta'            => get_field( 'footer_meta' ),
+			'content_limit'          => $this->get_field( 'content_limit', 'esc_html' ),
+			'image_size'             => $this->get_field( 'image_size', 'esc_html' ),
+			'image_align'            => $this->get_field( 'image_align', 'esc_html' ),
+			'more_link_text'         => $this->get_field( 'more_link_text', 'esc_html' ),
+			'header_meta'            => $this->get_field( 'header_meta', 'esc_html' ),
+			'footer_meta'            => $this->get_field( 'footer_meta', 'esc_html' ),
 			// Layout.
-			'template'               => get_field( 'template' ),
-			'columns_responsive'     => get_field( 'columns_responsive' ),
-			'columns'                => get_field( 'columns' ),
-			'columns_md'             => get_field( 'columns_md' ),
-			'columns_sm'             => get_field( 'columns_sm' ),
-			'columns_xs'             => get_field( 'columns_xs' ),
-			'column_min_width'       => get_field( 'column_min_width' ),
-			'align_columns'          => get_field( 'align_columns' ),
-			'align_columns_vertical' => get_field( 'align_columns_vertical' ),
-			'align_text'             => get_field( 'align_text' ),
-			'align_text_vertical'    => get_field( 'align_text_vertical' ),
-			'column_gap'             => get_field( 'column_gap' ),
-			'row_gap'                => get_field( 'row_gap' ),
+			'template'               => $this->get_field( 'template', 'esc_html' ),
+			'columns_responsive'     => $this->get_field( 'columns_responsive', 'esc_html' ),
+			'columns'                => $this->get_field( 'columns', 'esc_html' ),
+			'columns_md'             => $this->get_field( 'columns_md', 'esc_html' ),
+			'columns_sm'             => $this->get_field( 'columns_sm', 'esc_html' ),
+			'columns_xs'             => $this->get_field( 'columns_xs', 'esc_html' ),
+			// 'column_min_width'       => $this->get_field( 'column_min_width', 'esc_html' ),
+			'align_columns'          => $this->get_field( 'align_columns', 'esc_html' ),
+			'align_columns_vertical' => $this->get_field( 'align_columns_vertical', 'esc_html' ),
+			'align_text'             => $this->get_field( 'align_text', 'esc_html' ),
+			'align_text_vertical'    => $this->get_field( 'align_text_vertical', 'esc_html' ),
+			'column_gap'             => $this->get_field( 'column_gap', 'esc_html' ),
+			'row_gap'                => $this->get_field( 'row_gap', 'esc_html' ),
 		);
 
 		// Sanitize.
 		$this->values = array(
 			// Query.
-			'post_type'              => array_map( 'esc_attr', (array) $this->values['post_type'] ),
-			'number'                 => absint( $this->values['number'] ),
-			'offset'                 => absint( $this->values['offset'] ),
-			'query_by'               => $this->values['query_by'],
-			'post__in'               => $this->values['post__in'],
+			// 'post_type'              => array_map( 'esc_attr', (array) $this->values['post_type'] ),
+			// 'number'                 => absint( $this->values['number'] ),
+			// 'offset'                 => absint( $this->values['offset'] ),
+			// 'query_by'               => $this->values['query_by'],
+			// 'post__in'               => $this->values['post__in'],
 			'taxonomies'             => $this->values['taxonomies'],
 			'relation'               => $this->values['relation'],
 			'post_parent__in'        => $this->values['post_parent__in'],
@@ -186,8 +225,8 @@ class Mai_Grid_Block {
 			'exclude'                => $this->values['exclude'],
 			'load_more'              => (bool) $this->values['load_more'],
 			// Display.
-			'show_image'             => is_null( $this->values['show_image'] ) ? true : (bool) $this->values['show_image'], // These are the only defaults, so force them here. TODO: Still not working!
-			'show_title'             => is_null( $this->values['show_title'] ) ? true : (bool) $this->values['show_title'], // These are the only defaults, so force them here. TODO: Still not working!
+			'show_image'             => (bool) $this->values['show_image'],
+			'show_title'             => (bool) $this->values['show_title'],
 			'show_header_meta'       => (bool) $this->values['show_header_meta'],
 			'show_excerpt'           => (bool) $this->values['show_excerpt'],
 			'show_content'           => (bool) $this->values['show_content'],
@@ -207,10 +246,10 @@ class Mai_Grid_Block {
 			'columns_md'             => is_null( $this->values['columns_md'] ) ? null : absint( $this->values['columns_md'] ),
 			'columns_sm'             => is_null( $this->values['columns_sm'] ) ? null : absint( $this->values['columns_sm'] ),
 			'columns_xs'             => is_null( $this->values['columns_xs'] ) ? null : absint( $this->values['columns_xs'] ),
-			'column_min_width'       => absint( $this->values['column_min_width'] ),
+			// 'column_min_width'       => absint( $this->values['column_min_width'] ),
 			'align_columns'          => $this->get_flex_align( esc_attr( $this->values['align_columns'] ) ),
 			'align_columns_vertical' => $this->get_flex_align( esc_attr( $this->values['align_columns_vertical'] ) ),
-			'align_text'             => esc_attr( $this->values['align_text'] ),
+			'align_text'             => $this->values['align_text'] ? esc_attr( $this->values['align_text'] ) : 'unset',
 			'align_text_vertical'    => $this->get_flex_align( esc_attr( $this->values['align_text_vertical'] ) ),
 			'column_gap'             => $this->get_gap( esc_attr( $this->values['column_gap'] ) ),
 			'row_gap'                => $this->get_gap( esc_attr( $this->values['row_gap'] ) ),
@@ -269,7 +308,6 @@ class Mai_Grid_Block {
 					// Image.
 					if ( $this->values['show_image'] ) {
 						// TODO: If 'default', find an actual image size, or maybe this is from template config?
-						// TODO: Image Align.
 						$image_id = get_post_thumbnail_id();
 						if ( $image_id ) {
 							$data['image_id']    = $image_id;
@@ -320,7 +358,6 @@ class Mai_Grid_Block {
 					}
 					// Align Text Vertical
 					if ( $this->values['align_text_vertical'] ) {
-
 						$data['align_text_vertical'] = $this->values['align_text_vertical'] ;
 					}
 					// Boxed.
@@ -395,15 +432,15 @@ class Mai_Grid_Block {
 
 		// Handle query_by.
 		switch ( $this->values['query_by'] ) {
-			// case 'date':
-				// $args = 'else';
-				// break;
 			case 'parent':
 				$args['post_parent__in'] = $this->values['post_parent__in'];
-				break;
+			break;
 			case 'title':
-				$args['post__in'] = $this->values['post__in'];
-				break;
+				// Empty array returns all posts, so we need to check for values.
+				if ( $this->values['post__in'] ) {
+					$args['post__in'] = $this->values['post__in'];
+				}
+			break;
 			case 'taxonomy':
 				$args['tax_query'] = array(
 					'relation' => $this->values['relation'],
@@ -416,7 +453,12 @@ class Mai_Grid_Block {
 						'operator' => $taxo['operator'],
 					);
 				}
-				break;
+			break;
+		}
+
+		// Exclude entries.
+		if ( ( 'title' !== $this->values['query_by'] ) && $this->values['post__not_in'] ) {
+			$args['post__not_in'] = $this->values['post__not_in'];
 		}
 
 		// vd( $args );
@@ -429,9 +471,9 @@ class Mai_Grid_Block {
 			'class' => sprintf( 'mai-grid mai-grid-%s', sanitize_html_class( $this->values['template'] ) ),
 			'style' => '',
 		);
-		if ( $this->values['boxed'] ) {
-			$attributes['class'] .= ' has-boxed';
-		}
+		/**
+		 * Global styles.
+		 */
 		$attributes['style'] .= sprintf( '--columns:%s;', $this->values['columns'] );
 		$attributes['style'] .= sprintf( '--columns-md:%s;', $this->get_responsive_columns( $this->values['columns_md'], $this->values['columns'], $this->values['columns'] ) );
 		$attributes['style'] .= sprintf( '--columns-sm:%s;', $this->get_responsive_columns( $this->values['columns_sm'], $this->values['columns_md'], $this->values['columns'] ) );
@@ -440,9 +482,28 @@ class Mai_Grid_Block {
 		$attributes['style'] .= sprintf( '--row-gap:%s;', $this->values['row_gap'] );
 		$attributes['style'] .= sprintf( '--align-columns:%s;', $this->values['align_columns'] );
 		$attributes['style'] .= sprintf( '--align-columns-vertical:%s;', $this->values['align_columns_vertical'] );
-		$attributes['style'] .= sprintf( '--align-text:%s;', $this->values['align_text'] );
-		$attributes['style'] .= sprintf( '--align-text-vertical:%s;', $this->values['align_text_vertical'] );
-		$attributes['style'] .= sprintf( '--aspect-ratio:%s;', $this->values['show_image'] ? $this->get_aspect_ratio( $this->values['image_size'] ) : '4/3' );
+		/**
+		 * Template based classes.
+		 */
+		if ( $this->template_supports( $this->values['template'], 'boxed' ) && $this->values['boxed'] ) {
+			$attributes['class'] .= ' has-boxed';
+		}
+		if ( $this->template_supports( $this->values['template'], 'show_image' ) && $this->template_supports( $this->values['template'], 'image_align' ) && $this->values['show_image'] && $this->values['image_align'] ) {
+			$attributes['class'] .= ' has-image-align-' . $this->values['image_align'];
+		}
+		/**
+		 * Template based styles.
+		 */
+		if ( $this->template_supports( $this->values['template'], 'align_text' ) ) {
+			$attributes['style'] .= sprintf( '--align-text:%s;', $this->values['align_text'] );
+		}
+		if ( $this->template_supports( $this->values['template'], 'align_text_vertical' ) ) {
+			$attributes['style'] .= sprintf( '--align-text-vertical:%s;', $this->values['align_text_vertical'] );
+		}
+		if ( $this->template_supports( $this->values['template'], 'align_text_vertical' ) ) {
+			$attributes['style'] .= sprintf( '--aspect-ratio:%s;', $this->values['show_image'] ? $this->get_aspect_ratio( $this->values['image_size'] ) : '4/3' );
+		}
+		// Send it.
 		return $attributes;
 	}
 
@@ -715,13 +776,12 @@ class Mai_Grid_Block {
 			// return $field;
 		// }
 
-		$templates = $this->get_templates();
 
-		if ( ! $templates ) {
+		if ( ! $this->templates ) {
 			return $field;
 		}
 
-		foreach( $templates as $name => $template ) {
+		foreach( $this->templates as $name => $template ) {
 			$field['choices'][ $name ] = $template['label'];
 		}
 
@@ -890,6 +950,7 @@ class Mai_Grid_Block {
 			// return $field;
 		// }
 
+		// TODO: Handle actual exclusion.
 		$field['choices'] = array(
 			'exclude_current'   => __( 'Exclude current', 'mai-grid' ),
 			'exclude_displayed' => __( 'Exclude displayed', 'mai-grid' ),
@@ -1163,7 +1224,7 @@ class Mai_Grid_Block {
 
 		// Build conditions.
 		$conditions = array();
-		foreach( $this->get_templates() as $template_name => $template_values ) {
+		foreach( $this->templates as $template_name => $template_values ) {
 			// Skip if field is supported.
 			if ( in_array( $field['name'], $template_values['supports'] ) ) {
 				continue;
@@ -1198,10 +1259,11 @@ class Mai_Grid_Block {
 		return $field;
 	}
 
+	function template_supports( $template, $value ) {
+		return isset( $this->templates[ $template ]['supports'] ) && in_array( $value, $this->templates[ $template ]['supports'] );
+	}
+
 	/**
-	 * TODO: explicitely declare support for every setting in Display tab. It's too confusing to guess right now.
-	 * TODO: defaults won't work with PHP. Needs to be JS, but that would change the actual values, not the default.
-	 * Maybe we don't do this.
 	 *
 	 */
 	function get_templates() {
@@ -1245,7 +1307,7 @@ class Mai_Grid_Block {
 					'boxed',
 				),
 			),
-			// TODO: Horizontail
+			// TODO: Horizontal?
 		);
 	}
 
@@ -1260,23 +1322,24 @@ class Mai_Grid_Block {
 
 	function get_wp_query_fields() {
 		return array(
-			'post_type'      => 'field_5df1053632ca2',
-			'number'         => 'field_5df1053632ca8',
-			'offset'         => 'field_5df1bf01ea1de',
-			'query_by'       => 'field_5df1053632cad',
-			'post__in'       => 'field_5df1053632cbc',
-			'taxonomies'     => 'field_5df1397316270',
-			'taxonomy'       => 'field_5df1398916271',
-			'terms'          => 'field_5df139a216272',
-			'relation'       => 'field_5df139281626f',
-			'operator'       => 'field_5df18f2305c2c',
-			'relation'       => 'field_5df139281626f',
-			'parent'         => 'field_5df1053632ce4',
-			'orderby'        => 'field_5df1053632cec',
-			'meta_key'       => 'field_5df1053632cf4',
-			'order'          => 'field_5df1053632cfb',
-			'exclude'        => 'field_5df1053632d03',
-			'load_more'      => 'field_5df1bbaeb25f2',
+			'post_type'    => 'field_5df1053632ca2',
+			'number'       => 'field_5df1053632ca8',
+			'offset'       => 'field_5df1bf01ea1de',
+			'query_by'     => 'field_5df1053632cad',
+			'post__in'     => 'field_5df1053632cbc',
+			'post__not_in' => 'field_5e349237e1c01',
+			'taxonomies'   => 'field_5df1397316270',
+			'taxonomy'     => 'field_5df1398916271',
+			'terms'        => 'field_5df139a216272',
+			'relation'     => 'field_5df139281626f',
+			'operator'     => 'field_5df18f2305c2c',
+			'relation'     => 'field_5df139281626f',
+			'parent'       => 'field_5df1053632ce4',
+			'orderby'      => 'field_5df1053632cec',
+			'meta_key'     => 'field_5df1053632cf4',
+			'order'        => 'field_5df1053632cfb',
+			'exclude'      => 'field_5df1053632d03',
+			'load_more'    => 'field_5df1bbaeb25f2',
 		);
 	}
 
@@ -1307,10 +1370,6 @@ class Mai_Grid_Block {
 			'align_text_vertical' => 'field_5e2f519edc912',
 		);
 	}
-
-	/**
-	 * TODO: Move boxed to a new "Style" heading.
-	 */
 
 	function get_layout_fields() {
 		return array(

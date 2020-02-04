@@ -505,8 +505,6 @@ class Mai_Grid_Entries_Block {
 			return $field;
 		}
 
-		// TODO: If 'background' is the layout, can we do vertical alignment here too?!?!
-
 		$field['choices'] = array(
 			''       => __( 'None', 'mai-grid' ),
 			'left'   => __( 'Left', 'mai-grid' ),

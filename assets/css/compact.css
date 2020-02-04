@@ -1,6 +1,14 @@
 .mai-grid-compact .mai-grid__entry {
 	display: grid;
+}
+
+.mai-grid-compact .mai-grid__entry,
+.mai-grid-compact.has-image-align-left .mai-grid__entry {
 	grid-template-columns: auto 1fr;
+}
+
+.mai-grid-compact.has-image-align-right .mai-grid__entry {
+	grid-template-columns: 1fr auto;
 }
 
 .mai-grid-compact:not(.has-boxed) .mai-grid__entry {
@@ -20,6 +28,11 @@
 
 .mai-grid-compact .mai-grid__link--image {
 	width: 80px;
+}
+
+.mai-grid-compact.has-image-align-right .mai-grid__link--image {
+	-webkit-box-ordinal-group: 3;
+	order: 2;
 }
 
 .mai-grid-compact .mai-grid__content {
@@ -55,12 +68,9 @@
 .mai-grid-compact.has-boxed .mai-grid__entry {
 	border: 1px solid rgba(0,0,0,.04);
 	border-radius: 3px;
+	overflow: hidden;
 }
 
 .mai-grid-compact.has-boxed .mai-grid__content {
 	padding: 4px 16px;
-}
-
-.mai-grid-compact.has-boxed .mai-grid__image {
-	border-radius: 2px 0 0 2px;
 }

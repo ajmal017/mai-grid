@@ -41,7 +41,7 @@
 	height: 23px;
 }
 
-.acf-block-component .acf-block-fields div.acf-field.mai-grid-show-conditional + .mai-grid-show-conditional::before {
+.acf-block-component .acf-block-fields div.acf-field.mai-grid-show-conditional:not(.acf-hidden) + .mai-grid-show-conditional:not(.acf-hidden)::before {
 	height: 100%;
 }
 
