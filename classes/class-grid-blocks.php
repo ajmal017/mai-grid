@@ -6,9 +6,11 @@
  * @since   0.1.0
  * @return  object
  */
-add_action( 'plugins_loaded', function() {
-	return Mai_Grid_Blocks::instance();
-});
+// add_action( 'plugins_loaded', function() {
+// 	return Mai_Grid_Blocks::instance();
+// });
+
+Mai_Grid_Blocks::instance();
 
 final class Mai_Grid_Blocks  {
 
@@ -119,8 +121,8 @@ final class Mai_Grid_Blocks  {
 	}
 
 	function do_post_grid( $block, $content = '', $is_preview = false ) {
-		$args = $this->get_base_args();
-		$args = array_merge( $args, $this->get_wp_query_args() );
+		$args = $this->get_base_feilds();
+		$args = array_merge( $args, $this->get_wp_query_fields() );
 		if ( ! empty( $block['className'] ) ) {
 			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
 		}
@@ -129,7 +131,8 @@ final class Mai_Grid_Blocks  {
 	}
 
 	function do_term_grid( $block, $content = '', $is_preview = false ) {
-		$args = $this->get_base_args();
+		// TODO: block id?
+		$args = $this->get_base_feilds();
 		$args = array_merge( $args, $this->get_wp_term_query_args() );
 		if ( ! empty( $block['className'] ) ) {
 			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
@@ -138,21 +141,21 @@ final class Mai_Grid_Blocks  {
 		echo $grid->get();
 	}
 
-	function get_base_args() {
+	function get_base_feilds() {
 		$args = array();
 		foreach( Mai_Grid_Base::get_display_fields() as $name => $key ) {
-			$args[ $name ] = get_field( $name );
+			$args[ $name ] = $this->get_field( $name );
 		}
 		foreach( Mai_Grid_Base::get_layout_fields() as $name => $key ) {
-			$args[ $name ] = get_field( $name );
+			$args[ $name ] = $this->get_field( $name );
 		}
 		return $args;
 	}
 
-	function get_wp_query_args() {
+	function get_wp_query_fields() {
 		$args = array();
 		foreach( Mai_Grid_Base::get_wp_query_fields() as $name => $key ) {
-			$args[ $name ] = get_field( $name );
+			$args[ $name ] = $this->get_field( $name );
 		}
 		return $args;
 	}
@@ -160,9 +163,14 @@ final class Mai_Grid_Blocks  {
 	function get_wp_term_query_args() {
 		$args = array();
 		foreach( Mai_Grid_Base::get_layout_fields() as $name => $key ) {
-			$args[ $name ] = get_field( $name );
+			$args[ $name ] = $this->get_field( $name );
 		}
 		return $args;
+	}
+
+	function get_field( $name ) {
+		$value = get_field( $name );
+		return is_null( $value ) ? $this->fields[ $name ]['default'] : $value;
 	}
 
 	function run_filters() {
@@ -313,6 +321,14 @@ final class Mai_Grid_Blocks  {
 		foreach( Mai_Grid_Base::get_display_fields() as $name => $values ) {
 			// Skip template field.
 			if ( 'template' === $name ) {
+				continue;
+			}
+			// Skip show field.
+			if ( 'show' === $name ) {
+				continue;
+			}
+			// Skip show field.
+			if ( 'show_items' === $name ) {
 				continue;
 			}
 			// Add filter.
@@ -679,9 +695,9 @@ final class Mai_Grid_Blocks  {
 
 		$field['choices'] = array(
 			''       => __( 'Clear', 'mai-grid' ),
-			'left'   => __( 'Left', 'mai-grid' ),
+			'start'  => __( 'Start', 'mai-grid' ),
 			'center' => __( 'Center', 'mai-grid' ),
-			'right'  => __( 'Right', 'mai-grid' ),
+			'end'    => __( 'End', 'mai-grid' ),
 		);
 
 		return $field;

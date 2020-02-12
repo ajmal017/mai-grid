@@ -7,7 +7,64 @@ namespace Composer\Autoload;
 class ComposerStaticInit031020ac0959976b22d57590a58c9ab0
 {
     public static $files = array (
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        'edf8ef411b308ea9e315d190a754d91b' => __DIR__ . '/..' . '/a5hleyrich/wp-queue/src/functions.php',
+        '1331aa11ac8d9643185b37d6ed1543c3' => __DIR__ . '/..' . '/deliciousbrains/wp-image-processing-queue/src/functions.php',
         'eb560c198217526cfde8ceb63ae508de' => __DIR__ . '/..' . '/yahnis-elsts/plugin-update-checker/load-v4p8.php',
+    );
+
+    public static $prefixLengthsPsr4 = array (
+        'W' => 
+        array (
+            'WP_Queue\\' => 9,
+        ),
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Contracts\\Translation\\' => 30,
+            'Symfony\\Component\\Translation\\' => 30,
+        ),
+        'I' => 
+        array (
+            'Image_Processing_Queue\\' => 23,
+        ),
+    );
+
+    public static $prefixDirsPsr4 = array (
+        'WP_Queue\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/a5hleyrich/wp-queue/src/WP_Queue',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Symfony\\Contracts\\Translation\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/translation-contracts',
+        ),
+        'Symfony\\Component\\Translation\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/translation',
+        ),
+        'Image_Processing_Queue\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/deliciousbrains/wp-image-processing-queue/src/Image_Processing_Queue',
+        ),
+    );
+
+    public static $fallbackDirsPsr4 = array (
+        0 => __DIR__ . '/..' . '/nesbot/carbon/src',
+    );
+
+    public static $prefixesPsr0 = array (
+        'U' => 
+        array (
+            'UpdateHelper\\' => 
+            array (
+                0 => __DIR__ . '/..' . '/kylekatarnls/update-helper/src',
+            ),
+        ),
     );
 
     public static $classMap = array (
@@ -17,6 +74,10 @@ class ComposerStaticInit031020ac0959976b22d57590a58c9ab0
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
+            $loader->prefixLengthsPsr4 = ComposerStaticInit031020ac0959976b22d57590a58c9ab0::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit031020ac0959976b22d57590a58c9ab0::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit031020ac0959976b22d57590a58c9ab0::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit031020ac0959976b22d57590a58c9ab0::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit031020ac0959976b22d57590a58c9ab0::$classMap;
 
         }, null, ClassLoader::class);

@@ -9,6 +9,22 @@
 // 	new Mai_Grid_Base;
 // });
 
+// Image_Processing_Queue\Queue::instance();
+// $attempts = apply_filters( 'ipq_job_attempts', 3 );
+// $interval = apply_filters( 'ipq_cron_interval', 1 );
+// wp_queue()->cron( $attempts, $interval );
+
+// // Make sure we have the database tables we need.
+// add_action( 'admin_init', function() {
+
+// 	$tables = get_option( 'mai_ipq_tables_installed', 0 );
+
+// 	if ( ! $tables ) {
+// 		wp_queue_install_tables();
+// 		update_site_option( 'mai_ipq_tables_installed', '1' );
+// 	}
+// });
+
 /**
  * This should handle templates, sanitization, enqueing of files, etc., but nothing with ACF
  * since ACF should only be used for the block. We need a shortcode and helper function as well,
@@ -20,10 +36,10 @@ class Mai_Grid_Base {
 	protected $args;
 	// protected $fields;
 
-	protected $base_url;
-	protected $base_dir;
+	// protected $base_url;
+	// protected $base_dir;
 	protected $version;
-	protected $suffix;
+	// protected $suffix;
 	protected $templates;
 	protected $fields;
 	// protected $values;
@@ -33,10 +49,10 @@ class Mai_Grid_Base {
 		$this->type      = $type;
 		$this->args      = $args;
 
-		$this->base_url  = MAI_GRID_PLUGIN_URL . 'assets';
-		$this->base_dir  = MAI_GRID_PLUGIN_DIR . 'assets';
+		// $this->base_url  = MAI_GRID_PLUGIN_URL . 'assets';
+		// $this->base_dir  = MAI_GRID_PLUGIN_DIR . 'assets';
 		$this->version   = MAI_GRID_VERSION;
-		$this->suffix    = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
+		// $this->suffix    = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
 		$this->templates = self::get_templates();
 		$this->fields    = self::get_fields();
 	}
@@ -48,6 +64,8 @@ class Mai_Grid_Base {
 			'class'                  => '',
 			// Display.
 			'template'               => $this->fields['template']['default'],
+			'show'             => $this->fields['show']['default'],
+			'show_items'             => $this->fields['show_items']['default'],
 			'show_image'             => $this->fields['show_image']['default'],
 			'image_size'             => $this->fields['image_size']['default'],
 			'image_align'            => $this->fields['image_align']['default'],
@@ -99,6 +117,8 @@ class Mai_Grid_Base {
 			'class'                  => $this->sanitize( $this->args['class'], 'sanitize_html_class' ),
 			// Display.
 			'template'               => $this->sanitize( $this->args['template'], 'esc_html' ),
+			'show'                   => $this->sanitize( $this->args['show'], 'esc_html' ),
+			'show_items'                   => $this->sanitize( $this->args['show_items'], 'esc_html' ),
 			'show_image'             => $this->sanitize( $this->args['show_image'], 'esc_html' ),
 			'image_size'             => $this->sanitize( $this->args['image_size'], 'esc_html' ),
 			'image_align'            => $this->sanitize( $this->args['image_align'], 'esc_html' ),
@@ -146,6 +166,11 @@ class Mai_Grid_Base {
 		);
 
 		$this->args = apply_filters( 'mai_grid_args', $this->args, $this->type );
+
+		if ( ! is_admin() ) {
+			vd( $this->args['show'] );
+			vd( $this->args['show_items'] );
+		}
 
 		// Get the entries HTML.
 		$grid = $this->get_grid_entries();
@@ -234,7 +259,8 @@ class Mai_Grid_Base {
 					'boxed',
 				),
 			),
-			// TODO: Horizontal?
+			// TODO: Side by side? Like a checkerboard thing (media/text block), with image on left/right with object-fit cover and all other stuff on right.
+			// TODO: Horizontal? For recent post in sidebar type stuff, but not forced like compact. Still allow the other display stuff. Image align_vertical can do align-items for vertical alignment. Could be useful.
 		);
 		// Filter so custom sites can add their own templates.
 		return apply_filters( 'mai_grid_templates', $templates );
@@ -255,6 +281,14 @@ class Mai_Grid_Base {
 			'template' => array(
 				'default' => 'standard',
 				'key'     => 'field_5de9b96fb69b0',
+			),
+			'show' => array(
+				'default' => '',
+				'key'     => 'field_5e441588438a3',
+			),
+			'show_items' => array(
+				'default' => '',
+				'key'     => 'field_5e436bc5fb76e',
 			),
 			'show_image' => array(
 				'default' => true,
@@ -297,7 +331,7 @@ class Mai_Grid_Base {
 				'key'     => 'field_5e1e6843e988f',
 			),
 			'more_link_text' => array(
-				// TODO: Filter on this, even though we have it elsewhere?
+				// TODO: Filter on this default? Will we have a separate filter in v2?
 				'default' => __( 'Read More', 'mai-grid' ),
 				'key'     => 'field_5c85465018395',
 			),
@@ -454,6 +488,7 @@ class Mai_Grid_Base {
 		$data = array(
 			'args'                => $this->args,
 			'link'                => '',
+			'image'            => '',
 			'image_id'            => '',
 			'image_size'          => '',
 			'image_align'         => '',
@@ -481,7 +516,9 @@ class Mai_Grid_Base {
 						$data['link'] = get_permalink();
 						// Image.
 						if ( $this->args['show_image'] ) {
+
 							// TODO: If 'default', find an actual image size, or maybe this is from template config?
+							// TODO: Maybe choose aspect ratio instead of size here. Then we use a helper function and new registered image sizes to build picture/source.
 							$image_id = get_post_thumbnail_id();
 							if ( $image_id ) {
 								$data['image_id']    = $image_id;
@@ -594,8 +631,8 @@ class Mai_Grid_Base {
 		$attributes['style'] .= sprintf( '--columns-xs:%s;', $this->get_responsive_columns( $this->args['columns_xs'], $this->args['columns_sm'], $this->args['columns'] ) );
 		$attributes['style'] .= sprintf( '--column-gap:%s;', $this->args['column_gap'] );
 		$attributes['style'] .= sprintf( '--row-gap:%s;', $this->args['row_gap'] );
-		$attributes['style'] .= sprintf( '--align-columns:%s;', $this->args['align_columns'] );
-		$attributes['style'] .= sprintf( '--align-columns-vertical:%s;', $this->args['align_columns_vertical'] );
+		$attributes['style'] .= sprintf( '--align-columns:%s;', ! empty( $this->args['align_columns'] ) ? $this->args['align_columns'] : 'unset' );
+		$attributes['style'] .= sprintf( '--align-columns-vertical:%s;', ! empty( $this->args['align_columns_vertical'] ) ? $this->args['align_columns_vertical'] : 'unset' );
 		// Template based classes.
 		if ( $this->template_supports( $this->args['template'], 'boxed' ) && $this->args['boxed'] ) {
 			$attributes['class'] .= ' has-boxed';
@@ -605,12 +642,12 @@ class Mai_Grid_Base {
 		}
 		// Template based styles.
 		if ( $this->template_supports( $this->args['template'], 'align_text' ) ) {
-			$attributes['style'] .= sprintf( '--align-text:%s;', $this->args['align_text'] );
+			$attributes['style'] .= sprintf( '--align-text:%s;', $this->get_align_text( $this->args['align_text'] ) );
 		}
 		if ( $this->template_supports( $this->args['template'], 'align_text_vertical' ) ) {
-			$attributes['style'] .= sprintf( '--align-text-vertical:%s;', $this->args['align_text_vertical'] );
+			$attributes['style'] .= sprintf( '--align-text-vertical:%s;', $this->get_align_text_vertical( $this->args['align_text_vertical'] ) );
 		}
-		if ( $this->template_supports( $this->args['template'], 'align_text_vertical' ) ) {
+		if ( $this->template_supports( $this->args['template'], 'show_image' ) ) {
 			$attributes['style'] .= sprintf( '--aspect-ratio:%s;', $this->args['show_image'] ? $this->get_aspect_ratio( $this->args['image_size'] ) : '4/3' );
 		}
 		// Send it.
@@ -657,6 +694,40 @@ class Mai_Grid_Base {
 			break;
 		}
 		return absint( $current_columns );
+	}
+
+	function get_align_text( $alignment ) {
+		switch ( $alignment ) {
+			case 'start':
+				$value = 'start';
+			break;
+			case 'center':
+				$value = 'center';
+			break;
+			case 'end':
+				$value = 'end';
+			break;
+			default:
+				$value = 'unset';
+		}
+		return $value;
+	}
+
+	function get_align_text_vertical( $alignment ) {
+		switch ( $alignment ) {
+			case 'top':
+				$value = 'start';
+			break;
+			case 'middle':
+				$value = 'center';
+			break;
+			case 'bottom':
+				$value = 'end';
+			break;
+			default:
+				$value = 'unset';
+		}
+		return $value;
 	}
 
 	function get_aspect_ratio( $image_size ) {
@@ -759,12 +830,13 @@ class Mai_Grid_Base {
 
 		if ( is_admin() ) {
 
-			// Default admin CSS.
+			// Default admin scripts.
 			$this->enqueue_asset( 'admin', 'css' );
+			// $this->enqueue_asset( 'admin', 'js', false, array( 'jquery', 'jquery-ui-core', 'jquery-ui-sortable' ) );
 
 			// We can't dynamically load assets via ajax when the template select field changes, so we need them all available in the backend.
 			foreach( array_keys( $this->templates ) as $template ) {
-				$this->enqueue_asset( $template, 'css' );
+				$this->enqueue_asset( $template, 'css', true );
 			}
 
 			// Query JS.
@@ -779,32 +851,147 @@ class Mai_Grid_Base {
 		} else {
 
 			// Only load the template CSS file we need.
-			$this->enqueue_asset( $this->args['template'], 'css' );
+			$this->enqueue_asset( $this->args['template'], 'css', true );
 		}
 	}
 
 	/**
 	 * Enqueue an asset.
 	 *
-	 * @param   string  $name  The asset name.
-	 * @param   string  $type  The type. Typically js or css.
+	 * @param   string  $name          The asset name.
+	 * @param   string  $type          The type. Typically js or css.
+	 * @param   bool    $template      Wether this is a template asset or not.
+	 * @param   array   $dependencies  Script dependencies.
 	 *
 	 * @return  void
 	 */
-	function enqueue_asset( $name, $type ) {
-		if ( ! file_exists( "{$this->base_dir}/{$type}/{$name}{$this->suffix}.{$type}" ) ) {
-			return;
+	function enqueue_asset( $name, $type, $template = false, $dependencies = [] ) {
+		// TODO: These should get cleaned up once in the engine.
+		$base_url = $template ? untrailingslashit( MAI_GRID_TEMPLATES_URL ) : trailingslashit( MAI_GRID_PLUGIN_URL ) . 'assets/' . $type;
+		$base_dir = $template ? untrailingslashit( MAI_GRID_TEMPLATES_DIR ) : trailingslashit( MAI_GRID_PLUGIN_DIR ) . 'assets/' . $type;
+		$suffix   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
+		if ( ! file_exists( "{$base_dir}/{$name}{$suffix}.{$type}" ) ) {
+			// Fallback if someone overrides the CSS/JS in a theme and doesn't proved .min version.
+			if ( '.min' === $suffix ) {
+				if ( file_exists( "{$base_dir}/{$name}.{$type}" ) ) {
+					$suffix = '';
+				} else {
+					return;
+				}
+			}
 		}
-		$url     = sprintf( '%s/%s/%s%s.%s', $this->base_url, $type, $name, $this->suffix, $type );
-		$version = $this->version . '.' . date ( 'njYHi', filemtime( "{$this->base_dir}/{$type}/{$name}{$this->suffix}.{$type}" ) );
+		$url     = sprintf( '%s/%s%s.%s', $base_url, $name, $suffix, $type );
+		$version = $this->version . '.' . date ( 'njYHi', filemtime( "{$base_dir}/{$name}{$suffix}.{$type}" ) );
 		switch ( $type ) {
 			case 'css':
-				wp_enqueue_style( "mai-grid-{$name}", $url, array(), $version );
+				wp_enqueue_style( "mai-grid-{$name}", $url, $dependencies, $version );
 				break;
 			case 'js':
-				wp_enqueue_script( "mai-grid-{$name}", $url, array(), $version, true );
+				wp_enqueue_script( "mai-grid-{$name}", $url, $dependencies, $version, true );
 				break;
 		}
 	}
 
+}
+
+
+
+// $keys = array(
+// 	'field_5db27a5c59103',
+// 	'field_5db12313e2106',
+// 	'field_5db27a6a59104',
+// 	'field_5d8c2a579a252',
+// );
+// foreach( $keys as $key ) {
+// 	// Make field read only.
+// 	add_filter( "acf/load_field/key={$key}", function( $field ) {
+// 		$field['readonly'] = 1;
+// 		return $field;
+// 	}, 10, 1 );
+// }
+
+// add_filter( "acf/load_field/key=field_5e43090598bb2", function( $field ) {
+// 	// vd( $field );
+// 	$field['readonly'] = 1;
+// 	return $field;
+// });
+
+// add_filter( 'acf/field_wrapper_attributes', function( $wrapper, $field ) {
+// 	if ( 'field_5e43090598bb2' !== $field['key'] ) {
+// 		return $field;
+// 	}
+// 	$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' acf-hidden' : 'acf-hidden';
+// 	return $field;
+// }, 10, 2 );
+
+// add_filter( 'acf/load_field/key=field_5e4308c598bb1', 'mai_grid_update_labels_attempt' );
+function mai_grid_update_labels_attempt( $field ) {
+	$values = get_field( 'field_5e43074298bae' );
+	vd( $values );
+	return $field;
+}
+
+add_filter( 'acf/load_field/key=field_5e43074298bae', function( $field ) {
+	// $values = get_field( 'field_5e43074298bae' );
+	// vd( $values );
+	// vd( $field );
+	return $field;
+});
+
+add_filter( 'acf/load_value/key=field_5e43074298bae', function( $value ) {
+
+	// vd( $value );
+	return $value;
+
+	// If we already have values, return em.
+	if ( $value ) {
+		return $value;
+	}
+
+	// Defaults and order.
+	$value = array(
+		array(
+			'field_5e4308c598bb1' => true,
+			'field_5e43090598bb2' => 'title',
+		),
+		array(
+			'field_5e4308c598bb1' => true,
+			'field_5e43090598bb2' => 'image',
+		),
+		array(
+			'field_5e4308c598bb1' => false,
+			'field_5e43090598bb2' => 'excerpt',
+		),
+		array(
+			'field_5e4308c598bb1' => false,
+			'field_5e43090598bb2' => 'footer_meta',
+		),
+		array(
+			'field_5e4308c598bb1' => false,
+			'field_5e43090598bb2' => 'more_link',
+		),
+	);
+
+	return $value;
+});
+
+
+function mai_grid_write_to_file( $value ) {
+	/**
+	 * This function for testing & debuggin only.
+	 * Do not leave this function working on your site.
+	 */
+	$file   = dirname( __FILE__ ) . '/__data.txt';
+	$handle = fopen( $file, 'a' );
+	ob_start();
+	if ( is_array( $value ) || is_object( $value ) ) {
+		print_r( $value );
+	} elseif ( is_bool( $value ) ) {
+		var_dump( $value );
+	} else {
+		echo $value;
+	}
+	echo "\r\n\r\n";
+	fwrite( $handle, ob_get_clean() );
+	fclose( $handle );
 }

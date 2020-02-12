@@ -1,9 +1,17 @@
 jQuery(document).ready(function($) {
 
+	// console.log( $( '.acf-checkbox-list.acf-bl' ) )
+
+	// // $( '.acf-field-checkbox.acf-field-5e42fcfc13a26 .acf-checkbox-list' ).sortable();
+	// $( '.acf-checkbox-list.acf-bl' ).sortable();
+
 	if ( 'object' !== typeof acf ) {
 		return
 	}
 
+
+
+	return;
 
 	/**
 	 * TODO:

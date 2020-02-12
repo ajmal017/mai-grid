@@ -23,6 +23,9 @@ jQuery(document).ready(function($) {
 	// 	}
 	// });
 
+
+	return;
+
 	var fields = maiGridWPQueryVars.fields;
 
 	acf.addFilter( 'select2_ajax_data', function( data, args, $input, field, instance ) {

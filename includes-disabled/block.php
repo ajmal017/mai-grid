@@ -102,7 +102,7 @@ class Mai_Grid_Entries_Block {
 			$rows    = absint( ceil( $items / $columns ) );
 			$empty   = ( $columns * $rows ) - $items;
 
-			printf( '<div class="mai-grid mai-grid-%s" style="--columns: %s;--mai-grid-gutter: %s;--empty: %s;">',
+			printf( '<div class="mai-grid mai-grid-%s" style="--columns: %s;--gutter: %s;--empty: %s;">',
 				sanitize_html_class( $data['template'] ),
 				$data['columns'],
 				'16px',

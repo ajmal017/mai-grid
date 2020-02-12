@@ -1,6 +1,7 @@
 {
     "require": {
         "yahnis-elsts/plugin-update-checker": "^4.5",
-        "gamajo/template-loader": "^1.3"
+        "gamajo/template-loader": "^1.3",
+        "deliciousbrains/wp-image-processing-queue": "^1.0"
     }
 }
