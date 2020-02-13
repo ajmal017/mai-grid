@@ -149,7 +149,7 @@ final class Mai_Grid_Plugin {
 		foreach ( glob( MAI_GRID_INCLUDES_DIR . '*.php' ) as $file ) { include $file; }
 		// Classes.
 		// foreach ( glob( MAI_GRID_CLASSES_DIR . '*.php' ) as $file ) { include $file; }
-		include_once __DIR__ . '/classes/class-template-loader.php';
+		// include_once __DIR__ . '/classes/class-template-loader.php';
 		include_once __DIR__ . '/classes/class-grid-base.php';
 		include_once __DIR__ . '/classes/class-grid-blocks.php';
 		// include_once __DIR__ . '/classes/class-grid.php';
@@ -157,7 +157,7 @@ final class Mai_Grid_Plugin {
 		// include_once __DIR__ . '/classes/class-post-grid.php';
 		// include_once __DIR__ . '/classes/class-post-grid-block.php';
 		include_once __DIR__ . '/includes/acf-sortable-checkbox/acf-sortable-checkbox.php';
-		include_once __DIR__ . '/includes/acf-sortable-group/acf-sortable-group.php';
+		// include_once __DIR__ . '/includes/acf-sortable-group/acf-sortable-group.php';
 	}
 
 	/**

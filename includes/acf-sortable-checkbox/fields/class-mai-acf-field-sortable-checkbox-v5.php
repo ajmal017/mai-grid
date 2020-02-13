@@ -91,8 +91,7 @@ class mai_acf_field_sortable_checkbox extends acf_field {
 
 
 		// append to class
-		// $ul['class'] .= ' ' . ($field['layout'] == 'horizontal' ? 'acf-hl' : 'acf-bl');
-		$ul['class'] .= ' ' . $field['class'];
+		$ul['class'] .= ' acf-bl ' . $field['class'];
 
 
 		// checkbox saves an array
@@ -242,7 +241,7 @@ class mai_acf_field_sortable_checkbox extends acf_field {
 		// Render.
 		$checked = isset( $attrs['checked'] );
 
-		return '<label' . ($checked ? ' class="selected"' : '') . '><input ' . acf_esc_attr( $attrs ) . '/> ' . acf_esc_html( $label ) . '</label><span class="sortable-checkbox-icon">' . $icon . '</span>';
+		return '<label' . ($checked ? ' class="selected"' : '') . '><input ' . acf_esc_attr( $attrs ) . '/> ' . acf_esc_html( $label ) . '</label><span class="sortable-checkbox-handle">' . $icon . '</span>';
 	}
 
 	/*
@@ -343,47 +342,6 @@ class mai_acf_field_sortable_checkbox extends acf_field {
 
 		// select -> update_value()
 		$value = acf_get_field_type('select')->update_value( $value, $post_id, $field );
-
-
-		// save_other_choice
-		if( $field['save_custom'] ) {
-
-			// get raw $field (may have been changed via repeater field)
-			// if field is local, it won't have an ID
-			$selector = $field['ID'] ? $field['ID'] : $field['key'];
-			$field = acf_get_field( $selector, true );
-
-
-			// bail early if no ID (JSON only)
-			if( !$field['ID'] ) return $value;
-
-
-			// loop
-			foreach( $value as $v ) {
-
-				// ignore if already eixsts
-				if( isset($field['choices'][ $v ]) ) continue;
-
-
-				// unslash (fixes serialize single quote issue)
-				$v = wp_unslash($v);
-
-
-				// sanitize (remove tags)
-				$v = sanitize_text_field($v);
-
-
-				// append
-				$field['choices'][ $v ] = $v;
-
-			}
-
-
-			// save
-			acf_update_field( $field );
-
-		}
-
 
 		// return
 		return $value;

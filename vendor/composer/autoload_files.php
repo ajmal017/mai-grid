@@ -6,8 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => $vendorDir . '/symfony/polyfill-mbstring/bootstrap.php',
-    'edf8ef411b308ea9e315d190a754d91b' => $vendorDir . '/a5hleyrich/wp-queue/src/functions.php',
-    '1331aa11ac8d9643185b37d6ed1543c3' => $vendorDir . '/deliciousbrains/wp-image-processing-queue/src/functions.php',
-    'eb560c198217526cfde8ceb63ae508de' => $vendorDir . '/yahnis-elsts/plugin-update-checker/load-v4p8.php',
+    '241d2b5b9c1e680c0770b006b0271156' => $vendorDir . '/yahnis-elsts/plugin-update-checker/load-v4p9.php',
 );

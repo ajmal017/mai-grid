@@ -17,7 +17,7 @@
 		// add sortable
 		$field.find( '.acf-sortable-checkbox-list' ).sortable({
 			items: '> li',
-			// handle: '> .acf-fc-layout-handle',
+			handle: '> .sortable-checkbox-handle',
 			// forceHelperSize: true,
 			placeholder: 'sortable-checkbox-placeholder',
 			forcePlaceholderSize: true,
@@ -26,7 +26,8 @@
 				// self.render();
 			},
 			update: function(event, ui) {
-				// self.$input().trigger('change');
+				// console.log( $(this).prev( 'input[type="hidden"]' ) );
+				$(this).prev( 'input[type="hidden"]' ).trigger( 'change' );
 			}
 		});
 

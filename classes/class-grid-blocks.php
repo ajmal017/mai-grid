@@ -20,7 +20,7 @@ final class Mai_Grid_Blocks  {
 	 */
 	private static $instance;
 
-	private $templates;
+	// private $templates;
 	private $fields;
 
 	/**
@@ -72,7 +72,7 @@ final class Mai_Grid_Blocks  {
 	}
 
 	function run() {
-		$this->templates = Mai_Grid_Base::get_templates();
+		// $this->templates = Mai_Grid_Base::get_templates();
 		$this->fields    = Mai_Grid_Base::get_fields();
 		add_action( 'acf/init', array( $this, 'register_blocks' ), 10, 3 );
 	}
@@ -93,7 +93,7 @@ final class Mai_Grid_Blocks  {
 			// 'mode'            => 'auto',
 			// 'mode'            => 'edit',
 			'mode'            => 'preview',
-			// 'enqueue_assets'  => array( $this, 'enqueue_assets'),
+			'enqueue_assets'  => array( $this, 'enqueue_assets'),
 			'render_callback' => array( $this, 'do_post_grid' ),
 			'supports'        => array(
 				'align'  => array( 'wide' ),
@@ -111,7 +111,7 @@ final class Mai_Grid_Blocks  {
 			// 'mode'            => 'auto',
 			// 'mode'            => 'edit',
 			'mode'            => 'preview',
-			// 'enqueue_assets'  => array( $this, 'enqueue_assets'),
+			'enqueue_assets'  => array( $this, 'enqueue_assets'),
 			'render_callback' => array( $this, 'do_term_grid' ),
 			'supports'        => array(
 				'align'  => array( 'wide' ),
@@ -120,28 +120,65 @@ final class Mai_Grid_Blocks  {
 		) );
 	}
 
+	function enqueue_assets() {
+		if ( ! is_admin() ) {
+			return;
+		}
+		$this->enqueue_asset( 'admin', 'css' );
+		$this->enqueue_asset( 'admin', 'js' );
+	}
+
+	function enqueue_asset( $name, $type ) {
+		// TODO: These should get cleaned up once in the engine.
+		$base_url = trailingslashit( MAI_GRID_PLUGIN_URL ) . 'assets/' . $type;
+		$base_dir = trailingslashit( MAI_GRID_PLUGIN_DIR ) . 'assets/' . $type;
+		$suffix   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
+		if ( ! file_exists( "{$base_dir}/{$name}{$suffix}.{$type}" ) ) {
+			// Fallback if someone overrides the CSS/JS in a theme and doesn't proved .min version.
+			if ( '.min' === $suffix ) {
+				if ( file_exists( "{$base_dir}/{$name}.{$type}" ) ) {
+					$suffix = '';
+				} else {
+					return;
+				}
+			}
+		}
+		$url     = sprintf( '%s/%s%s.%s', $base_url, $name, $suffix, $type );
+		$version = $this->version . '.' . date ( 'njYHi', filemtime( "{$base_dir}/{$name}{$suffix}.{$type}" ) );
+		switch ( $type ) {
+			case 'css':
+				wp_enqueue_style( "mai-grid-{$name}", $url, $dependencies, $version );
+			break;
+			case 'js':
+				wp_enqueue_script( "mai-grid-{$name}", $url, $dependencies, $version, true );
+			break;
+		}
+	}
+
 	function do_post_grid( $block, $content = '', $is_preview = false ) {
-		$args = $this->get_base_feilds();
+		$args = array( 'type' => 'post' );
+		$args = array_merge( $this->get_base_fields(), $args );
 		$args = array_merge( $args, $this->get_wp_query_fields() );
 		if ( ! empty( $block['className'] ) ) {
 			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
 		}
-		$grid = new Mai_Grid_Base( 'post', $args );
+		$grid = new Mai_Grid_Base( $args );
 		echo $grid->get();
 	}
 
 	function do_term_grid( $block, $content = '', $is_preview = false ) {
 		// TODO: block id?
-		$args = $this->get_base_feilds();
+		$args = array( 'type' => 'term' );
+		$args = array_merge( $this->get_base_fields(), $args );
 		$args = array_merge( $args, $this->get_wp_term_query_args() );
 		if ( ! empty( $block['className'] ) ) {
 			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
 		}
-		$grid = new Mai_Grid_Base( 'term', $args );
+		$grid = new Mai_Grid_Base( $args );
 		echo $grid->get();
 	}
 
-	function get_base_feilds() {
+	function get_base_fields() {
 		$args = array();
 		foreach( Mai_Grid_Base::get_display_fields() as $name => $key ) {
 			$args[ $name ] = $this->get_field( $name );
@@ -177,18 +214,6 @@ final class Mai_Grid_Blocks  {
 
 		// Add field wrapper classes.
 		add_filter( 'acf/field_wrapper_attributes', function( $wrapper, $field ) {
-			// Show.
-			if ( in_array( $field['key'], array(
-				$this->fields['show_image']['key'],
-				$this->fields['show_title']['key'],
-				$this->fields['show_header_meta']['key'],
-				$this->fields['show_excerpt']['key'],
-				$this->fields['show_content']['key'],
-				$this->fields['show_more_link']['key'],
-				$this->fields['show_footer_meta']['key'],
-			) ) ) {
-				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-show' : 'mai-grid-show';
-			}
 			// Conditional Show.
 			if ( in_array( $field['key'], array(
 				$this->fields['image_size']['key'],
@@ -275,8 +300,8 @@ final class Mai_Grid_Blocks  {
 		/**
 		 * Display.
 		 */
-		// Template.
-		add_filter( "acf/load_field/key={$this->fields['template']['key']}",                      array( $this, 'load_templates' ) );
+		// Show.
+		add_filter( "acf/load_field/key={$this->fields['show']['key']}",                          array( $this, 'load_show' ) );
 		// Image Size.
 		add_filter( "acf/load_field/key={$this->fields['image_size']['key']}",                    array( $this, 'load_image_sizes' ) );
 		// Image Alignment.
@@ -300,53 +325,30 @@ final class Mai_Grid_Blocks  {
 		add_filter( "acf/load_field/key={$this->fields['align_text_vertical']['key']}",           array( $this, 'load_align_text_vertical' ) );
 
 		// Labels.
-		foreach( Mai_Grid_Base::get_display_fields() as $name => $values ) {
-			// Skip if name does not contain 'show_'.
-			if ( false === strpos ( $name, 'show_' ) ) {
-				continue;
-			}
-			add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
-				// Keep admin clean.
-				if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-					return $field;
-				}
-				// Clear label.
-				$field['label'] = '';
-				// TODO: JS to get template value and set defaults? Too aggressive?
-				// $field['default'] = '';
-				return $field;
-			});
-		}
-		// Conditionals.
-		foreach( Mai_Grid_Base::get_display_fields() as $name => $values ) {
-			// Skip template field.
-			if ( 'template' === $name ) {
-				continue;
-			}
-			// Skip show field.
-			if ( 'show' === $name ) {
-				continue;
-			}
-			// Skip show field.
-			if ( 'show_items' === $name ) {
-				continue;
-			}
-			// Add filter.
-			add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
-				// Keep admin clean.
-				if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-					return $field;
-				}
-				$field = $this->add_conditional_logic( $field );
-				return $field;
-			});
-		}
+		// foreach( Mai_Grid_Base::get_display_fields() as $name => $values ) {
+		// 	// Skip if name does not contain 'show_'.
+		// 	if ( false === strpos ( $name, 'show_' ) ) {
+		// 		continue;
+		// 	}
+		// 	add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
+		// 		// Keep admin clean.
+		// 		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+		// 			return $field;
+		// 		}
+		// 		// Clear label.
+		// 		$field['label'] = '';
+		// 		// TODO: JS to get template value and set defaults? Too aggressive?
+		// 		// $field['default'] = '';
+		// 		return $field;
+		// 	});
+		// }
+
 		// Defaults.
 		foreach( $this->fields as $name => $values ) {
 			// Skip template field.
-			if ( 'template' === $name ) {
-				continue;
-			}
+			// if ( 'template' === $name ) {
+			// 	continue;
+			// }
 			// Add filter.
 			add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
 				// Set default from our config filter.
@@ -561,23 +563,27 @@ final class Mai_Grid_Blocks  {
 		return $field;
 	}
 
-	function load_templates( $field ) {
+	function load_show( $field ) {
 
-		// Start empty.
-		$field['choices'] = array();
+		// Default choices, in default order.
+		$field['choices'] = array(
+			'image'       => __( 'Image', 'mai-grid' ),
+			'title'       => __( 'Title', 'mai-grid' ),
+			'header_meta' => __( 'Header Meta', 'mai-grid' ),
+			'excerpt'     => __( 'Excerpt', 'mai-grid' ),
+			'content'     => __( 'Content', 'mai-grid' ),
+			'more_link'   => __( 'Read More link', 'mai-grid' ),
+			'footer_meta' => __( 'Footer Meta', 'mai-grid' ),
+		);
 
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
+		// Get existing values, which are sorted correctly, without infinite loop.
+		remove_filter( "acf/load_field/key={$this->fields['show']['key']}", array( $this, 'load_show' ) );
+		$existing = get_field( 'show' );
+		$defaults = $field['choices'];
+		add_filter( "acf/load_field/key={$this->fields['show']['key']}", array( $this, 'load_show' ) );
 
-		if ( ! $this->templates ) {
-			return $field;
-		}
-
-		foreach( $this->templates as $name => $template ) {
-			$field['choices'][ $name ] = $template['label'];
-		}
+		// If we have existing values, reorder them.
+		$field['choices'] = $existing ? array_merge( array_flip( $existing ), $defaults ) : $field['choices'];
 
 		return $field;
 	}
@@ -634,7 +640,7 @@ final class Mai_Grid_Blocks  {
 		}
 
 		$field['choices'] = array(
-			''       => __( 'Default', 'mai-grid' ),
+			'full'   => __( 'Full', 'mai-grid' ),
 			'left'   => __( 'Left', 'mai-grid' ),
 			'center' => __( 'Center', 'mai-grid' ),
 			'right'  => __( 'Right', 'mai-grid' ),
@@ -773,45 +779,6 @@ final class Mai_Grid_Blocks  {
 
 	function load_more_link_text( $field ) {
 		$field['placeholder'] = __( 'Read More', 'mai-grid' );
-		return $field;
-	}
-
-	function add_conditional_logic( $field ) {
-
-		// Build conditions.
-		$conditions = array();
-		foreach( $this->templates as $template_name => $template_values ) {
-			// Skip if field is supported.
-			if ( in_array( $field['name'], $template_values['supports'] ) ) {
-				continue;
-			}
-			// Add condition to hide field.
-			$conditions[] = array(
-				'field'    => $this->fields['template']['key'],
-				'operator' => '!=',
-				'value'    => $template_name,
-			);
-		}
-
-		// Bail if no new conditions on this field.
-		if ( empty( $conditions ) ) {
-			return $field;
-		}
-
-		// If existing conditional logic.
-		if ( $field['conditional_logic'] ) {
-			// Loop through and add this condition to each.
-			foreach( $field['conditional_logic'] as $logic_index => $logic_values ) {
-				// $field['conditional_logic'][ $logic_index ][] = $conditions;
-				$field['conditional_logic'][ $logic_index ] = array_merge( $logic_values, $conditions );
-			}
-		}
-		// No existing conditions.
-		else {
-			$field['conditional_logic'] = array( $conditions );
-		}
-
-		// Send it.
 		return $field;
 	}
 

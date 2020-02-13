@@ -9,7 +9,71 @@ jQuery(document).ready(function($) {
 		return
 	}
 
+	/**
+	*  initialize_sortable_field
+	*
+	*  This function will initialize the $field.
+	*
+	*  @date	30/11/17
+	*  @since	5.6.5
+	*
+	*  @param	n/a
+	*  @return	n/a
+	*/
+	function initialize_sortable_field( $field ) {
 
+		if ( ! $field.hasClass( 'mai-acf-sortable-checkboxes' ) ) {
+			return;
+		}
+
+		// Get sortable checkboxes.
+		// $field_wrap = $( '.mai-acf-sortable-checkboxes' );
+
+		// // Bail if no sortable checkboxes.
+		// if ( ! $field_wrap.length ) {
+		// 	return;
+		// }
+
+		// add sortable
+		$field.find( '.acf-checkbox-list' ).sortable({
+			items: '> li',
+			handle: '> .mai-acf-sortable-handle',
+			// forceHelperSize: true,
+			placeholder: 'sortable-checkbox-placeholder',
+			forcePlaceholderSize: true,
+			scroll: true,
+			create: function(event, ui) {
+				$(this).find( 'li' ).append( '<span class="mai-acf-sortable-handle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"/></svg></span>' );
+			},
+			stop: function(event, ui) {
+				// self.render();
+			},
+			update: function(event, ui) {
+				// console.log( $(this).prev( 'input[type="hidden"]' ) );
+				$(this).find( 'input[type="checkbox"]' ).trigger( 'change' );
+			}
+		});
+
+	}
+
+
+	if ( typeof acf.add_action !== 'undefined' ) {
+
+		/*
+		*  ready & append (ACF5)
+		*
+		*  These two events are called when a field element is ready for initizliation.
+		*  - ready: on page load similar to $(document).ready()
+		*  - append: on new DOM elements appended via repeater field or other AJAX calls
+		*
+		*  @param	n/a
+		*  @return	n/a
+		*/
+
+		acf.add_action( 'ready_field/key=field_5e441d93d6236', initialize_sortable_field );
+		acf.add_action( 'append_field/key=field_5e441d93d6236', initialize_sortable_field );
+
+	}
 
 	return;
 

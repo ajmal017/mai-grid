@@ -32,7 +32,7 @@
  */
 class Mai_Grid_Base {
 
-	protected $type;
+	// protected $type;
 	protected $args;
 	// protected $fields;
 
@@ -40,44 +40,48 @@ class Mai_Grid_Base {
 	// protected $base_dir;
 	protected $version;
 	// protected $suffix;
-	protected $templates;
+	// protected $templates;
+	protected $defaults;
 	protected $fields;
 	// protected $values;
 
-	function __construct( $type, $args ) {
+	function __construct( $args ) {
 
-		$this->type      = $type;
-		$this->args      = $args;
+		// $args['type']      = $type;
+
+		$this->args      = $this->get_args( $args );
 
 		// $this->base_url  = MAI_GRID_PLUGIN_URL . 'assets';
 		// $this->base_dir  = MAI_GRID_PLUGIN_DIR . 'assets';
 		$this->version   = MAI_GRID_VERSION;
 		// $this->suffix    = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
-		$this->templates = self::get_templates();
+		// $this->templates = self::get_templates();
+		$this->defaults  = self::get_defaults();
 		$this->fields    = self::get_fields();
 	}
 
-	function get() {
+	function get_args( $args ) {
 
 		// Parse args.
-		$this->args = shortcode_atts( array(
+		$args = shortcode_atts( array(
+			'type'                   => 'post',  // post, term, user.
+			'context'                => 'block', // block, singular, archive.
 			'class'                  => '',
 			// Display.
-			'template'               => $this->fields['template']['default'],
-			'show'             => $this->fields['show']['default'],
-			'show_items'             => $this->fields['show_items']['default'],
-			'show_image'             => $this->fields['show_image']['default'],
+			// 'template'               => $this->fields['template']['default'],
+			'show'                   => $this->fields['show']['default'],
+			// // 'show_image'             => $this->fields['show_image']['default'],
 			'image_size'             => $this->fields['image_size']['default'],
 			'image_align'            => $this->fields['image_align']['default'],
-			'show_title'             => $this->fields['show_title']['default'],
-			'show_header_meta'       => $this->fields['show_header_meta']['default'],
+			// // 'show_title'             => $this->fields['show_title']['default'],
+			// // 'show_header_meta'       => $this->fields['show_header_meta']['default'],
 			'header_meta'            => $this->fields['header_meta']['default'],
-			'show_excerpt'           => $this->fields['show_excerpt']['default'],
-			'show_content'           => $this->fields['show_content']['default'],
+			// // 'show_excerpt'           => $this->fields['show_excerpt']['default'],
+			// // 'show_content'           => $this->fields['show_content']['default'],
 			'content_limit'          => $this->fields['content_limit']['default'],
-			'show_more_link'         => $this->fields['show_more_link']['default'],
+			// // 'show_more_link'         => $this->fields['show_more_link']['default'],
 			'more_link_text'         => $this->fields['more_link_text']['default'],
-			'show_footer_meta'       => $this->fields['show_footer_meta']['default'],
+			// // 'show_footer_meta'       => $this->fields['show_footer_meta']['default'],
 			'footer_meta'            => $this->fields['footer_meta']['default'],
 			'boxed'                  => $this->fields['boxed']['default'],
 			'align_text'             => $this->fields['align_text']['default'],
@@ -110,27 +114,28 @@ class Mai_Grid_Base {
 			'meta_key'               => $this->fields['meta_key']['default'],
 			'order'                  => $this->fields['order']['default'],
 			'exclude'                => $this->fields['exclude']['default'],
-		), $this->args, 'mai_grid' );
+		), $args, 'mai_grid' );
 
 		// Sanitize.
-		$this->args = array(
-			'class'                  => $this->sanitize( $this->args['class'], 'sanitize_html_class' ),
+		$args = array(
+			'type'                   => $this->sanitize( $this->args['type'], 'esc_html' ),
+			'context'                => $this->sanitize( $this->args['context'], 'esc_html' ),
+			'class'                  => $this->sanitize( $this->args['class'], 'esc_html' ),
 			// Display.
-			'template'               => $this->sanitize( $this->args['template'], 'esc_html' ),
+			// 'template'               => $this->sanitize( $this->args['template'], 'esc_html' ),
 			'show'                   => $this->sanitize( $this->args['show'], 'esc_html' ),
-			'show_items'                   => $this->sanitize( $this->args['show_items'], 'esc_html' ),
-			'show_image'             => $this->sanitize( $this->args['show_image'], 'esc_html' ),
+			// // 'show_image'             => $this->sanitize( $this->args['show_image'], 'esc_html' ),
 			'image_size'             => $this->sanitize( $this->args['image_size'], 'esc_html' ),
 			'image_align'            => $this->sanitize( $this->args['image_align'], 'esc_html' ),
-			'show_title'             => $this->sanitize( $this->args['show_title'], 'esc_html' ),
-			'show_header_meta'       => $this->sanitize( $this->args['show_header_meta'], 'esc_html' ),
+			// // 'show_title'             => $this->sanitize( $this->args['show_title'], 'esc_html' ),
+			// // 'show_header_meta'       => $this->sanitize( $this->args['show_header_meta'], 'esc_html' ),
 			'header_meta'            => $this->sanitize( $this->args['header_meta'], 'esc_html' ),
-			'show_excerpt'           => $this->sanitize( $this->args['show_excerpt'], 'esc_html' ),
-			'show_content'           => $this->sanitize( $this->args['show_content'], 'esc_html' ),
+			// // 'show_excerpt'           => $this->sanitize( $this->args['show_excerpt'], 'esc_html' ),
+			// // 'show_content'           => $this->sanitize( $this->args['show_content'], 'esc_html' ),
 			'content_limit'          => $this->sanitize( $this->args['content_limit'], 'esc_html' ),
-			'show_more_link'         => $this->sanitize( $this->args['show_more_link'], 'esc_html' ),
+			// // 'show_more_link'         => $this->sanitize( $this->args['show_more_link'], 'esc_html' ),
 			'more_link_text'         => $this->sanitize( $this->args['more_link_text'], 'esc_html' ),
-			'show_footer_meta'       => $this->sanitize( $this->args['show_footer_meta'], 'esc_html' ),
+			// 'show_footer_meta'       => $this->sanitize( $this->args['show_footer_meta'], 'esc_html' ),
 			'footer_meta'            => $this->sanitize( $this->args['footer_meta'], 'esc_html' ),
 			'boxed'                  => $this->sanitize( $this->args['boxed'], 'esc_html' ),
 			'align_text'             => $this->sanitize( $this->args['align_text'], 'esc_html' ),
@@ -165,105 +170,212 @@ class Mai_Grid_Base {
 			'exclude'                => (array) $this->sanitize( $this->args['exclude'], 'esc_html' ),
 		);
 
-		$this->args = apply_filters( 'mai_grid_args', $this->args, $this->type );
+		return apply_filters( 'mai_grid_args', $args );
+	}
 
-		if ( ! is_admin() ) {
-			vd( $this->args['show'] );
-			vd( $this->args['show_items'] );
-		}
-
-		// Get the entries HTML.
-		$grid = $this->get_grid_entries();
-
-		// Bail if no entries.
-		if ( ! $grid ) {
-			return;
-		}
+	function render() {
 
 		// Enqueue scripts and styles.
 		$this->enqueue_assets();
 
-		$html = genesis_markup( array(
+		genesis_markup( array(
 			'open'    => '<div %s>',
 			'context' => 'mai-grid',
 			'params'  => $this->args,
 			'atts'    => $this->get_attributes(),
-			'echo'    => false,
+			'echo'    => true,
 		) );
 
-			$html .= genesis_markup( array(
+			genesis_markup( array(
 				'open'    => '<div %s>',
-				'context' => 'mai-grid__wrap',
+				'context' => 'mai-grid-wrap',
 				'params'  => $this->args,
-				'echo'    => false,
+				'echo'    => true,
 			) );
 
-				$html .= $grid;
+				$this->do_grid_entries();
 
-			$html .= genesis_markup( array(
+			genesis_markup( array(
 				'close'   => '</div>',
-				'context' => 'mai-grid__wrap',
-				'echo'    => false,
+				'context' => 'mai-grid-wrap',
+				'echo'    => true,
 			) );
 
-		$html .= genesis_markup( array(
+		genesis_markup( array(
 			'close'   => '</div>',
 			'context' => 'mai-grid',
-			'echo'    => false,
+			'echo'    => true,
 		) );
+
+	}
+
+	function do_grid_entries() {
+
+		switch ( $args['type'] ) {
+			case 'post':
+				$show  = array_flip( $this->args['show'] );
+				$posts = new WP_Query( $this->get_post_query_args() );
+				if ( $posts->have_posts() ):
+					while ( $posts->have_posts() ) : $posts->the_post();
+
+						mai_do_entry( $args );
+
+						// For now, until cleanup.
+						continue;
+
+						// $html .= mai_get_entry( $post, $args );
+
+						// $html .= mai_get_entry([
+						// 	'title'   => mai_get_entry_title(),
+						// 	'content' => mai_get_entry_content(),
+						// ]);
+
+						// Empty.
+						$image_html = $title_html = $header_meta_html = $excerpt_html = $content_html = $more_link_html = $footer_meta_html = '';
+
+						// Link.
+						$link = get_permalink();
+
+						// Image.
+						if ( isset( $show['image'] ) ) {
+							// TODO: If 'default', find an actual image size, or maybe this is from template config?
+							// TODO: Maybe choose aspect ratio instead of size here. Then we use a helper function and new registered image sizes to build picture/source.
+							$image_id = get_post_thumbnail_id();
+							if ( $image_id ) {
+								$image_html = wp_get_attachment_image( $image_id, $this->args['image_size'], false, array( 'class' => 'mai-grid-image' ) );
+							}
+						}
+
+						// Title.
+						if ( isset( $show['title'] ) ) {
+							$title_html = get_the_title();
+						}
+
+						// Header Meta.
+						if ( isset( $show['header_meta'] ) ) {
+							$header_meta_html = do_shortcode( $this->args['header_meta'] );
+						}
+
+						// Excerpt.
+						if ( isset( $show['excerpt'] ) ) {
+							// $excerpt_html = wpautop( get_the_excerpt() );
+							$excerpt_html = get_the_excerpt();
+							// Limit.
+							if ( $this->args['content_limit'] > 0 ) {
+								$excerpt_html = wpautop( $this->get_the_content_limit( $excerpt_html, $this->args['content_limit'] ) );
+							}
+						}
+
+						// Content.
+						if ( isset( $show['content'] ) ) {
+							$content_html = strip_shortcodes( get_the_content() );
+							// Limit.
+							if ( $this->args['content_limit'] > 0 ) {
+								$content_html = $this->get_the_content_limit( $content_html, $this->args['content_limit'] );
+							}
+						}
+
+						// More Link.
+						if ( isset( $show['more_link'] ) ) {
+							$more_link_html = $this->args['more_link_text'] ? $this->args['more_link_text'] : $this->fields['more_link_text']['default'];
+						}
+
+						// Footer Meta.
+						if ( isset( $show['footer_meta'] ) ) {
+							$footer_meta_html = do_shortcode( $this->args['footer_meta'] );
+						}
+
+						$elements = [
+							'image'       => sprintf( '<a class="mai-grid-image-link" href="%s">%s</a>', $link, $image_html ),
+							'title'       => sprintf( '<h3 class="mai-grid-title"><a class="mai-grid-title-link" href="%s">%s</a></h3>', $link, $title_html ),
+							'header_meta' => sprintf( '<div class="mai-grid-header-meta">%s</div>', $header_meta_html ),
+							'excerpt'     => sprintf( '<div class="mai-grid-content">%s</div>', $excerpt_html ),
+							'content'     => sprintf( '<div class="mai-grid-content">%s</div>', $content_html ),
+							'more_link'   => sprintf( '<div class="mai-grid-more"><a class="mai-grid-more-link" href="%s">%s</a></div>', $link, $more_link_html ),
+							'footer_meta' => sprintf( '<div class="mai-grid-footer-meta">%s</div>', $footer_meta_html ),
+						];
+
+						$html .= $this->get_grid_entry( $elements );
+
+					endwhile;
+				endif;
+				wp_reset_postdata();
+			break;
+			case 'term':
+			break;
+		}
 
 		return $html;
 	}
 
-	/**
-	 *
-	 */
-	static function get_templates() {
-		$templates = array(
-			'standard' => array(
-				'label'    => __( 'Standard', 'mai-grid' ),
-				'supports' => array(
-					'show_image',
-					'image_size',
-					'image_align',
-					'show_title',
-					'show_header_meta',
-					'header_meta',
-					'show_excerpt',
-					'show_content',
-					'content_limit',
-					'show_more_link',
-					'more_link_text',
-					'show_footer_meta',
-					'footer_meta',
-					'boxed',
-					'align_text',
-				),
-			),
-			'background' => array(
-				'label'    => __( 'Background Image', 'mai-grid' ),
-				'supports' => array(
-					'show_image',
-					'image_size',
-					'show_title',
-					'align_text',
-					'align_text_vertical',
-				),
-			),
-			'compact' => array(
-				'label'    => __( 'Compact', 'mai-grid' ),
-				'supports' => array(
-					'show_image',
-					'image_align',
-					'show_title',
-					'boxed',
-				),
-			),
-			// TODO: Side by side? Like a checkerboard thing (media/text block), with image on left/right with object-fit cover and all other stuff on right.
-			// TODO: Horizontal? For recent post in sidebar type stuff, but not forced like compact. Still allow the other display stuff. Image align_vertical can do align-items for vertical alignment. Could be useful.
-		);
-		// Filter so custom sites can add their own templates.
-		return apply_filters( 'mai_grid_templates', $templates );
+	function get_grid_entry( $elements, $args = [] ) {
+
+		$elements = wp_parse_args( $elements, [
+			'image'       => '',
+			'title'       => '',
+			'header_meta' => '',
+			'excerpt'     => '',
+			'content'     => '',
+			'more_link'   => '',
+			'footer_meta' => '',
+		]);
+
+		$args = wp_parse_args( $args, [
+			'content' => 'post', // post, term, user,
+		]);
+
+		$elements = apply_filters( 'mai_post_grid_entry_elements', $elements, $this->args );
+
+		$html = '';
+
+		// Open.
+		// TODO: genesis_markup for attributes, etc.
+		$html .= '<article class="mai-grid-entry">';
+
+			// Maybe show image and wrap.
+			if ( isset( $show['image'] ) && ( 'full' !== $this->args['image_align'] ) ) {
+				// $html .= $elements['image'];
+				$html .= '<div class="mai-grid-inner">';
+			}
+
+				// Loop through elements.
+				foreach ( $this->args['show'] as $element ) {
+
+						do_action( sprintf( 'mai_%s_title', $args['type'] ), $this->args );
+
+						// do_action( 'mai_term_title' );
+						// do_action( 'mai_term_title' );
+
+
+
+					// if ( isset( $show['image'] ) && ( 'image' === $element ) && ( 'full' !== $this->args['image_align'] ) ) {
+					// 	continue;
+					// }
+					// vd( $elements[ $element ] );
+					$html .= $elements[ $element ];
+				}
+
+			// Maybe close wrap.
+			if ( isset( $show['image'] ) && ( 'full' !== $this->args['image_align'] ) ) {
+				$html .= '</div>';
+			}
+
+		// Close.
+		$html .= '</article>';
+
+		return $html;
+	}
+
+	static function get_defaults() {
+		$fields   = self::get_fields();
+		$defaults = [
+			'type'    => 'post',
+			'context' => 'block',
+		];
+		foreach( $fields as $field ) {
+			$defaults[ $key ] = $field['default'];
+		}
+		return apply_filters( 'mai_grid_defaults', $defaults );
 	}
 
 	static function get_fields() {
@@ -278,22 +390,18 @@ class Mai_Grid_Base {
 
 	static function get_display_fields() {
 		return array(
-			'template' => array(
-				'default' => 'standard',
-				'key'     => 'field_5de9b96fb69b0',
-			),
+			// 'template' => array(
+			// 	'default' => 'standard',
+			// 	'key'     => 'field_5de9b96fb69b0',
+			// ),
 			'show' => array(
-				'default' => '',
-				'key'     => 'field_5e441588438a3',
+				'default' => array( 'title', 'image' ),
+				'key'     => 'field_5e441d93d6236',
 			),
-			'show_items' => array(
-				'default' => '',
-				'key'     => 'field_5e436bc5fb76e',
-			),
-			'show_image' => array(
-				'default' => true,
-				'key'     => 'field_5e1e665ffc7e5',
-			),
+			// 'show_image' => array(
+			// 	'default' => true,
+			// 	'key'     => 'field_5e1e665ffc7e5',
+			// ),
 			'image_size' => array(
 				'default' => 'default',
 				'key'     => 'field_5bd50e580d1e9',
@@ -302,43 +410,43 @@ class Mai_Grid_Base {
 				'default' => '',
 				'key'     => 'field_5e2f3adf82130',
 			),
-			'show_title' => array(
-				'default' => true,
-				'key'     => 'field_5e1e6693fc7e6',
-			),
-			'show_header_meta' => array(
-				'default' => '',
-				'key'     => 'field_5e1e680ce988d',
-			),
+			// 'show_title' => array(
+			// 	'default' => true,
+			// 	'key'     => 'field_5e1e6693fc7e6',
+			// ),
+			// 'show_header_meta' => array(
+			// 	'default' => '',
+			// 	'key'     => 'field_5e1e680ce988d',
+			// ),
 			'header_meta' => array(
 				'default' => '',
 				'key'     => 'field_5e2b563a7c6cf',
 			),
-			'show_excerpt' => array(
-				'default' => '',
-				'key'     => 'field_5e1e67e7e988b',
-			),
-			'show_content' => array(
-				'default' => '',
-				'key'     => 'field_5e1e67fce988c',
-			),
+			// 'show_excerpt' => array(
+			// 	'default' => '',
+			// 	'key'     => 'field_5e1e67e7e988b',
+			// ),
+			// 'show_content' => array(
+			// 	'default' => '',
+			// 	'key'     => 'field_5e1e67fce988c',
+			// ),
 			'content_limit' => array(
 				'default' => '',
 				'key'     => 'field_5bd51ac107244',
 			),
-			'show_more_link' => array(
-				'default' => '',
-				'key'     => 'field_5e1e6843e988f',
-			),
+			// 'show_more_link' => array(
+			// 	'default' => '',
+			// 	'key'     => 'field_5e1e6843e988f',
+			// ),
 			'more_link_text' => array(
 				// TODO: Filter on this default? Will we have a separate filter in v2?
 				'default' => __( 'Read More', 'mai-grid' ),
 				'key'     => 'field_5c85465018395',
 			),
-			'show_footer_meta' => array(
-				'default' => '',
-				'key'     => 'field_5e1e6835e988e',
-			),
+			// 'show_footer_meta' => array(
+			// 	'default' => '',
+			// 	'key'     => 'field_5e1e6835e988e',
+			// ),
 			'footer_meta' => array(
 				'default' => '',
 				'key'     => 'field_5e2b567e7c6d0',
@@ -478,100 +586,6 @@ class Mai_Grid_Base {
 		);
 	}
 
-
-	function get_grid_entries() {
-
-		/**
-		 * Start data array so we don't need isset() in template.
-		 * This is the data getting passed to the template.
-		 */
-		$data = array(
-			'args'                => $this->args,
-			'link'                => '',
-			'image'            => '',
-			'image_id'            => '',
-			'image_size'          => '',
-			'image_align'         => '',
-			'title'               => '',
-			'header_meta'         => '',
-			'footer_meta'         => '',
-			'content'             => '',
-			'more_link'           => $this->args['show_more_link'],
-			'align_text'          => $this->args['align_text'],
-			'align_text_vertical' => $this->args['align_text_vertical'],
-			'boxed'               => $this->args['boxed'],
-		);
-
-		$html = '';
-
-		// Get the template loader.
-		$loader = new Mai_Grid_Template_Loader;
-
-		switch ( $this->type ) {
-			case 'post':
-				$posts = new WP_Query( $this->get_post_query_args() );
-				if ( $posts->have_posts() ):
-					while ( $posts->have_posts() ) : $posts->the_post();
-						// Link.
-						$data['link'] = get_permalink();
-						// Image.
-						if ( $this->args['show_image'] ) {
-
-							// TODO: If 'default', find an actual image size, or maybe this is from template config?
-							// TODO: Maybe choose aspect ratio instead of size here. Then we use a helper function and new registered image sizes to build picture/source.
-							$image_id = get_post_thumbnail_id();
-							if ( $image_id ) {
-								$data['image_id']    = $image_id;
-								$data['image_size']  = ( 'default' == $this->args['image_size'] ) ? 'thumbnail' : $this->args['image_size'];
-								$data['image_align'] = $this->args['image_align'];
-							}
-						}
-						// Title.
-						if ( $this->args['show_title'] ) {
-							$data['title'] = get_the_title();
-						}
-						// Header Meta.
-						if ( $this->args['show_header_meta'] ) {
-							$data['header_meta'] = do_shortcode( $this->args['header_meta'] );
-						}
-						// Excerpt.
-						if ( $this->args['show_excerpt'] ) {
-							$data['content'] = wpautop( get_the_excerpt() );
-						}
-						// Content.
-						if ( $this->args['show_content'] ) {
-							$data['content'] = strip_shortcodes( get_the_content() );
-						}
-						// Content Limit.
-						if ( $this->args['content_limit'] > 0 ) {
-							$data['content'] = $this->get_the_content_limit( $data['content'], $this->args['content_limit'] );
-						}
-						// Footer Meta.
-						if ( $this->args['show_footer_meta'] ) {
-							$data['footer_meta'] = do_shortcode( $this->args['footer_meta'] );
-						}
-
-						/**
-						 * TODO: This is not loading correctly when you add a new grid block.
-						 * The grid is empty until you toggle Show things.
-						 */
-
-						// Template.
-						ob_start();
-						$loader->set_template_data( $data );
-						$loader->get_template_part( $this->args['template'] );
-						$html .= ob_get_clean();
-					endwhile;
-				endif;
-				wp_reset_postdata();
-			break;
-			case 'term':
-			break;
-		}
-
-		return $html;
-	}
-
 	function get_post_query_args() {
 
 		$query_args = array(
@@ -621,7 +635,7 @@ class Mai_Grid_Base {
 	function get_attributes() {
 		// Start the attributes.
 		$attributes = array(
-			'class' => sprintf( 'mai-grid mai-grid-%s', sanitize_html_class( $this->args['template'] ) ),
+			'class' => sprintf( 'mai-grid mai-grid-%s', sanitize_html_class( 'mai-todo' ) ),
 			'style' => '',
 		);
 		// Global styles.
@@ -633,23 +647,23 @@ class Mai_Grid_Base {
 		$attributes['style'] .= sprintf( '--row-gap:%s;', $this->args['row_gap'] );
 		$attributes['style'] .= sprintf( '--align-columns:%s;', ! empty( $this->args['align_columns'] ) ? $this->args['align_columns'] : 'unset' );
 		$attributes['style'] .= sprintf( '--align-columns-vertical:%s;', ! empty( $this->args['align_columns_vertical'] ) ? $this->args['align_columns_vertical'] : 'unset' );
-		// Template based classes.
-		if ( $this->template_supports( $this->args['template'], 'boxed' ) && $this->args['boxed'] ) {
-			$attributes['class'] .= ' has-boxed';
-		}
-		if ( $this->template_supports( $this->args['template'], 'show_image' ) && $this->template_supports( $this->args['template'], 'image_align' ) && $this->args['show_image'] && $this->args['image_align'] ) {
-			$attributes['class'] .= ' has-image-align-' . $this->args['image_align'];
-		}
-		// Template based styles.
-		if ( $this->template_supports( $this->args['template'], 'align_text' ) ) {
-			$attributes['style'] .= sprintf( '--align-text:%s;', $this->get_align_text( $this->args['align_text'] ) );
-		}
-		if ( $this->template_supports( $this->args['template'], 'align_text_vertical' ) ) {
-			$attributes['style'] .= sprintf( '--align-text-vertical:%s;', $this->get_align_text_vertical( $this->args['align_text_vertical'] ) );
-		}
-		if ( $this->template_supports( $this->args['template'], 'show_image' ) ) {
-			$attributes['style'] .= sprintf( '--aspect-ratio:%s;', $this->args['show_image'] ? $this->get_aspect_ratio( $this->args['image_size'] ) : '4/3' );
-		}
+		// // Template based classes.
+		// if ( $this->template_supports( $this->args['template'], 'boxed' ) && $this->args['boxed'] ) {
+		// 	$attributes['class'] .= ' has-boxed';
+		// }
+		// if ( $this->template_supports( $this->args['template'], 'show_image' ) && $this->template_supports( $this->args['template'], 'image_align' ) && $this->args['show_image'] && $this->args['image_align'] ) {
+		// 	$attributes['class'] .= ' has-image-align-' . $this->args['image_align'];
+		// }
+		// // Template based styles.
+		// if ( $this->template_supports( $this->args['template'], 'align_text' ) ) {
+		// 	$attributes['style'] .= sprintf( '--align-text:%s;', $this->get_align_text( $this->args['align_text'] ) );
+		// }
+		// if ( $this->template_supports( $this->args['template'], 'align_text_vertical' ) ) {
+		// 	$attributes['style'] .= sprintf( '--align-text-vertical:%s;', $this->get_align_text_vertical( $this->args['align_text_vertical'] ) );
+		// }
+		// if ( $this->template_supports( $this->args['template'], 'show_image' ) ) {
+		// 	$attributes['style'] .= sprintf( '--aspect-ratio:%s;', $this->args['show_image'] ? $this->get_aspect_ratio( $this->args['image_size'] ) : '4/3' );
+		// }
 		// Send it.
 		return $attributes;
 	}
@@ -787,10 +801,6 @@ class Mai_Grid_Base {
 		return trim( $value );
 	}
 
-	function template_supports( $template, $value ) {
-		return isset( $this->templates[ $template ]['supports'] ) && in_array( $value, $this->templates[ $template ]['supports'] );
-	}
-
 	/**
 	 * Sanitize a value. Checks for null/array.
 	 *
@@ -832,26 +842,16 @@ class Mai_Grid_Base {
 
 			// Default admin scripts.
 			$this->enqueue_asset( 'admin', 'css' );
-			// $this->enqueue_asset( 'admin', 'js', false, array( 'jquery', 'jquery-ui-core', 'jquery-ui-sortable' ) );
-
-			// We can't dynamically load assets via ajax when the template select field changes, so we need them all available in the backend.
-			foreach( array_keys( $this->templates ) as $template ) {
-				$this->enqueue_asset( $template, 'css', true );
-			}
+			// $this->enqueue_asset( 'admin', 'js' );
 
 			// Query JS.
-			switch ( $this->type ) {
+			switch ( $args['type'] ) {
 				case 'post':
 					$this->enqueue_asset( 'wp-query', 'js' );
 				break;
 				case 'term':
 				break;
 			}
-
-		} else {
-
-			// Only load the template CSS file we need.
-			$this->enqueue_asset( $this->args['template'], 'css', true );
 		}
 	}
 
@@ -860,15 +860,14 @@ class Mai_Grid_Base {
 	 *
 	 * @param   string  $name          The asset name.
 	 * @param   string  $type          The type. Typically js or css.
-	 * @param   bool    $template      Wether this is a template asset or not.
 	 * @param   array   $dependencies  Script dependencies.
 	 *
 	 * @return  void
 	 */
-	function enqueue_asset( $name, $type, $template = false, $dependencies = [] ) {
+	function enqueue_asset( $name, $type, $dependencies = [] ) {
 		// TODO: These should get cleaned up once in the engine.
-		$base_url = $template ? untrailingslashit( MAI_GRID_TEMPLATES_URL ) : trailingslashit( MAI_GRID_PLUGIN_URL ) . 'assets/' . $type;
-		$base_dir = $template ? untrailingslashit( MAI_GRID_TEMPLATES_DIR ) : trailingslashit( MAI_GRID_PLUGIN_DIR ) . 'assets/' . $type;
+		$base_url = trailingslashit( MAI_GRID_PLUGIN_URL ) . 'assets/' . $type;
+		$base_dir = trailingslashit( MAI_GRID_PLUGIN_DIR ) . 'assets/' . $type;
 		$suffix   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
 		if ( ! file_exists( "{$base_dir}/{$name}{$suffix}.{$type}" ) ) {
 			// Fallback if someone overrides the CSS/JS in a theme and doesn't proved .min version.
@@ -885,113 +884,11 @@ class Mai_Grid_Base {
 		switch ( $type ) {
 			case 'css':
 				wp_enqueue_style( "mai-grid-{$name}", $url, $dependencies, $version );
-				break;
+			break;
 			case 'js':
 				wp_enqueue_script( "mai-grid-{$name}", $url, $dependencies, $version, true );
-				break;
+			break;
 		}
 	}
 
-}
-
-
-
-// $keys = array(
-// 	'field_5db27a5c59103',
-// 	'field_5db12313e2106',
-// 	'field_5db27a6a59104',
-// 	'field_5d8c2a579a252',
-// );
-// foreach( $keys as $key ) {
-// 	// Make field read only.
-// 	add_filter( "acf/load_field/key={$key}", function( $field ) {
-// 		$field['readonly'] = 1;
-// 		return $field;
-// 	}, 10, 1 );
-// }
-
-// add_filter( "acf/load_field/key=field_5e43090598bb2", function( $field ) {
-// 	// vd( $field );
-// 	$field['readonly'] = 1;
-// 	return $field;
-// });
-
-// add_filter( 'acf/field_wrapper_attributes', function( $wrapper, $field ) {
-// 	if ( 'field_5e43090598bb2' !== $field['key'] ) {
-// 		return $field;
-// 	}
-// 	$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' acf-hidden' : 'acf-hidden';
-// 	return $field;
-// }, 10, 2 );
-
-// add_filter( 'acf/load_field/key=field_5e4308c598bb1', 'mai_grid_update_labels_attempt' );
-function mai_grid_update_labels_attempt( $field ) {
-	$values = get_field( 'field_5e43074298bae' );
-	vd( $values );
-	return $field;
-}
-
-add_filter( 'acf/load_field/key=field_5e43074298bae', function( $field ) {
-	// $values = get_field( 'field_5e43074298bae' );
-	// vd( $values );
-	// vd( $field );
-	return $field;
-});
-
-add_filter( 'acf/load_value/key=field_5e43074298bae', function( $value ) {
-
-	// vd( $value );
-	return $value;
-
-	// If we already have values, return em.
-	if ( $value ) {
-		return $value;
-	}
-
-	// Defaults and order.
-	$value = array(
-		array(
-			'field_5e4308c598bb1' => true,
-			'field_5e43090598bb2' => 'title',
-		),
-		array(
-			'field_5e4308c598bb1' => true,
-			'field_5e43090598bb2' => 'image',
-		),
-		array(
-			'field_5e4308c598bb1' => false,
-			'field_5e43090598bb2' => 'excerpt',
-		),
-		array(
-			'field_5e4308c598bb1' => false,
-			'field_5e43090598bb2' => 'footer_meta',
-		),
-		array(
-			'field_5e4308c598bb1' => false,
-			'field_5e43090598bb2' => 'more_link',
-		),
-	);
-
-	return $value;
-});
-
-
-function mai_grid_write_to_file( $value ) {
-	/**
-	 * This function for testing & debuggin only.
-	 * Do not leave this function working on your site.
-	 */
-	$file   = dirname( __FILE__ ) . '/__data.txt';
-	$handle = fopen( $file, 'a' );
-	ob_start();
-	if ( is_array( $value ) || is_object( $value ) ) {
-		print_r( $value );
-	} elseif ( is_bool( $value ) ) {
-		var_dump( $value );
-	} else {
-		echo $value;
-	}
-	echo "\r\n\r\n";
-	fwrite( $handle, ob_get_clean() );
-	fclose( $handle );
 }

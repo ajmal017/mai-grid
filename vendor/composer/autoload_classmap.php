@@ -6,5 +6,4 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Gamajo_Template_Loader' => $vendorDir . '/gamajo/template-loader/class-gamajo-template-loader.php',
 );
