@@ -156,7 +156,7 @@ final class Mai_Grid_Plugin {
 		// include_once __DIR__ . '/classes/class-grid-block.php';
 		// include_once __DIR__ . '/classes/class-post-grid.php';
 		// include_once __DIR__ . '/classes/class-post-grid-block.php';
-		include_once __DIR__ . '/includes/acf-sortable-checkbox/acf-sortable-checkbox.php';
+		// include_once __DIR__ . '/includes/acf-sortable-checkbox/acf-sortable-checkbox.php';
 		// include_once __DIR__ . '/includes/acf-sortable-group/acf-sortable-group.php';
 	}
 

@@ -163,7 +163,7 @@ final class Mai_Grid_Blocks  {
 			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
 		}
 		$grid = new Mai_Grid_Base( $args );
-		echo $grid->get();
+		$grid->render();
 	}
 
 	function do_term_grid( $block, $content = '', $is_preview = false ) {
@@ -175,7 +175,7 @@ final class Mai_Grid_Blocks  {
 			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
 		}
 		$grid = new Mai_Grid_Base( $args );
-		echo $grid->get();
+		$grid->render();
 	}
 
 	function get_base_fields() {
