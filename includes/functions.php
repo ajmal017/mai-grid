@@ -1,5 +1,36 @@
 <?php
 
+// TEMPORARY TILL I'M USING MAI ENGINE.
+add_action( 'after_setup_theme', function() {
+
+	$sizes = [
+		'landscape-xl' => mai_apply_aspect_ratio( 1920, '16:9' ),
+		'landscape-lg' => mai_apply_aspect_ratio( 1280, '16:9' ),
+		'landscape-md' => mai_apply_aspect_ratio( 896, '4:3' ),
+		'landscape-sm' => mai_apply_aspect_ratio( 512, '4:3' ),
+		'landscape-xs' => mai_apply_aspect_ratio( 256, '4:3' ),
+		'portrait-md'  => mai_apply_aspect_ratio( 896, '3:4' ),
+		'portrait-sm'  => mai_apply_aspect_ratio( 512, '3:4' ),
+		'portrait-xs'  => mai_apply_aspect_ratio( 256, '3:4' ),
+		'square-md'    => mai_apply_aspect_ratio( 896, '1:1' ),
+		'square-sm'    => mai_apply_aspect_ratio( 512, '1:1' ),
+		'square-xs'    => mai_apply_aspect_ratio( 256, '1:1' ),
+		'tiny'         => mai_apply_aspect_ratio( 80, '1:1' ),
+	];
+
+	foreach( $sizes as $name => $values ) {
+		add_image_size( $values[0], $values[1], $values[2] );
+	}
+
+});
+function mai_apply_aspect_ratio( $width = 896, $ratio = '16:9' ) {
+	$ratio       = explode( ':', $ratio );
+	$x           = $ratio[0];
+	$y           = $ratio[1];
+	$height      = (int) $width / $x * $y;
+	return [ $width, $height, true ];
+}
+
 /**
  * // Loop.
  * @link  https://github.com/studiopress/genesis/blob/master/lib/structure/loops.php#L64
@@ -14,7 +45,7 @@
 // do_action( 'genesis_entry_footer' );
 
 /**
- * Get a grid entry.
+ * Echo a grid entry.
  *
  * @param   object  The (post, term, user) entry object.
  * @param   object  The object to get the entry.
@@ -22,422 +53,83 @@
  * @return  string
  */
 function mai_do_entry( $entry, $args ) {
-
-	// Open.
-
-	// Loop through our elements.
-	foreach( $args['show'] as $element ) {
-		$function = "mai_do_entry_$element";
-
-
-		$function( $entry, $args, $element );
-	}
-
-	// Close.
+	$entry = new Mai_Entry( $entry, $args );
+	$entry->render();
 }
 
-/**
- * Backwards compatibility for Genesis hooks.
- */
-function mai_do_genesis_entry_header() {
-	do_action( 'genesis_entry_header' );
-}
-function mai_do_genesis_before_entry_content() {
-	do_action( 'genesis_before_entry_content' );
-}
-function mai_do_genesis_entry_content() {
-	do_action( 'genesis_entry_content' );
-}
-function mai_do_genesis_after_entry_content() {
-	do_action( 'genesis_after_entry_content' );
-}
-function mai_do_genesis_entry_footer() {
-	do_action( 'genesis_entry_footer' );
+function mai_get_image_sizes() {
+	$breakpoints = mai_get_breakpoints();
+	return [
+		'sm' => $breakpoints['xs'],
+		'md' => $breakpoints['md'],
+		'lg' => $breakpoints['xl'],
+	];
 }
 
-/**
- * Display the post content.
- *
- * Initially based off of genesis_do_post_title().
- *
- * @return  void
- */
-function mai_do_entry_title( $entry, $args ) {
+function mai_get_breakpoints() {
 
-	$link = false;
+	// "screen-xs": "400px", // mobile portrait
+	// "screen-sm": "600px", // mobile landscape
+	// "screen-md": "800px", // tablet portrait
+	// "screen-lg": "1000px", // tablet landscape
+	// "screen-xl": "1200px", // desktop
 
-	// Title.
-	switch ( $args['type'] ) {
-		case 'post':
-
-			// Not a block.
-			if ( 'block' !== $args['block'] ) {
-
-				// Singular and archive wrap and title text.
-				if ( 'singular' === $args['context'] ) {
-					$wrap  = 'h1';
-					$title = genesis_entry_header_hidden_on_current_page() ? get_the_title() : '';
-				} else {
-					$wrap  = 'h2';
-					$title = get_the_title();
-				}
-
-				// If HTML5 with semantic headings, wrap in H1.
-				$wrap  = genesis_get_seo_option( 'semantic_headings' ) ? 'h1' : $wrap;
-
-				// Filter the post title text.
-				$title = apply_filters( 'genesis_post_title_text', $title );
-
-				// Wrap in H2 on static homepages if Primary Title H1 is set to title or description.
-				if (
-					( 'singular' === $args['context'] )
-					&& is_front_page()
-					&& ! is_home()
-					&& genesis_seo_active()
-					&& 'neither' !== genesis_get_seo_option( 'home_h1_on' )
-				) {
-					$wrap = 'h2';
-				}
-
-				/**
-				 * Entry title wrapping element.
-				 *
-				 * The wrapping element for the entry title.
-				 *
-				 * @param string $wrap The wrapping element (h1, h2, p, etc.).
-				 */
-				$wrap = apply_filters( 'genesis_entry_title_wrap', $wrap );
-
-				// Link it, if necessary.
-				if ( ( 'archive' === $args['context'] ) && apply_filters( 'genesis_link_post_title', true ) ) {
-					$link = true;
-				}
-			}
-			// Block.
-			else {
-
-				$wrap  = 'h3';
-				$title = get_the_title( $entry );
-				$link  = true;
-			}
-		break;
-		case 'term':
-			$wrap  = 'h3'; // Only blocks use this function for terms.
-			$title = ''; // TODO.
-		break;
-		case 'user':
-			$wrap  = 'h3'; // Only blocks use this function for users.
-			$title = ''; // TODO.
-		break;
-		default:
-			$title = '';
-	}
-
-	// Bail if no title.
-	if ( ! $title ) {
-		return;
-	}
-
-	// If linking.
-	if ( $link ) {
-		$title = genesis_markup(
-			[
-				'open'    => '<a %s>',
-				'close'   => '</a>',
-				'content' => $title,
-				'context' => 'entry-title-link',
-				'echo'    => false,
-				'params'  => [
-					'args'  => $args,
-					'entry' => $entry,
-				],
-			]
-		);
-	}
-
-	/**
-	 * Entry title wrapping element.
-	 *
-	 * The wrapping element for the entry title.
-	 *
-	 * @param  string  $wrap The wrapping element (h1, h2, p, etc.).
-	 */
-	$wrap = apply_filters( 'mai_entry_title_wrap', $wrap, $args );
-
-	// Build the output.
-	$output = genesis_markup(
-		[
-			'open'    => "<{$wrap} %s>",
-			'close'   => "</{$wrap}>",
-			'content' => $title,
-			'context' => 'entry-title',
-			'echo'    => false,
-			'params'  => [
-				'wrap'  => $wrap,
-				'args'  => $args,
-				'entry' => $entry,
-			],
-		]
-	);
-
-	// Add genesis filter.
-	if ( 'post' === $args['type'] ) {
-		$output = apply_filters( 'genesis_post_title_output', $output, $wrap, $title ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- title output is left unescaped to accommodate trusted user input. See https://codex.wordpress.org/Function_Reference/the_title#Security_considerations.
-	}
-
-	echo $output;
-
+	return [
+		'xs' => '',
+		'sm' => 512,
+		'md' => 768,
+		'lg' => 1024,
+		'xl' => 1152,
+	];
 }
 
-/**
- * Display the post excerpt.
- *
- * Initially based off of genesis_do_post_content().
- *
- * @return  void
- */
-function mai_do_entry_excerpt( $args ) {
+function mai_get_breakpoint_columns( array $columns ) {
 
-	// Excerpt.
-	switch ( $args['type'] ) {
-		case 'post':
-			$excerpt = get_the_excerpt();
-			break;
-		case 'term':
-			$excerpt = ''; // TODO (intro text).
-			break;
-		case 'user':
-			$excerpt = ''; // TODO (possibly not an option for users).
-			break;
-		default:
-			$excerpt = '';
-	}
+	$columns = wp_parse_args( $columns, [
+		'xs' => 1,
+		'sm' => 1,
+		'md' => 1,
+		'lg' => 1,
+		'xl' => 1,
+	]);
 
-	// Limit.
-	if ( $args['content_limit'] > 0 ) {
-		$excerpt = mai_get_content_limit( $excerpt, $args['content_limit'] );
-	}
+	return $content;
 
-	// Output.
-	genesis_markup(
-		[
-			'open'    => '<div %s>',
-			'close'   => '</div>',
-			'context' => 'entry-excerpt',
-			'content' => $excerpt,
-			'echo'    => false,
-			'params'  => [
-				'args'  => $args,
-				'entry' => $entry,
-			],
-		]
-	);
-
-}
-
-/**
- * Display the post content.
- *
- * Initially based off of genesis_do_post_content().
- *
- * @return  void
- */
-function mai_do_entry_content( $entry, $args ) {
-
-	// Content.
-	switch ( $args['type'] ) {
-		case 'post':
-			$content = strip_shortcodes( get_the_content( null, false, $entry ) );
-			break;
-		case 'term':
-			$content = term_description( $entry->term_id );
-			break;
-		case 'user':
-			$content = get_the_author_meta( 'description', $entry->ID );
-			break;
-		default:
-			$content = '';
-	}
-
-	// Limit.
-	if ( $args['content_limit'] > 0 ) {
-		$content = mai_get_content_limit( $content, $args['content_limit'] );
-	}
-
-	// Output.
-	genesis_markup(
-		[
-			'open'    => '<div %s>',
-			'close'   => '</div>',
-			'context' => 'entry-content',
-			'content' => $content,
-			'echo'    => false,
-			'params'  => [
-				'args'  => $args,
-				'entry' => $entry,
-			],
-		]
-	);
-
-}
-
-/**
- * Display the header meta.
- *
- * Initially based off genesis_post_info().
- */
-function mai_do_entry_header_meta( $entry, $args ) {
-
-	$header_meta = '';
-
-	// Header meta.
-	switch ( $args['type'] ) {
-		case 'post':
-			// Not a block.
-			if ( 'block' !== $args['block'] ) {
-				if ( post_type_supports( get_post_type(), 'genesis-entry-meta-before-content' ) ) {
-					// TODO: Once other post types use our settings we'll need to account for it here.
-					$header_meta = genesis_get_option( 'entry_meta_before_content' );
-					$header_meta = apply_filters( 'genesis_post_info', $header_meta );
-					$header_meta = wp_kses_post( $header_meta );
-					$header_meta = trim( $header_meta );
-				}
-			}
-			// A block.
-			else {
-				$header_meta = $args['header_meta'];
-			}
-		break;
-		case 'term':
-			$header_meta = ''; // TODO.
-		break;
-		case 'user':
-			$header_meta = ''; // TODO.
-		break;
-		default:
-			$header_meta = '';
-	}
-
-	// Bail if none.
-	if ( ! $header_meta ) {
-		return;
-	}
-
-	// Run shortcodes.
-	$header_meta = do_shortcode( $header_meta );
-
-	genesis_markup(
-		[
-			'open'    => '<p %s>',
-			'close'   => '</p>',
-			'content' => genesis_strip_p_tags( $header_meta ),
-			'context' => 'entry-meta-before-content',
-			'params'  => [
-				'args'  => $args,
-				'entry' => $entry,
-			],
-		]
-	);
-
-}
-
-/**
- * Display the footer meta.
- *
- * Initially based off genesis_post_meta().
- */
-function mai_do_entry_footer_meta( $entry, $args ) {
-
-	$footer_meta = '';
-
-	// Footer meta.
-	switch ( $args['type'] ) {
-		case 'post':
-			// Not a block.
-			if ( 'block' !== $args['block'] ) {
-				if ( post_type_supports( get_post_type(), 'genesis-entry-meta-after-content' ) ) {
-					// TODO: Once other post types use our settings we'll need to account for it here.
-					$footer_meta = genesis_get_option( 'entry_meta_after_content' );
-					$footer_meta = apply_filters( 'genesis_post_info', $footer_meta );
-					$footer_meta = wp_kses_post( $footer_meta );
-					$footer_meta = trim( $footer_meta );
-				}
-			}
-			// A block.
-			else {
-				$footer_meta = $args['footer_meta'];
-			}
-		break;
-		case 'term':
-			$footer_meta = ''; // TODO.
-		break;
-		case 'user':
-			$footer_meta = ''; // TODO.
-		break;
-		default:
-			$footer_meta = '';
-	}
-
-	// Bail if none.
-	if ( ! $footer_meta ) {
-		return;
-	}
-
-	// Run shortcodes.
-	$footer_meta = do_shortcode( $footer_meta );
-
-	genesis_markup(
-		[
-			'open'    => '<p %s>',
-			'close'   => '</p>',
-			'content' => genesis_strip_p_tags( $footer_meta ),
-			'context' => 'entry-meta-after-content',
-			'params'  => [
-				'args'  => $args,
-				'entry' => $entry,
-			],
-		]
-	);
-
-}
-
-function mai_do_entry_more_link( $entry, $args ) {
-
-	// Link.
-	switch ( $args['type'] ) {
-		case 'post':
-			$more_link = get_the_permalink( $entry );
-		break;
-		case 'term':
-			$more_link = ''; // TODO.
-		break;
-		case 'user':
-			$more_link = ''; // TODO.
-		break;
-		default:
-			$more_link = '';
-	}
-
-	// Bail if no link.
-	if ( ! $more_link ) {
-		return;
-	}
-
-	genesis_markup(
-		[
-			'open'    => '<a %s>',
-			'close'   => '</a>',
-			'content' => esc_html( __( 'Read More', 'mai-engine' ) ),
-			'context' => 'entry-read-more',
-			'atts'    => [
-				'href' => $more_link,
-			],
-			'params'  => [
-				'args'  => $args,
-				'entry' => $entry,
-			],
-		]
-	);
+	// static $current_columns;
+	// // Set the current column.
+	// if ( ! isset( $current_columns ) ) {
+	// 	$current_columns = $original_value;
+	// }
+	// // If using responsive settings, and have a value.
+	// if ( $this->args['columns_responsive'] && is_numeric( $value ) ) {
+	// 	$current_columns = $value;
+	// 	return $current_columns;
+	// }
+	// $compare = is_numeric( $previous_value ) ? $previous_value : $current_columns;
+	// switch ( $compare ) {
+	// 	case 6:
+	// 		$current_columns = 4;
+	// 	break;
+	// 	case 5:
+	// 		$current_columns = 3;
+	// 	break;
+	// 	case 4:
+	// 		$current_columns = 2;
+	// 	break;
+	// 	case 3:
+	// 		$current_columns = 2;
+	// 	break;
+	// 	case 2:
+	// 		$current_columns = 1;
+	// 	break;
+	// 	case 1:
+	// 		$current_columns = 1;
+	// 	break;
+	// 	case 0:
+	// 		$current_columns = 0;
+	// 	break;
+	// }
+	// return absint( $current_columns );
 }
 
 /**

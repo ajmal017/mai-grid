@@ -47,7 +47,7 @@ class Mai_Grid_Base {
 
 	function __construct( $args ) {
 
-		// $args['type']      = $type;
+		// $this->args['type']      = $type;
 
 		$this->args      = $this->get_args( $args );
 
@@ -211,101 +211,30 @@ class Mai_Grid_Base {
 
 	function do_grid_entries() {
 
-		switch ( $args['type'] ) {
+		switch ( $this->args['type'] ) {
 			case 'post':
 				$show  = array_flip( $this->args['show'] );
 				$posts = new WP_Query( $this->get_post_query_args() );
-				if ( $posts->have_posts() ):
+				if ( $posts->have_posts() ) {
 					while ( $posts->have_posts() ) : $posts->the_post();
 
 						mai_do_entry( $args );
 
-						// For now, until cleanup.
-						continue;
-
-						// $html .= mai_get_entry( $post, $args );
-
-						// $html .= mai_get_entry([
-						// 	'title'   => mai_get_entry_title(),
-						// 	'content' => mai_get_entry_content(),
-						// ]);
-
-						// Empty.
-						$image_html = $title_html = $header_meta_html = $excerpt_html = $content_html = $more_link_html = $footer_meta_html = '';
-
-						// Link.
-						$link = get_permalink();
-
-						// Image.
-						if ( isset( $show['image'] ) ) {
-							// TODO: If 'default', find an actual image size, or maybe this is from template config?
-							// TODO: Maybe choose aspect ratio instead of size here. Then we use a helper function and new registered image sizes to build picture/source.
-							$image_id = get_post_thumbnail_id();
-							if ( $image_id ) {
-								$image_html = wp_get_attachment_image( $image_id, $this->args['image_size'], false, array( 'class' => 'mai-grid-image' ) );
-							}
-						}
-
-						// Title.
-						if ( isset( $show['title'] ) ) {
-							$title_html = get_the_title();
-						}
-
-						// Header Meta.
-						if ( isset( $show['header_meta'] ) ) {
-							$header_meta_html = do_shortcode( $this->args['header_meta'] );
-						}
-
-						// Excerpt.
-						if ( isset( $show['excerpt'] ) ) {
-							// $excerpt_html = wpautop( get_the_excerpt() );
-							$excerpt_html = get_the_excerpt();
-							// Limit.
-							if ( $this->args['content_limit'] > 0 ) {
-								$excerpt_html = wpautop( $this->get_the_content_limit( $excerpt_html, $this->args['content_limit'] ) );
-							}
-						}
-
-						// Content.
-						if ( isset( $show['content'] ) ) {
-							$content_html = strip_shortcodes( get_the_content() );
-							// Limit.
-							if ( $this->args['content_limit'] > 0 ) {
-								$content_html = $this->get_the_content_limit( $content_html, $this->args['content_limit'] );
-							}
-						}
-
-						// More Link.
-						if ( isset( $show['more_link'] ) ) {
-							$more_link_html = $this->args['more_link_text'] ? $this->args['more_link_text'] : $this->fields['more_link_text']['default'];
-						}
-
-						// Footer Meta.
-						if ( isset( $show['footer_meta'] ) ) {
-							$footer_meta_html = do_shortcode( $this->args['footer_meta'] );
-						}
-
-						$elements = [
-							'image'       => sprintf( '<a class="mai-grid-image-link" href="%s">%s</a>', $link, $image_html ),
-							'title'       => sprintf( '<h3 class="mai-grid-title"><a class="mai-grid-title-link" href="%s">%s</a></h3>', $link, $title_html ),
-							'header_meta' => sprintf( '<div class="mai-grid-header-meta">%s</div>', $header_meta_html ),
-							'excerpt'     => sprintf( '<div class="mai-grid-content">%s</div>', $excerpt_html ),
-							'content'     => sprintf( '<div class="mai-grid-content">%s</div>', $content_html ),
-							'more_link'   => sprintf( '<div class="mai-grid-more"><a class="mai-grid-more-link" href="%s">%s</a></div>', $link, $more_link_html ),
-							'footer_meta' => sprintf( '<div class="mai-grid-footer-meta">%s</div>', $footer_meta_html ),
-						];
-
-						$html .= $this->get_grid_entry( $elements );
-
 					endwhile;
-				endif;
+				} else {
+					// TODO.
+				}
 				wp_reset_postdata();
 			break;
+			break;
 			case 'term':
+				// TODO.
+			break;
+			case 'user':
+				// TODO.
 			break;
 		}
 
-		return $html;
 	}
 
 	function get_grid_entry( $elements, $args = [] ) {
@@ -341,7 +270,7 @@ class Mai_Grid_Base {
 				// Loop through elements.
 				foreach ( $this->args['show'] as $element ) {
 
-						do_action( sprintf( 'mai_%s_title', $args['type'] ), $this->args );
+						do_action( sprintf( 'mai_%s_title', $this->args['type'] ), $this->args );
 
 						// do_action( 'mai_term_title' );
 						// do_action( 'mai_term_title' );
@@ -372,7 +301,7 @@ class Mai_Grid_Base {
 			'type'    => 'post',
 			'context' => 'block',
 		];
-		foreach( $fields as $field ) {
+		foreach( $fields as $key => $field ) {
 			$defaults[ $key ] = $field['default'];
 		}
 		return apply_filters( 'mai_grid_defaults', $defaults );
@@ -845,7 +774,7 @@ class Mai_Grid_Base {
 			// $this->enqueue_asset( 'admin', 'js' );
 
 			// Query JS.
-			switch ( $args['type'] ) {
+			switch ( $this->args['type'] ) {
 				case 'post':
 					$this->enqueue_asset( 'wp-query', 'js' );
 				break;
