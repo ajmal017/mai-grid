@@ -20,7 +20,7 @@ echo sprintf( '<div class="%s">', $entry_classes );
 			// Image.
 			if ( $data->args['show_image'] && $data->image_id ) {
 				$image_size  = ( empty( $data->image_size ) || ( 'default' == $data->image_size ) ) ? 'thumbnail' : $data->image_size;
-				$image_align = 'none';
+				$image_position = 'none';
 				echo wp_get_attachment_image( $data->image_id, $image_size, false, array( 'class' => 'mai-grid__image' ) );
 			}
 

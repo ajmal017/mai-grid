@@ -5,6 +5,8 @@ class Mai_Entry {
 
 	protected $entry;
 	protected $args;
+	protected $type;
+	protected $context;
 	protected $id;
 	protected $url;
 	protected $breakpoints;
@@ -16,7 +18,7 @@ class Mai_Entry {
 		$this->context     = $this->args['context'];
 		$this->id          = $this->get_id();
 		$this->url         = $this->get_url();
-		$this->breakpoints = mai_get_breakpoints();
+		$this->breakpoints = mai_temp_get_breakpoints();
 	}
 
 	function render() {
@@ -48,13 +50,13 @@ class Mai_Entry {
 		);
 
 		// Check if extra wrap is needed.
-		$has_inner = in_array( 'image', $this->args['show'] ) && ( ! in_array( $this->args['image_align'], array( 'left', 'right' ) ) );
+		$has_inner = in_array( 'image', $this->args['show'] ) && in_array( $this->args['image_position'], array( 'left', 'right' ) );
 
 		// If we have inner wrap.
 		if ( $has_inner ) {
 
 			// Image outside inner wrap.
-			do_image();
+			$this->do_image();
 
 			// Inner open.
 			genesis_markup(
@@ -159,13 +161,13 @@ class Mai_Entry {
 		}
 
 		// Image.
-		return genesis_markup(
+		genesis_markup(
 			[
 				'open'    => '<a %s>',
 				'close'   => '</a>',
-				'content' => $image_html,
+				'content' => $image,
 				'context' => 'entry-image-link',
-				'echo'    => false,
+				'echo'    => true,
 				'atts'    => [
 					'href' => $this->url,
 				]
@@ -175,52 +177,16 @@ class Mai_Entry {
 
 	function get_image() {
 
-		$srcset = $sizes = array();
+		// Get the image ID.
+		$image_id = $this->get_image_id();
 
-		$image_id   = $this->get_image_id();
-		$image_size = $this->get_image_size();
-
-		// $breakpoints = mai_get_breakpoints();
-		// $sm = $breakpoints['sm']; // 512
-		// $md = $breakpoints['md']; // 896
-		// $lg = $breakpoints['lg']; // 1280
-
-		// https://playground.local/wp-content/uploads/2019/09/jamie-avatar-acde0e78a67c50ce03339de22c7dc9ad-1024x1024.png 1024w,
-		// https://playground.local/wp-content/uploads/2019/09/jamie-avatar-acde0e78a67c50ce03339de22c7dc9ad-300x300.png 300w,
-		// https://playground.local/wp-content/uploads/2019/09/jamie-avatar-acde0e78a67c50ce03339de22c7dc9ad-150x150.png 150w,
-		// https://playground.local/wp-content/uploads/2019/09/jamie-avatar-acde0e78a67c50ce03339de22c7dc9ad-768x768.png 768w,
-		// https://playground.local/wp-content/uploads/2019/09/jamie-avatar-acde0e78a67c50ce03339de22c7dc9ad-80x80.png 80w,
-		// https://playground.local/wp-content/uploads/2019/09/jamie-avatar-acde0e78a67c50ce03339de22c7dc9ad-1x1.png 1w,
-		// https://playground.local/wp-content/uploads/2019/09/jamie-avatar-acde0e78a67c50ce03339de22c7dc9ad-600x600.png 600w,
-		// https://playground.local/wp-content/uploads/2019/09/jamie-avatar-acde0e78a67c50ce03339de22c7dc9ad-100x100.png 100w
-
-
-		// switch ( $image_size ) {
-		// 	case 'full-xl':
-		// 		// $srcset[] =
-		// 	break;
-		// 	case 'landscape-lg':
-		// 	case 'landscape-md':
-		// 	case 'landscape-sm':
-		// 		$image_id = get_post_thumbnail_id( $this->id );
-		// 		$image_id = $image_id ? $image_id : genesis_get_image_id( 0, $this->id );
-		// 	break;
-		// 	case 'term':
-		// 		$image_id = get_term_meta( $this->id, 'mai_image', true ); // TODO.
-		// 	break;
-		// 	case 'user':
-		// 		$image_id = get_user_meta( $this->id, 'mai_image', true ); // TODO.
-		// 	break;
-		// 	default:
-		// 		$image_id = 0;
-		// }
-
-
+		// Bail if no image ID.
+		if ( ! $image_id ) {
+			return;
+		}
 
 		/**
 		 * Filters the output of 'wp_calculate_image_sizes()'.
-		 *
-		 * @since 4.4.0
 		 *
 		 * @param string       $sizes         A source size value for use in a 'sizes' attribute.
 		 * @param array|string $size          Requested size. Image size or array of width and height values
@@ -230,40 +196,54 @@ class Mai_Entry {
 		 * @param int          $attachment_id Image attachment ID of the original image or 0.
 		 */
 		add_filter( 'wp_calculate_image_sizes', [ $this, 'calculate_image_sizes' ], 10, 5 );
-		wp_get_attachment_image( $image_id, $image_size );
+		$image = wp_get_attachment_image( $image_id, $this->get_image_size() );
 		remove_filter( 'wp_calculate_image_sizes', [ $this, 'calculate_image_sizes' ], 10, 5 );
+
+		return $image;
 	}
 
 	function calculate_image_sizes( $sizes, $size, $image_src, $image_meta, $attachment_id ) {
 
 		// '(min-width: 768px) 322px, (min-width: 576px) 255px, calc( (100vw - 30px) / 2)'
 
+		/**
+		 * TODO:
+		 * handle 0/auto columns.
+		 */
+
 		$new_sizes = [];
 
-		$image_sizes = mai_get_image_sizes();
-		$breakpoints = mai_get_breakpoints();
-		$columns     = get_breakpoint_columns();
-		foreach( $columns as $size => $count ) {
+		// $image_sizes = mai_temp_get_image_sizes();
+		$container = $this->breakpoints['xl'] . 'px';
+		foreach( $this->get_breakpoint_columns() as $size => $count ) {
 			// if ( 0 === $columns ) {
 				// $new_sizes[] = 	"(min-width: 768px) 322px, (min-width: 576px) 255px, calc( (100vw - 30px) / 2)";
 			// }
 			switch ( $size ) {
 				case 'xs':
-					$max_width   = $breakpoint['sm'] . 'px';
-					$image_width =
-					$new_sizes[] = 	"(max-width: {$value}) $image_width";
+					$max_width   = ( $this->breakpoints['sm'] + 1 ) . 'px';
+					$new_sizes[] = "(max-width: {$max_width}) calc( {$container} / $count )";
 				break;
 				case 'sm':
-					$something = 'else';
+					$min_width   = $this->breakpoints['sm'] . 'px';
+					$max_width   = ( $this->breakpoints['md'] + 1 ) . 'px';
+					$new_sizes[] = "(min-width: {$min_width}) and (max-width: {$max_width}) calc( {$container} / $count )";
+				break;
+				case 'md':
+					$min_width   = $this->breakpoints['md'] . 'px';
+					$max_width   = ( $this->breakpoints['lg'] + 1 ) . 'px';
+					$new_sizes[] = "(min-width: {$min_width}) and (max-width: {$max_width}) calc( {$container} / $count )";
+				break;
+				case 'lg':
+					$min_width   = $this->breakpoints['lg'] . 'px';
+					$new_sizes[] = "(min-width: {$min_width}) calc( {$container} / $count )";
 				break;
 			}
 
 
 		}
-		vd( $attachment_id );
-		// vd( $sizes );
 
-		return $sizes;
+		return implode( ',', $new_sizes );
 	}
 
 	function get_breakpoint_columns() {
@@ -374,7 +354,7 @@ class Mai_Entry {
 		// "image-lg": "one-whole  - 1200",
 
 		$fw_content  = ( 'full-width-content' === genesis_site_layout() ) ? true: false;
-		$img_aligned = in_array( $this->args['image_align'], ['left', 'right'] );
+		$img_aligned = in_array( $this->args['image_position'], ['left', 'right'] );
 
 		// If singular.
 		if ( 'singular' === $this->context ) {
@@ -481,7 +461,7 @@ class Mai_Entry {
 				else {
 
 					$wrap  = 'h3';
-					$title = get_the_title( $entry );
+					$title = get_the_title( $this->entry );
 					$link  = true;
 				}
 			break;
@@ -515,8 +495,8 @@ class Mai_Entry {
 						'href' => $this->url,
 					],
 					'params'  => [
-						'args'  => $args,
-						'entry' => $entry,
+						'args'  => $this->args,
+						'entry' => $this->entry,
 					],
 				]
 			);
@@ -592,7 +572,7 @@ class Mai_Entry {
 				'close'   => '</div>',
 				'context' => 'entry-excerpt',
 				'content' => $excerpt,
-				'echo'    => false,
+				'echo'    => true,
 				'params'  => [
 					'args'  => $this->args,
 					'entry' => $this->entry,
@@ -638,7 +618,7 @@ class Mai_Entry {
 				'close'   => '</div>',
 				'context' => 'entry-content',
 				'content' => $content,
-				'echo'    => false,
+				'echo'    => true,
 				'params'  => [
 					'args'  => $this->args,
 					'entry' => $this->entry,
@@ -775,7 +755,7 @@ class Mai_Entry {
 		// Link.
 		switch ( $this->type ) {
 			case 'post':
-				$more_link = get_the_permalink( $entry );
+				$more_link = get_the_permalink( $this->entry );
 			break;
 			case 'term':
 				$more_link = ''; // TODO.
@@ -807,6 +787,26 @@ class Mai_Entry {
 				],
 			]
 		);
+	}
+
+	function do_after_entry_widget_area() {
+
+		genesis_widget_area(
+			'after-entry',
+			[
+				'before' => '<div class="after-entry widget-area">',
+				'after'  => '</div>',
+			]
+		);
+	}
+
+	function do_author_box() {
+		// TODO. genesis_do_author_box_single() has checks if post type supports. Do we want that?
+		echo genesis_get_author_box( 'single' );
+	}
+
+	function do_adjacent_entry_nav() {
+		genesis_adjacent_entry_nav();
 	}
 
 	/**

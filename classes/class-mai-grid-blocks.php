@@ -20,7 +20,7 @@ final class Mai_Grid_Blocks  {
 	 */
 	private static $instance;
 
-	// private $templates;
+	private $helper;
 	private $fields;
 
 	/**
@@ -72,8 +72,9 @@ final class Mai_Grid_Blocks  {
 	}
 
 	function run() {
-		// $this->templates = Mai_Grid_Base::get_templates();
-		$this->fields    = Mai_Grid_Base::get_fields();
+		// $this->helper = new Mai_Settings_Helper;
+		// $this->fields = Mai_Grid_Base::get_fields();
+		$this->fields = mai_get_settings_fields();
 		add_action( 'acf/init', array( $this, 'register_blocks' ), 10, 3 );
 	}
 
@@ -216,8 +217,9 @@ final class Mai_Grid_Blocks  {
 		add_filter( 'acf/field_wrapper_attributes', function( $wrapper, $field ) {
 			// Conditional Show.
 			if ( in_array( $field['key'], array(
+				$this->fields['image_orientation']['key'],
 				$this->fields['image_size']['key'],
-				$this->fields['image_align']['key'],
+				$this->fields['image_position']['key'],
 				$this->fields['header_meta']['key'],
 				$this->fields['content_limit']['key'],
 				$this->fields['more_link_text']['key'],
@@ -302,10 +304,12 @@ final class Mai_Grid_Blocks  {
 		 */
 		// Show.
 		add_filter( "acf/load_field/key={$this->fields['show']['key']}",                          array( $this, 'load_show' ) );
+		// Image Orientation.
+		add_filter( "acf/load_field/key={$this->fields['image_orientation']['key']}",             array( $this, 'load_image_orientation' ) );
 		// Image Size.
 		add_filter( "acf/load_field/key={$this->fields['image_size']['key']}",                    array( $this, 'load_image_sizes' ) );
 		// Image Alignment.
-		add_filter( "acf/load_field/key={$this->fields['image_align']['key']}",                   array( $this, 'load_image_align' ) );
+		add_filter( "acf/load_field/key={$this->fields['image_position']['key']}",                   array( $this, 'load_image_position' ) );
 		// More Link Text.
 		add_filter( "acf/load_field/key={$this->fields['more_link_text']['key']}",                array( $this, 'load_more_link_text' ) );
 
@@ -324,25 +328,6 @@ final class Mai_Grid_Blocks  {
 		add_filter( "acf/load_field/key={$this->fields['align_text']['key']}",                    array( $this, 'load_align_text' ) );
 		add_filter( "acf/load_field/key={$this->fields['align_text_vertical']['key']}",           array( $this, 'load_align_text_vertical' ) );
 
-		// Labels.
-		// foreach( Mai_Grid_Base::get_display_fields() as $name => $values ) {
-		// 	// Skip if name does not contain 'show_'.
-		// 	if ( false === strpos ( $name, 'show_' ) ) {
-		// 		continue;
-		// 	}
-		// 	add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
-		// 		// Keep admin clean.
-		// 		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-		// 			return $field;
-		// 		}
-		// 		// Clear label.
-		// 		$field['label'] = '';
-		// 		// TODO: JS to get template value and set defaults? Too aggressive?
-		// 		// $field['default'] = '';
-		// 		return $field;
-		// 	});
-		// }
-
 		// Defaults.
 		foreach( $this->fields as $name => $values ) {
 			// Skip template field.
@@ -352,7 +337,8 @@ final class Mai_Grid_Blocks  {
 			// Add filter.
 			add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
 				// Set default from our config filter.
-				$field['default'] =$this->fields[ $field['name'] ]['default'];
+				// $field['default'] = $this->fields[ $field['name'] ]['default'];
+				$field['default'] = $this->helper->get_default( $field['key'] );
 				return $field;
 			});
 		}
@@ -566,15 +552,7 @@ final class Mai_Grid_Blocks  {
 	function load_show( $field ) {
 
 		// Default choices, in default order.
-		$field['choices'] = array(
-			'image'       => __( 'Image', 'mai-grid' ),
-			'title'       => __( 'Title', 'mai-grid' ),
-			'header_meta' => __( 'Header Meta', 'mai-grid' ),
-			'excerpt'     => __( 'Excerpt', 'mai-grid' ),
-			'content'     => __( 'Content', 'mai-grid' ),
-			'more_link'   => __( 'Read More link', 'mai-grid' ),
-			'footer_meta' => __( 'Footer Meta', 'mai-grid' ),
-		);
+		$field['choices'] = $this->helper->get_choices( 'show' );
 
 		// Get existing values, which are sorted correctly, without infinite loop.
 		remove_filter( "acf/load_field/key={$this->fields['show']['key']}", array( $this, 'load_show' ) );
@@ -589,6 +567,25 @@ final class Mai_Grid_Blocks  {
 	}
 
 	/**
+	 * Load image orientation.
+	 */
+	function load_image_orientation( $field ) {
+
+		// Keep admin clean.
+		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
+			$field['choices'] = [
+				'landscape' => __( 'Landscape', 'mai-engine' ),
+				'custom'    => __( 'Custom', 'mai-engine' ),
+			];
+			return $field;
+		}
+
+		$field['choices'] = $this->helper->get_choices['image_orientation'];
+
+		return $field;
+	}
+
+	/**
 	 * Load image sizes.
 	 * Much of the code take from genesis_get_image_sizes().
 	 */
@@ -596,8 +593,8 @@ final class Mai_Grid_Blocks  {
 
 		// Keep admin clean.
 		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// $field['choices'] = array();
-			$field['choices'] = array( 'default' => __( 'Default' ) );
+			$field['choices'] = array();
+			// $field['choices'] = array( 'default' => __( 'Default' ) );
 			return $field;
 		}
 
@@ -629,7 +626,7 @@ final class Mai_Grid_Blocks  {
 		return $field;
 	}
 
-	function load_image_align( $field ) {
+	function load_image_position( $field ) {
 
 		// Start empty.
 		$field['choices'] = array();

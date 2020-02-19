@@ -145,11 +145,13 @@ final class Mai_Grid_Plugin {
 	private function includes() {
 		// Include vendor libraries.
 		require_once __DIR__ . '/vendor/autoload.php';
+		require_once __DIR__ . '/vendor/aristath/kirki/kirki.php';
 		// Includes.
 		foreach ( glob( MAI_GRID_INCLUDES_DIR . '*.php' ) as $file ) { include $file; }
 		// Classes.
 		// foreach ( glob( MAI_GRID_CLASSES_DIR . '*.php' ) as $file ) { include $file; }
 		// include_once __DIR__ . '/classes/class-template-loader.php';
+		include_once __DIR__ . '/classes/class-mai-entry.php';
 		include_once __DIR__ . '/classes/class-mai-grid-base.php';
 		include_once __DIR__ . '/classes/class-mai-grid-blocks.php';
 		// include_once __DIR__ . '/classes/class-grid.php';

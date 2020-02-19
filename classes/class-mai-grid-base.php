@@ -71,8 +71,9 @@ class Mai_Grid_Base {
 			// 'template'               => $this->fields['template']['default'],
 			'show'                   => $this->fields['show']['default'],
 			// // 'show_image'             => $this->fields['show_image']['default'],
+			'image_orientation'      => $this->fields['image_orientation']['default'],
 			'image_size'             => $this->fields['image_size']['default'],
-			'image_align'            => $this->fields['image_align']['default'],
+			'image_position'            => $this->fields['image_position']['default'],
 			// // 'show_title'             => $this->fields['show_title']['default'],
 			// // 'show_header_meta'       => $this->fields['show_header_meta']['default'],
 			'header_meta'            => $this->fields['header_meta']['default'],
@@ -118,56 +119,57 @@ class Mai_Grid_Base {
 
 		// Sanitize.
 		$args = array(
-			'type'                   => $this->sanitize( $this->args['type'], 'esc_html' ),
-			'context'                => $this->sanitize( $this->args['context'], 'esc_html' ),
-			'class'                  => $this->sanitize( $this->args['class'], 'esc_html' ),
+			'type'                   => $this->sanitize( $args['type'], 'esc_html' ),
+			'context'                => $this->sanitize( $args['context'], 'esc_html' ),
+			'class'                  => $this->sanitize( $args['class'], 'esc_html' ),
 			// Display.
-			// 'template'               => $this->sanitize( $this->args['template'], 'esc_html' ),
-			'show'                   => $this->sanitize( $this->args['show'], 'esc_html' ),
-			// // 'show_image'             => $this->sanitize( $this->args['show_image'], 'esc_html' ),
-			'image_size'             => $this->sanitize( $this->args['image_size'], 'esc_html' ),
-			'image_align'            => $this->sanitize( $this->args['image_align'], 'esc_html' ),
-			// // 'show_title'             => $this->sanitize( $this->args['show_title'], 'esc_html' ),
-			// // 'show_header_meta'       => $this->sanitize( $this->args['show_header_meta'], 'esc_html' ),
-			'header_meta'            => $this->sanitize( $this->args['header_meta'], 'esc_html' ),
-			// // 'show_excerpt'           => $this->sanitize( $this->args['show_excerpt'], 'esc_html' ),
-			// // 'show_content'           => $this->sanitize( $this->args['show_content'], 'esc_html' ),
-			'content_limit'          => $this->sanitize( $this->args['content_limit'], 'esc_html' ),
-			// // 'show_more_link'         => $this->sanitize( $this->args['show_more_link'], 'esc_html' ),
-			'more_link_text'         => $this->sanitize( $this->args['more_link_text'], 'esc_html' ),
-			// 'show_footer_meta'       => $this->sanitize( $this->args['show_footer_meta'], 'esc_html' ),
-			'footer_meta'            => $this->sanitize( $this->args['footer_meta'], 'esc_html' ),
-			'boxed'                  => $this->sanitize( $this->args['boxed'], 'esc_html' ),
-			'align_text'             => $this->sanitize( $this->args['align_text'], 'esc_html' ),
-			'align_text_vertical'    => $this->sanitize( $this->args['align_text_vertical'], 'esc_html' ),
+			// 'template'               => $this->sanitize( $args['template'], 'esc_html' ),
+			'show'                   => $this->sanitize( $args['show'], 'esc_html' ),
+			// // 'show_image'             => $this->sanitize( $args['show_image'], 'esc_html' ),
+			'image_orientation'      => $this->sanitize( $args['image_orientation'], 'esc_html' ),
+			'image_size'             => $this->sanitize( $args['image_size'], 'esc_html' ),
+			'image_position'            => $this->sanitize( $args['image_position'], 'esc_html' ),
+			// // 'show_title'             => $this->sanitize( $args['show_title'], 'esc_html' ),
+			// // 'show_header_meta'       => $this->sanitize( $args['show_header_meta'], 'esc_html' ),
+			'header_meta'            => $this->sanitize( $args['header_meta'], 'esc_html' ),
+			// // 'show_excerpt'           => $this->sanitize( $args['show_excerpt'], 'esc_html' ),
+			// // 'show_content'           => $this->sanitize( $args['show_content'], 'esc_html' ),
+			'content_limit'          => $this->sanitize( $args['content_limit'], 'esc_html' ),
+			// // 'show_more_link'         => $this->sanitize( $args['show_more_link'], 'esc_html' ),
+			'more_link_text'         => $this->sanitize( $args['more_link_text'], 'esc_html' ),
+			// 'show_footer_meta'       => $this->sanitize( $args['show_footer_meta'], 'esc_html' ),
+			'footer_meta'            => $this->sanitize( $args['footer_meta'], 'esc_html' ),
+			'boxed'                  => $this->sanitize( $args['boxed'], 'esc_html' ),
+			'align_text'             => $this->sanitize( $args['align_text'], 'esc_html' ),
+			'align_text_vertical'    => $this->sanitize( $args['align_text_vertical'], 'esc_html' ),
 			// Layout.
-			'columns_responsive'     => $this->sanitize( $this->args['columns_responsive'], 'esc_html' ),
-			'columns'                => $this->sanitize( $this->args['columns'], 'esc_html' ),
-			'columns_md'             => $this->sanitize( $this->args['columns_md'], 'esc_html' ),
-			'columns_sm'             => $this->sanitize( $this->args['columns_sm'], 'esc_html' ),
-			'columns_xs'             => $this->sanitize( $this->args['columns_xs'], 'esc_html' ),
-			'align_columns'          => $this->sanitize( $this->args['align_columns'], 'esc_html' ),
-			'align_columns_vertical' => $this->sanitize( $this->args['align_columns_vertical'], 'esc_html' ),
-			'column_gap'             => $this->sanitize( $this->args['column_gap'], 'esc_html' ),
-			'row_gap'                => $this->sanitize( $this->args['row_gap'], 'esc_html' ),
+			'columns_responsive'     => $this->sanitize( $args['columns_responsive'], 'esc_html' ),
+			'columns'                => $this->sanitize( $args['columns'], 'esc_html' ),
+			'columns_md'             => $this->sanitize( $args['columns_md'], 'esc_html' ),
+			'columns_sm'             => $this->sanitize( $args['columns_sm'], 'esc_html' ),
+			'columns_xs'             => $this->sanitize( $args['columns_xs'], 'esc_html' ),
+			'align_columns'          => $this->sanitize( $args['align_columns'], 'esc_html' ),
+			'align_columns_vertical' => $this->sanitize( $args['align_columns_vertical'], 'esc_html' ),
+			'column_gap'             => $this->sanitize( $args['column_gap'], 'esc_html' ),
+			'row_gap'                => $this->sanitize( $args['row_gap'], 'esc_html' ),
 			// WP_Query.
-			'post_type'              => (array) $this->sanitize( $this->args['post_type'], 'esc_html' ),
-			'number'                 => $this->sanitize( $this->args['number'], 'esc_html' ),
-			'offset'                 => $this->sanitize( $this->args['offset'], 'esc_html' ),
-			'query_by'               => $this->sanitize( $this->args['query_by'], 'esc_html' ),
-			'post__in'               => (array) $this->sanitize( $this->args['post__in'], 'esc_html' ),
-			'post__not_in'           => (array) $this->sanitize( $this->args['post__not_in'], 'esc_html' ),
-			'taxonomies'             => $this->sanitize( $this->args['taxonomies'], 'esc_html' ),
-			'taxonomy'               => $this->sanitize( $this->args['taxonomy'], 'esc_html' ),
-			'terms'                  => $this->sanitize( $this->args['terms'], 'esc_html' ),
-			'relation'               => $this->sanitize( $this->args['relation'], 'esc_html' ),
-			'operator'               => $this->sanitize( $this->args['operator'], 'esc_html' ),
-			'relation'               => $this->sanitize( $this->args['relation'], 'esc_html' ),
-			'post_parent__in'        => $this->sanitize( $this->args['post_parent__in'], 'esc_html' ),
-			'orderby'                => $this->sanitize( $this->args['orderby'], 'esc_html' ),
-			'meta_key'               => $this->sanitize( $this->args['meta_key'], 'esc_html' ),
-			'order'                  => $this->sanitize( $this->args['order'], 'esc_html' ),
-			'exclude'                => (array) $this->sanitize( $this->args['exclude'], 'esc_html' ),
+			'post_type'              => (array) $this->sanitize( $args['post_type'], 'esc_html' ),
+			'number'                 => $this->sanitize( $args['number'], 'esc_html' ),
+			'offset'                 => $this->sanitize( $args['offset'], 'esc_html' ),
+			'query_by'               => $this->sanitize( $args['query_by'], 'esc_html' ),
+			'post__in'               => (array) $this->sanitize( $args['post__in'], 'esc_html' ),
+			'post__not_in'           => (array) $this->sanitize( $args['post__not_in'], 'esc_html' ),
+			'taxonomies'             => $this->sanitize( $args['taxonomies'], 'esc_html' ),
+			'taxonomy'               => $this->sanitize( $args['taxonomy'], 'esc_html' ),
+			'terms'                  => $this->sanitize( $args['terms'], 'esc_html' ),
+			'relation'               => $this->sanitize( $args['relation'], 'esc_html' ),
+			'operator'               => $this->sanitize( $args['operator'], 'esc_html' ),
+			'relation'               => $this->sanitize( $args['relation'], 'esc_html' ),
+			'post_parent__in'        => $this->sanitize( $args['post_parent__in'], 'esc_html' ),
+			'orderby'                => $this->sanitize( $args['orderby'], 'esc_html' ),
+			'meta_key'               => $this->sanitize( $args['meta_key'], 'esc_html' ),
+			'order'                  => $this->sanitize( $args['order'], 'esc_html' ),
+			'exclude'                => (array) $this->sanitize( $args['exclude'], 'esc_html' ),
 		);
 
 		return apply_filters( 'mai_grid_args', $args );
@@ -178,34 +180,13 @@ class Mai_Grid_Base {
 		// Enqueue scripts and styles.
 		$this->enqueue_assets();
 
-		genesis_markup( array(
-			'open'    => '<div %s>',
-			'context' => 'mai-grid',
-			'params'  => $this->args,
-			'atts'    => $this->get_attributes(),
-			'echo'    => true,
-		) );
+		$this->args['class'] = 'mai-grid ' . $this->args['class'];
+		$this->args['class'] = trim( $this->args['class'] );
+		mai_do_entries_open( $this->args );
 
-			genesis_markup( array(
-				'open'    => '<div %s>',
-				'context' => 'mai-grid-wrap',
-				'params'  => $this->args,
-				'echo'    => true,
-			) );
+			$this->do_grid_entries();
 
-				$this->do_grid_entries();
-
-			genesis_markup( array(
-				'close'   => '</div>',
-				'context' => 'mai-grid-wrap',
-				'echo'    => true,
-			) );
-
-		genesis_markup( array(
-			'close'   => '</div>',
-			'context' => 'mai-grid',
-			'echo'    => true,
-		) );
+		mai_do_entries_close( $this->args );
 
 	}
 
@@ -218,7 +199,8 @@ class Mai_Grid_Base {
 				if ( $posts->have_posts() ) {
 					while ( $posts->have_posts() ) : $posts->the_post();
 
-						mai_do_entry( $args );
+						global $post;
+						mai_do_entry( $post, $this->args );
 
 					endwhile;
 				} else {
@@ -262,7 +244,7 @@ class Mai_Grid_Base {
 		$html .= '<article class="mai-grid-entry">';
 
 			// Maybe show image and wrap.
-			if ( isset( $show['image'] ) && ( 'full' !== $this->args['image_align'] ) ) {
+			if ( isset( $show['image'] ) && ( 'full' !== $this->args['image_position'] ) ) {
 				// $html .= $elements['image'];
 				$html .= '<div class="mai-grid-inner">';
 			}
@@ -277,7 +259,7 @@ class Mai_Grid_Base {
 
 
 
-					// if ( isset( $show['image'] ) && ( 'image' === $element ) && ( 'full' !== $this->args['image_align'] ) ) {
+					// if ( isset( $show['image'] ) && ( 'image' === $element ) && ( 'full' !== $this->args['image_position'] ) ) {
 					// 	continue;
 					// }
 					// vd( $elements[ $element ] );
@@ -285,7 +267,7 @@ class Mai_Grid_Base {
 				}
 
 			// Maybe close wrap.
-			if ( isset( $show['image'] ) && ( 'full' !== $this->args['image_align'] ) ) {
+			if ( isset( $show['image'] ) && ( 'full' !== $this->args['image_position'] ) ) {
 				$html .= '</div>';
 			}
 
@@ -319,63 +301,35 @@ class Mai_Grid_Base {
 
 	static function get_display_fields() {
 		return array(
-			// 'template' => array(
-			// 	'default' => 'standard',
-			// 	'key'     => 'field_5de9b96fb69b0',
-			// ),
 			'show' => array(
 				'default' => array( 'title', 'image' ),
 				'key'     => 'field_5e441d93d6236',
 			),
-			// 'show_image' => array(
-			// 	'default' => true,
-			// 	'key'     => 'field_5e1e665ffc7e5',
-			// ),
+			'image_orientation' => array(
+				'default' => 'landscape',
+				'key'     => 'field_5e4d4efe99279',
+			),
 			'image_size' => array(
 				'default' => 'default',
 				'key'     => 'field_5bd50e580d1e9',
 			),
-			'image_align' => array(
+			'image_position' => array(
 				'default' => '',
 				'key'     => 'field_5e2f3adf82130',
 			),
-			// 'show_title' => array(
-			// 	'default' => true,
-			// 	'key'     => 'field_5e1e6693fc7e6',
-			// ),
-			// 'show_header_meta' => array(
-			// 	'default' => '',
-			// 	'key'     => 'field_5e1e680ce988d',
-			// ),
 			'header_meta' => array(
 				'default' => '',
 				'key'     => 'field_5e2b563a7c6cf',
 			),
-			// 'show_excerpt' => array(
-			// 	'default' => '',
-			// 	'key'     => 'field_5e1e67e7e988b',
-			// ),
-			// 'show_content' => array(
-			// 	'default' => '',
-			// 	'key'     => 'field_5e1e67fce988c',
-			// ),
 			'content_limit' => array(
 				'default' => '',
 				'key'     => 'field_5bd51ac107244',
 			),
-			// 'show_more_link' => array(
-			// 	'default' => '',
-			// 	'key'     => 'field_5e1e6843e988f',
-			// ),
 			'more_link_text' => array(
 				// TODO: Filter on this default? Will we have a separate filter in v2?
 				'default' => __( 'Read More', 'mai-grid' ),
 				'key'     => 'field_5c85465018395',
 			),
-			// 'show_footer_meta' => array(
-			// 	'default' => '',
-			// 	'key'     => 'field_5e1e6835e988e',
-			// ),
 			'footer_meta' => array(
 				'default' => '',
 				'key'     => 'field_5e2b567e7c6d0',
@@ -559,123 +513,6 @@ class Mai_Grid_Base {
 		// vd( $args );
 
 		return apply_filters( 'mai_post_grid_query_args', $query_args );
-	}
-
-	function get_attributes() {
-		// Start the attributes.
-		$attributes = array(
-			'class' => sprintf( 'mai-grid mai-grid-%s', sanitize_html_class( 'mai-todo' ) ),
-			'style' => '',
-		);
-		// Global styles.
-		$attributes['style'] .= sprintf( '--columns:%s;', $this->args['columns'] );
-		$attributes['style'] .= sprintf( '--columns-md:%s;', $this->get_responsive_columns( $this->args['columns_md'], $this->args['columns'], $this->args['columns'] ) );
-		$attributes['style'] .= sprintf( '--columns-sm:%s;', $this->get_responsive_columns( $this->args['columns_sm'], $this->args['columns_md'], $this->args['columns'] ) );
-		$attributes['style'] .= sprintf( '--columns-xs:%s;', $this->get_responsive_columns( $this->args['columns_xs'], $this->args['columns_sm'], $this->args['columns'] ) );
-		$attributes['style'] .= sprintf( '--column-gap:%s;', $this->args['column_gap'] );
-		$attributes['style'] .= sprintf( '--row-gap:%s;', $this->args['row_gap'] );
-		$attributes['style'] .= sprintf( '--align-columns:%s;', ! empty( $this->args['align_columns'] ) ? $this->args['align_columns'] : 'unset' );
-		$attributes['style'] .= sprintf( '--align-columns-vertical:%s;', ! empty( $this->args['align_columns_vertical'] ) ? $this->args['align_columns_vertical'] : 'unset' );
-		// // Template based classes.
-		// if ( $this->template_supports( $this->args['template'], 'boxed' ) && $this->args['boxed'] ) {
-		// 	$attributes['class'] .= ' has-boxed';
-		// }
-		// if ( $this->template_supports( $this->args['template'], 'show_image' ) && $this->template_supports( $this->args['template'], 'image_align' ) && $this->args['show_image'] && $this->args['image_align'] ) {
-		// 	$attributes['class'] .= ' has-image-align-' . $this->args['image_align'];
-		// }
-		// // Template based styles.
-		// if ( $this->template_supports( $this->args['template'], 'align_text' ) ) {
-		// 	$attributes['style'] .= sprintf( '--align-text:%s;', $this->get_align_text( $this->args['align_text'] ) );
-		// }
-		// if ( $this->template_supports( $this->args['template'], 'align_text_vertical' ) ) {
-		// 	$attributes['style'] .= sprintf( '--align-text-vertical:%s;', $this->get_align_text_vertical( $this->args['align_text_vertical'] ) );
-		// }
-		// if ( $this->template_supports( $this->args['template'], 'show_image' ) ) {
-		// 	$attributes['style'] .= sprintf( '--aspect-ratio:%s;', $this->args['show_image'] ? $this->get_aspect_ratio( $this->args['image_size'] ) : '4/3' );
-		// }
-		// Send it.
-		return $attributes;
-	}
-
-	/**
-	 *
-	 * TODO: Will this break if more than one grid on a page?
-	 */
-	function get_responsive_columns( $value, $previous_value, $original_value ) {
-		static $current_columns;
-		// Set the current column.
-		if ( ! isset( $current_columns ) ) {
-			$current_columns = $original_value;
-		}
-		// If using responsive settings, and have a value.
-		if ( $this->args['columns_responsive'] && is_numeric( $value ) ) {
-			$current_columns = $value;
-			return $current_columns;
-		}
-		$compare = is_numeric( $previous_value ) ? $previous_value : $current_columns;
-		switch ( $compare ) {
-			case 6:
-				$current_columns = 4;
-			break;
-			case 5:
-				$current_columns = 3;
-			break;
-			case 4:
-				$current_columns = 2;
-			break;
-			case 3:
-				$current_columns = 2;
-			break;
-			case 2:
-				$current_columns = 1;
-			break;
-			case 1:
-				$current_columns = 1;
-			break;
-			case 0:
-				$current_columns = 0;
-			break;
-		}
-		return absint( $current_columns );
-	}
-
-	function get_align_text( $alignment ) {
-		switch ( $alignment ) {
-			case 'start':
-				$value = 'start';
-			break;
-			case 'center':
-				$value = 'center';
-			break;
-			case 'end':
-				$value = 'end';
-			break;
-			default:
-				$value = 'unset';
-		}
-		return $value;
-	}
-
-	function get_align_text_vertical( $alignment ) {
-		switch ( $alignment ) {
-			case 'top':
-				$value = 'start';
-			break;
-			case 'middle':
-				$value = 'center';
-			break;
-			case 'bottom':
-				$value = 'end';
-			break;
-			default:
-				$value = 'unset';
-		}
-		return $value;
-	}
-
-	function get_aspect_ratio( $image_size ) {
-		$sizes = $this->get_image_sizes( $image_size );
-		return sprintf( '%s/%s', $sizes[0], $sizes[1] );
 	}
 
 	/**

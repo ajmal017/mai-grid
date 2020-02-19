@@ -1,10 +1,10 @@
 /* Defaults */
-.mai-grid,
-.mai-grid * {
+.entries,
+.entries * {
 	box-sizing: border-box;
 }
 
-.mai-grid-wrap {
+.entries-wrap {
 	display: -webkit-box;
 	display: flex;
 	flex-wrap: wrap;
@@ -18,26 +18,32 @@
 	margin-bottom: calc( var(--row-gap) - ( 1.5 * var(--row-gap) ) );
 }
 
-@media only screen and (max-width: 544px) {
-	.mai-grid-entry {
+@media only screen and (max-width: 511px) {
+	.entry {
 		--columns: var(--columns-xs);
 	}
 }
-@media only screen and (min-width: 545px) and (max-width: 768px) {
-	.mai-grid-entry {
+@media only screen and (min-width: 512px) and (max-width: 767px) {
+	.entry {
 		--columns: var(--columns-sm);
 	}
 }
-@media only screen and (min-width: 769px) and (max-width: 992px) {
-	.mai-grid-entry {
+@media only screen and (min-width: 768px) and (max-width: 1023px) {
+	.entry {
 		--columns: var(--columns-md);
 	}
 }
-.mai-grid-entry {
+@media only screen and (min-width: 1024px) {
+	.entry {
+		--columns: var(--columns-lg);
+	}
+}
+.entry {
 	width: 100%;
 	-webkit-box-flex: 1;
 	flex: 1 1 calc( ( 100% / var(--columns) ) - var(--column-gap) );
 	max-width: calc( ( 100% / var(--columns) ) - var(--column-gap) );
+	text-align: var(--align-text);
 	margin-left: calc( var(--column-gap) / 2 );
 	margin-right:calc( var(--column-gap) / 2 );
 	margin-top: calc( var(--row-gap) / 2 );
@@ -46,17 +52,19 @@
 
 /* Elements */
 
-.mai-grid-entry > * + *,
-.mai-grid-inner > * + * {
+.entry > * + *,
+.entries-wrap > * + * {
 	margin-top: 12px;
 }
 
-.mai-grid-title {
+/* TODO: Likely don't need these because of base styling in the new engine. */
+
+.entry-title {
 	font-size: 22px;
 }
 
-.mai-grid-title-link,
-.entry-content .mai-grid-title-link {
+.entry-title-link,
+.entry-content .entry-title-link {
 	color: #323232;
 	text-decoration: none;
 }

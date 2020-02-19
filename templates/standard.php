@@ -4,15 +4,15 @@ echo '<div class="mai-grid__entry">';
 	// Image.
 	if ( $data->args['show_image'] && $data->image_id ) {
 		$image_size  = ( empty( $data->image_size ) || ( 'default' == $data->image_size ) ) ? 'thumbnail' : $data->image_size;
-		$image_align = $data->image_align ? sprintf( 'align%s', $data->image_align ) : 'alignnone';
-		$image_class = sprintf( 'mai-grid__image %s', $image_align );
+		$image_position = $data->image_position ? sprintf( 'align%s', $data->image_position ) : 'alignnone';
+		$image_class = sprintf( 'mai-grid__image %s', $image_position );
 		$image_html  = wp_get_attachment_image( $data->image_id, $image_size, false, array( 'class' => $image_class ) );
-		printf( '<a class="mai-grid__link mai-grid__link--image has-%s" href="%s">%s</a>', $image_align, $data->link, $image_html );
+		printf( '<a class="mai-grid__link mai-grid__link--image has-%s" href="%s">%s</a>', $image_position, $data->link, $image_html );
 	}
 
 	// if ( $data->args['show_image'] && $data->image ) {
-	// 	$image_align = $data->image_align ? sprintf( 'align%s', $data->image_align ) : 'alignnone';
-	// 	printf( '<a class="mai-grid__link mai-grid__link--image has-%s" href="%s">%s</a>', $image_align, $data->link, $data->image );
+	// 	$image_position = $data->image_position ? sprintf( 'align%s', $data->image_position ) : 'alignnone';
+	// 	printf( '<a class="mai-grid__link mai-grid__link--image has-%s" href="%s">%s</a>', $image_position, $data->link, $data->image );
 	// }
 
 	// Title.

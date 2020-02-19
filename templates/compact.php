@@ -4,7 +4,7 @@ printf( '<div class="mai-grid__entry">', '' );
 	// Image.
 	if ( $data->args['show_image'] && $data->image_id ) {
 		$image_size  = ( empty( $data->image_size ) || ( 'default' == $data->image_size ) ) ? 'thumbnail' : $data->image_size;
-		$image_align = 'none';
+		$image_position = 'none';
 		$image_html  = wp_get_attachment_image( $data->image_id, $image_size, false, array( 'class' => 'mai-grid__image' ) );
 		$image_html  = printf( '<a class="mai-grid__link mai-grid__link--image" href="%s">%s</a>', $data->link, $image_html );
 	}

@@ -1,5 +1,58 @@
 [
     {
+        "name": "aristath/kirki",
+        "version": "v3.0.45",
+        "version_normalized": "3.0.45.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/aristath/kirki.git",
+            "reference": "5045850cfdfd319c9354fec46c333a140509b098"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/aristath/kirki/zipball/5045850cfdfd319c9354fec46c333a140509b098",
+            "reference": "5045850cfdfd319c9354fec46c333a140509b098",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.2"
+        },
+        "require-dev": {
+            "codacy/coverage": "dev-master",
+            "composer/installers": "*",
+            "dealerdirect/phpcodesniffer-composer-installer": "*",
+            "php-coveralls/php-coveralls": "^2.0",
+            "phpcompatibility/phpcompatibility-wp": "*",
+            "phpunit/phpunit": "*",
+            "wp-coding-standards/wpcs": "*"
+        },
+        "time": "2019-09-01T06:56:49+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "notification-url": "https://packagist.org/downloads/",
+        "include-path": [
+            ".",
+            "core"
+        ],
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "aristath",
+                "email": "aristath@gmail.com",
+                "homepage": "https://aristath.github.io",
+                "role": "Developer"
+            }
+        ],
+        "description": "Extending the WordPress customizer",
+        "homepage": "https://kirki.org",
+        "keywords": [
+            "customizer",
+            "wordpress"
+        ]
+    },
+    {
         "name": "yahnis-elsts/plugin-update-checker",
         "version": "v4.9",
         "version_normalized": "4.9.0.0",
