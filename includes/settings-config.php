@@ -19,7 +19,7 @@ class Mai_Settings_Config {
 			'show' => [
 				'label'    => esc_html__( 'Show', 'mai-engine' ),
 				'block'    => true,
-				'archive'  => true,
+				'archive'  => 'sortable',
 				'singular' => true,
 				'acf'      => 'field_5e441d93d6236',
 				'default'  => [ 'image', 'title' ],
@@ -27,42 +27,98 @@ class Mai_Settings_Config {
 			'image_orientation' => [
 				'label'    => esc_html__( 'Image Orientation', 'mai-engine' ),
 				'block'    => true,
-				'archive'  => true,
+				'archive'  => 'select',
 				'singular' => true,
 				'acf'      => 'field_5e4d4efe99279',
 				'default'  => 'landscape',
+				'conditions' => [
+					[
+						'setting'        => 'show',
+						'acf_operator'   => '==',
+						'kirki_operator' => 'contains',
+						'value'          => 'image',
+					],
+				],
 			],
 			'image_size' => [
-				'label'    => esc_html__( 'Image Size', 'mai-engine' ),
-				'block'    => true,
-				'archive'  => true,
-				'singular' => true,
-				'acf'      => 'field_5bd50e580d1e9',
-				'default'  => 'landscape-md',
+				'label'      => esc_html__( 'Image Size', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => 'select',
+				'singular'   => true,
+				'acf'        => 'field_5bd50e580d1e9',
+				'default'    => 'landscape-md',
+				'conditions' => [
+					[
+						'setting'        => 'show',
+						'acf_operator'   => '==',
+						'kirki_operator' => 'contains',
+						'value'          => 'image',
+					],
+					[
+						'setting'  => 'image_orientation',
+						'operator' => '==',
+						'value'    => 'custom',
+					],
+				],
 			],
 			'image_position' => [
-				'label'    => esc_html__( 'Image Position', 'mai-engine' ),
-				'block'    => true,
-				'archive'  => true,
-				'singular' => false,
-				'acf'      => 'field_5e2f3adf82130',
-				'default'  => '',
+				'label'      => esc_html__( 'Image Position', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => 'select',
+				'singular'   => false,
+				'acf'        => 'field_5e2f3adf82130',
+				'default'    => '',
+				'conditions' => [
+					[
+						'setting'        => 'show',
+						'acf_operator'   => '==',
+						'kirki_operator' => 'contains',
+						'value'          => 'image',
+					],
+				],
 			],
 			'header_meta' => [
-				'label'    => esc_html__( 'Header Meta', 'mai-engine' ),
-				'block'    => true,
-				'archive'  => true,
-				'singular' => true,
-				'acf'      => 'field_5e2b563a7c6cf',
-				'default'  => '',
+				'label'      => esc_html__( 'Header Meta', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => 'text',
+				'singular'   => true,
+				'acf'        => 'field_5e2b563a7c6cf',
+				'default'    => '',
+				'conditions' => [
+					[
+						'setting'        => 'show',
+						'acf_operator'   => '==',
+						'kirki_operator' => 'contains',
+						'value'          => 'header_meta',
+					],
+				],
 			],
 			'content_limit' => [
 				'label'    => esc_html__( 'Content Limit', 'mai-engine' ),
+				'desc'     => esc_html__( 'Limit the number of characters shown for the content or excerpt. Use 0 for no limit.', 'mai-engine' ),
 				'block'    => true,
-				'archive'  => true,
-				'singular' => true,
+				'archive'  => 'text',
+				'singular' => false,
 				'acf'      => 'field_5bd51ac107244',
 				'default'  => '',
+				'conditions' => [
+					[
+						[
+							'setting'        => 'show',
+							'acf_operator'   => '==',
+							'kirki_operator' => 'contains',
+							'value'          => 'excerpt',
+						],
+					],
+					[
+						[
+							'setting'        => 'show',
+							'acf_operator'   => '==',
+							'kirki_operator' => 'contains',
+							'value'          => 'content',
+						],
+					],
+				]
 			],
 			'more_link_text' => [
 				'label'    => esc_html__( 'More Link Text', 'mai-engine' ),
@@ -320,7 +376,10 @@ class Mai_Settings_Config {
 	function get_choices( $field ) {
 		return $this->$field();
 	}
-
+	/**
+	 * TODO: On singular, add after_entry (widget_area), author_box, adjacent_entry_nav.
+	 * TODO: On archive and singular, add genesis hooks.
+	 */
 	function show() {
 		return [
 			'image'       => esc_html__( 'Image', 'mai-engine' ),
