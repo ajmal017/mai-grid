@@ -244,4 +244,5 @@ function mai_grid_plugin() {
 }
 
 // Get Mai_Grid_Plugin Running.
+// add_action( 'genesis_setup', 'mai_grid_plugin' );
 mai_grid_plugin();

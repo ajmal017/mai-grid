@@ -23,9 +23,6 @@ jQuery(document).ready(function($) {
 	// 	}
 	// });
 
-
-	return;
-
 	var fields = maiGridWPQueryVars.fields;
 
 	acf.addFilter( 'select2_ajax_data', function( data, args, $input, field, instance ) {
@@ -44,6 +41,11 @@ jQuery(document).ready(function($) {
 
 		// If Posts/Entries field.
 		if ( fields.post__in === data.field_key ) {
+			data.post_type = getPostType( $input );
+		}
+
+		// Exclude Entries.
+		if ( fields.post__not_in === data.field_key ) {
 			data.post_type = getPostType( $input );
 		}
 

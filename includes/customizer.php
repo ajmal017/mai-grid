@@ -13,8 +13,9 @@ function maiengine_kirki_settings() {
 		return;
 	}
 
-	// Settings helper class.
-	$helper = new Mai_Settings_Helper;
+	// Settings config.
+	$config = new Mai_Settings_Config;
+	$fields = $config->get_fields();
 
 	// IDs.
 	$config_id = $panel_id = $settings_field = 'maiengine';
@@ -59,8 +60,8 @@ function maiengine_kirki_settings() {
 		'label'    => esc_html__( 'Show', 'mai-engine' ),
 		'section'  => $section_id,
 		'priority' => 10,
-		'choices'  => $helper->get_choices( 'show' ),
-		'default'  => $helper->get_default( 'show' ),
+		'choices'  => $config->get_choices( 'show' ),
+		'default'  => $fields['show']['default'],
 	] );
 
 	Kirki::add_field( $config_id, [
@@ -71,8 +72,8 @@ function maiengine_kirki_settings() {
 		'default'     => 'landscape',
 		'priority'    => 10,
 		'multiple'    => 1,
-		'choices'  => $helper->get_choices( 'image_orientation' ),
-		'default'  => $helper->get_default( 'image_orientation' ),
+		'choices'  => $config->get_choices( 'image_orientation'  ),
+		'default'  => $fields['show']['default'],
 	] );
 
 }

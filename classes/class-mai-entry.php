@@ -80,7 +80,7 @@ class Mai_Entry {
 				continue;
 			}
 
-			$method = "do_$element";
+			$method = "do_{$element}";
 			$this->$method();
 		}
 

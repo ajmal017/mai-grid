@@ -21,6 +21,7 @@ final class Mai_Grid_Blocks  {
 	private static $instance;
 
 	private $helper;
+	private $config;
 	private $fields;
 
 	/**
@@ -39,7 +40,6 @@ final class Mai_Grid_Blocks  {
 			self::$instance = new Mai_Grid_Blocks;
 			// Methods.
 			self::$instance->run();
-			self::$instance->run_filters();
 		}
 		return self::$instance;
 	}
@@ -72,10 +72,15 @@ final class Mai_Grid_Blocks  {
 	}
 
 	function run() {
-		// $this->helper = new Mai_Settings_Helper;
-		// $this->fields = Mai_Grid_Base::get_fields();
-		$this->fields = mai_get_settings_fields();
+		add_action( 'acf/init', array( $this, 'blocks_init' ), 10, 3 );
 		add_action( 'acf/init', array( $this, 'register_blocks' ), 10, 3 );
+	}
+
+	function blocks_init() {
+		// $this->config = mai_get_settings_config();
+		$this->config = new Mai_Settings_Config;
+		$this->fields = $this->config->get_fields();
+		$this->run_filters();
 	}
 
 	function register_blocks() {
@@ -157,21 +162,18 @@ final class Mai_Grid_Blocks  {
 	}
 
 	function do_post_grid( $block, $content = '', $is_preview = false ) {
-		$args = array( 'type' => 'post' );
-		$args = array_merge( $this->get_base_fields(), $args );
-		$args = array_merge( $args, $this->get_wp_query_fields() );
-		if ( ! empty( $block['className'] ) ) {
-			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
-		}
-		$grid = new Mai_Grid_Base( $args );
-		$grid->render();
+		// TODO: block id?
+		$this->do_grid( 'post', $block, $content = '', $is_preview = false );
 	}
 
 	function do_term_grid( $block, $content = '', $is_preview = false ) {
 		// TODO: block id?
-		$args = array( 'type' => 'term' );
-		$args = array_merge( $this->get_base_fields(), $args );
-		$args = array_merge( $args, $this->get_wp_term_query_args() );
+		$this->do_grid( 'term', $block, $content = '', $is_preview = false );
+	}
+
+	function do_grid( $type, $block, $content = '', $is_preview = false ) {
+		$args = array( 'type' => $type );
+		$args = array_merge( $args, $this->get_fields() );
 		if ( ! empty( $block['className'] ) ) {
 			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
 		}
@@ -179,31 +181,12 @@ final class Mai_Grid_Blocks  {
 		$grid->render();
 	}
 
-	function get_base_fields() {
-		$args = array();
-		foreach( Mai_Grid_Base::get_display_fields() as $name => $key ) {
-			$args[ $name ] = $this->get_field( $name );
+	function get_fields() {
+		$fields = [];
+		foreach( $this->fields as $name => $values ) {
+			$fields[ $name ] = $this->get_field( $name );
 		}
-		foreach( Mai_Grid_Base::get_layout_fields() as $name => $key ) {
-			$args[ $name ] = $this->get_field( $name );
-		}
-		return $args;
-	}
-
-	function get_wp_query_fields() {
-		$args = array();
-		foreach( Mai_Grid_Base::get_wp_query_fields() as $name => $key ) {
-			$args[ $name ] = $this->get_field( $name );
-		}
-		return $args;
-	}
-
-	function get_wp_term_query_args() {
-		$args = array();
-		foreach( Mai_Grid_Base::get_layout_fields() as $name => $key ) {
-			$args[ $name ] = $this->get_field( $name );
-		}
-		return $args;
+		return $fields;
 	}
 
 	function get_field( $name ) {
@@ -215,179 +198,130 @@ final class Mai_Grid_Blocks  {
 
 		// Add field wrapper classes.
 		add_filter( 'acf/field_wrapper_attributes', function( $wrapper, $field ) {
+
 			// Conditional Show.
 			if ( in_array( $field['key'], array(
-				$this->fields['image_orientation']['key'],
-				$this->fields['image_size']['key'],
-				$this->fields['image_position']['key'],
-				$this->fields['header_meta']['key'],
-				$this->fields['content_limit']['key'],
-				$this->fields['more_link_text']['key'],
-				$this->fields['footer_meta']['key'],
+				$this->fields['image_orientation']['acf'],
+				$this->fields['image_size']['acf'],
+				$this->fields['image_position']['acf'],
+				$this->fields['header_meta']['acf'],
+				$this->fields['content_limit']['acf'],
+				$this->fields['more_link_text']['acf'],
+				$this->fields['footer_meta']['acf'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-show-conditional' : 'mai-grid-show-conditional';
 			}
+
 			// Button Group.
 			if ( in_array( $field['key'], array(
-				$this->fields['align_text']['key'],
-				$this->fields['align_text_vertical']['key'],
-				$this->fields['columns']['key'],
-				$this->fields['columns_md']['key'],
-				$this->fields['columns_sm']['key'],
-				$this->fields['columns_xs']['key'],
-				$this->fields['align_columns']['key'],
-				$this->fields['align_columns_vertical']['key'],
+				$this->fields['align_text']['acf'],
+				$this->fields['align_text_vertical']['acf'],
+				$this->fields['columns']['acf'],
+				$this->fields['columns_md']['acf'],
+				$this->fields['columns_sm']['acf'],
+				$this->fields['columns_xs']['acf'],
+				$this->fields['align_columns']['acf'],
+				$this->fields['align_columns_vertical']['acf'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-button-group' : 'mai-grid-button-group';
 			}
+
 			// Button Group.
 			if ( in_array( $field['key'], array(
-				$this->fields['align_text']['key'],
-				$this->fields['align_text_vertical']['key'],
-				$this->fields['columns_md']['key'],
-				$this->fields['columns_sm']['key'],
-				$this->fields['columns_xs']['key'],
-				$this->fields['align_columns']['key'],
-				$this->fields['align_columns_vertical']['key'],
+				$this->fields['align_text']['acf'],
+				$this->fields['align_text_vertical']['acf'],
+				$this->fields['columns_md']['acf'],
+				$this->fields['columns_sm']['acf'],
+				$this->fields['columns_xs']['acf'],
+				$this->fields['align_columns']['acf'],
+				$this->fields['align_columns_vertical']['acf'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-button-group-clear' : 'mai-grid-button-group-clear';
 			}
+
 			// Nested Columns.
 			if ( in_array( $field['key'], array(
-				$this->fields['columns_md']['key'],
-				$this->fields['columns_sm']['key'],
-				$this->fields['columns_xs']['key'],
+				$this->fields['columns_md']['acf'],
+				$this->fields['columns_sm']['acf'],
+				$this->fields['columns_xs']['acf'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-nested-columns' : 'mai-grid-nested-columns';
 			}
+
 			// Nested Columns First.
 			if ( in_array( $field['key'], array(
-				$this->fields['columns_md']['key'],
+				$this->fields['columns_md']['acf'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-nested-columns-first' : 'mai-grid-nested-columns-first';
 			}
+
 			// Nested Columns Last.
 			if ( in_array( $field['key'], array(
-				$this->fields['columns_xs']['key'],
+				$this->fields['columns_xs']['acf'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-nested-columns-last' : 'mai-grid-nested-columns-last';
 			}
+
 			return $wrapper;
+
 		}, 10, 2 );
 
-		/**
-		 * WP_Query.
-		 */
-		// Post Types.
-		add_filter( "acf/load_field/key={$this->fields['post_type']['key']}",                     array( $this, 'load_post_types' ) );
-		// Get Entries By.
-		add_filter( "acf/load_field/key={$this->fields['query_by']['key']}",                      array( $this, 'load_query_by' ) );
-		// Entries.
-		add_filter( "acf/fields/post_object/query/key={$this->fields['post__in']['key']}",        array( $this, 'get_posts' ), 10, 1 );
-		// Taxonomy.
-		add_filter( "acf/load_field/key={$this->fields['taxonomy']['key']}",                      array( $this, 'load_taxonomies' ) );
-		// Terms.
-		add_filter( "acf/fields/taxonomy/query/key={$this->fields['terms']['key']}",              array( $this, 'get_terms' ), 10, 1 );
-		// Operator.
-		add_filter( "acf/load_field/key={$this->fields['operator']['key']}",                      array( $this, 'load_operators' ) );
-		// Parent.
-		add_filter( "acf/fields/post_object/query/key={$this->fields['post_parent__in']['key']}", array( $this, 'get_parents' ), 10, 1 );
-		// Exclude Content.
-		add_filter( "acf/load_field/key={$this->fields['exclude']['key']}",                       array( $this, 'load_exclude' ) );
-		// Order By.
-		add_filter( "acf/load_field/key={$this->fields['orderby']['key']}",                       array( $this, 'load_orderby' ) );
-		// Order.
-		add_filter( "acf/load_field/key={$this->fields['order']['key']}",                         array( $this, 'load_order' ) );
-
-		/**
-		 * Display.
-		 */
-		// Show.
-		add_filter( "acf/load_field/key={$this->fields['show']['key']}",                          array( $this, 'load_show' ) );
-		// Image Orientation.
-		add_filter( "acf/load_field/key={$this->fields['image_orientation']['key']}",             array( $this, 'load_image_orientation' ) );
-		// Image Size.
-		add_filter( "acf/load_field/key={$this->fields['image_size']['key']}",                    array( $this, 'load_image_sizes' ) );
-		// Image Alignment.
-		add_filter( "acf/load_field/key={$this->fields['image_position']['key']}",                   array( $this, 'load_image_position' ) );
-		// More Link Text.
-		add_filter( "acf/load_field/key={$this->fields['more_link_text']['key']}",                array( $this, 'load_more_link_text' ) );
-
-		/**
-		 * Layout.
-		 */
-		// Columns.
-		add_filter( "acf/load_field/key={$this->fields['columns']['key']}",                       array( $this, 'load_columns' ) );
-		add_filter( "acf/load_field/key={$this->fields['columns_md']['key']}",                    array( $this, 'load_columns_responsive' ) );
-		add_filter( "acf/load_field/key={$this->fields['columns_sm']['key']}",                    array( $this, 'load_columns_responsive' ) );
-		add_filter( "acf/load_field/key={$this->fields['columns_xs']['key']}",                    array( $this, 'load_columns_responsive' ) );
-		// Align Columns.
-		add_filter( "acf/load_field/key={$this->fields['align_columns']['key']}",                 array( $this, 'load_align_columns' ) );
-		add_filter( "acf/load_field/key={$this->fields['align_columns_vertical']['key']}",        array( $this, 'load_align_columns_vertical' ) );
-		// Align Text.
-		add_filter( "acf/load_field/key={$this->fields['align_text']['key']}",                    array( $this, 'load_align_text' ) );
-		add_filter( "acf/load_field/key={$this->fields['align_text_vertical']['key']}",           array( $this, 'load_align_text_vertical' ) );
-
-		// Defaults.
+		// Add filters.
 		foreach( $this->fields as $name => $values ) {
-			// Skip template field.
-			// if ( 'template' === $name ) {
-			// 	continue;
-			// }
-			// Add filter.
-			add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
-				// Set default from our config filter.
-				// $field['default'] = $this->fields[ $field['name'] ]['default'];
-				$field['default'] = $this->helper->get_default( $field['key'] );
-				return $field;
-			});
-		}
-	}
-
-	/**
-	 * Load Post Types.
-	 */
-	function load_post_types( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		$post_types = get_post_types( array(
-			'public'             => true,
-			'publicly_queryable' => true,
-		), 'objects', 'or' );
-
-		if ( $post_types ) {
-			foreach ( $post_types as $name => $post_type ) {
-				$field['choices'][ $name ] = $post_type->label;
+			// If an ACF field.
+			if ( $values['block'] && isset( $values['acf'] ) ) {
+				// Defaults.
+				add_filter( "acf/load_field/key={$values['acf']}", function( $field ) use ( $name ) {
+					// Set default from our config function.
+					$field['default'] = $this->fields[ $field['name'] ]['default'];
+					return $field;
+				});
+				// Choices.
+				if ( method_exists( $this->config, $name ) ) {
+					add_filter( "acf/load_field/key={$values['acf']}", function( $field ) {
+						// Set choices from our config function.
+						// $field['choices'] = $this->config[ $field['name'] ]['choices'];
+						$field['choices'] = $this->config->get_choices( $field['name'] );
+						return $field;
+					});
+				}
 			}
 		}
+
+		// Show.
+		add_filter( "acf/load_field/key={$this->fields['show']['acf']}",                          array( $this, 'load_show' ) );
+		// More Link Text.
+		add_filter( "acf/load_field/key={$this->fields['more_link_text']['acf']}",                array( $this, 'load_more_link_text' ) );
+		// Posts.
+		add_filter( "acf/fields/post_object/query/key={$this->fields['post__in']['acf']}",        array( $this, 'get_posts' ), 10, 1 );
+		// Terms.
+		add_filter( "acf/fields/taxonomy/query/key={$this->fields['terms']['acf']}",              array( $this, 'get_terms' ), 10, 1 );
+		// Parent.
+		add_filter( "acf/fields/post_object/query/key={$this->fields['post_parent__in']['acf']}", array( $this, 'get_parents' ), 10, 1 );
+	}
+
+	function load_show( $field ) {
+
+		// Default choices, in default order.
+		$field['choices'] = $this->config->get_choices( 'show' );
+
+		// Get existing values, which are sorted correctly, without infinite loop.
+		remove_filter( "acf/load_field/key={$this->fields['show']['acf']}", array( $this, 'load_show' ) );
+		$existing = get_field( 'show' );
+		$defaults = $field['choices'];
+		add_filter( "acf/load_field/key={$this->fields['show']['acf']}", array( $this, 'load_show' ) );
+
+		// If we have existing values, reorder them.
+		$field['choices'] = $existing ? array_merge( array_flip( $existing ), $defaults ) : $field['choices'];
 
 		return $field;
 	}
 
-	function load_query_by( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		$field['choices'] = array(
-			'date'     => __( 'Date', 'mai-grid' ),
-			'title'    => __( 'Title', 'mai-grid' ),
-			'taxonomy' => __( 'Taxonomy', 'mai-grid' ),
-			'parent'   => __( 'Parent', 'mai-grid' ),
-		);
-
+	/**
+	 * KEEEP THIS FOR PLACEHOLDER, BUT USE THE DEFAULT!
+	 */
+	function load_more_link_text( $field ) {
+		$field['placeholder'] = __( 'Read More', 'mai-grid' );
 		return $field;
 	}
 
@@ -398,30 +332,6 @@ final class Mai_Grid_Blocks  {
 		return $args;
 	}
 
-	function load_taxonomies( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		if ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) {
-
-			$taxonomies = get_object_taxonomies( $_REQUEST['post_type'], 'objects' );
-
-			if ( $taxonomies ) {
-				foreach ( $taxonomies as $name => $taxo ) {
-					$field['choices'][ $name ] = $taxo->label;
-				}
-			}
-		}
-
-		return $field;
-	}
-
 	function get_terms( $args ) {
 		if ( isset( $_REQUEST['taxonomy'] ) && ! empty( $_REQUEST['taxonomy'] ) ) {
 			$args['taxonomy'] = $_REQUEST['taxonomy'];
@@ -429,354 +339,11 @@ final class Mai_Grid_Blocks  {
 		return $args;
 	}
 
-	function load_operators( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		$field['choices'] = array(
-			'IN'     => __( 'In', 'mai-grid' ),
-			'NOT IN' => __( 'Not In', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
 	function get_parents( $args ) {
 		if ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) {
 			$args['post_type'] = $_REQUEST['post_type'];
 		}
 		return $args;
-	}
-
-	function load_parents( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			return $field;
-		}
-
-		// Bail if no post type.
-		if ( ! ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) ) {
-			return $field;
-		}
-
-		$posts = acf_get_grouped_posts( array(
-			'post_type'   => $_REQUEST['post_type'],
-			'post_status' => 'publish',
-		) );
-
-		if ( ! $posts ) {
-			return $field;
-		}
-
-		$field['choices'] = $posts;
-
-		// foreach( $posts as $post ) {
-			// $field['choices'][ $post->ID ] = acf_get_post_title( $post->ID );
-		// }
-
-		return $field;
-	}
-
-	function load_exclude( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		// TODO: Handle actual exclusion.
-		$field['choices'] = array(
-			'exclude_current'   => __( 'Exclude current', 'mai-grid' ),
-			'exclude_displayed' => __( 'Exclude displayed', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_orderby( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		$field['choices'] = array(
-			'title'          => __( 'Title', 'mai-grid' ),
-			'name'           => __( 'Slug', 'mai-grid' ),
-			'date'           => __( 'Date', 'mai-grid' ),
-			'modified'       => __( 'Modified', 'mai-grid' ),
-			'rand'           => __( 'Random', 'mai-grid' ),
-			'comment_count'  => __( 'Comment Count', 'mai-grid' ),
-			'menu_order'     => __( 'Menu Order', 'mai-grid' ),
-			'post__in'       => __( 'Entries Order', 'mai-grid' ),
-			'meta_value_num' => __( 'Meta Value Number', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_order( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		$field['choices'] = array(
-			'ASC'  => __( 'Ascending', 'mai-grid' ),
-			'DESC' => __( 'Descending', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_show( $field ) {
-
-		// Default choices, in default order.
-		$field['choices'] = $this->helper->get_choices( 'show' );
-
-		// Get existing values, which are sorted correctly, without infinite loop.
-		remove_filter( "acf/load_field/key={$this->fields['show']['key']}", array( $this, 'load_show' ) );
-		$existing = get_field( 'show' );
-		$defaults = $field['choices'];
-		add_filter( "acf/load_field/key={$this->fields['show']['key']}", array( $this, 'load_show' ) );
-
-		// If we have existing values, reorder them.
-		$field['choices'] = $existing ? array_merge( array_flip( $existing ), $defaults ) : $field['choices'];
-
-		return $field;
-	}
-
-	/**
-	 * Load image orientation.
-	 */
-	function load_image_orientation( $field ) {
-
-		// Keep admin clean.
-		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			$field['choices'] = [
-				'landscape' => __( 'Landscape', 'mai-engine' ),
-				'custom'    => __( 'Custom', 'mai-engine' ),
-			];
-			return $field;
-		}
-
-		$field['choices'] = $this->helper->get_choices['image_orientation'];
-
-		return $field;
-	}
-
-	/**
-	 * Load image sizes.
-	 * Much of the code take from genesis_get_image_sizes().
-	 */
-	function load_image_sizes( $field ) {
-
-		// Keep admin clean.
-		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			$field['choices'] = array();
-			// $field['choices'] = array( 'default' => __( 'Default' ) );
-			return $field;
-		}
-
-		global $_wp_additional_image_sizes;
-		$sizes = $field['choices'] = array( 'default' => __( 'Default' ) );
-		foreach ( get_intermediate_image_sizes() as $size ) {
-			if ( isset( $_wp_additional_image_sizes[ $size ] ) ) {
-				$sizes[ $size ] = array(
-					'width'  => absint( $_wp_additional_image_sizes[ $size ]['width'] ),
-					'height' => absint( $_wp_additional_image_sizes[ $size ]['height'] ),
-					'crop'   => $_wp_additional_image_sizes[ $size ]['crop'],
-				);
-			} else {
-				$sizes[ $size ] = array(
-					'width'  => absint( get_option( "{$size}_size_w" ) ),
-					'height' => absint( get_option( "{$size}_size_h" ) ),
-					'crop'   => (bool) get_option( "{$size}_crop" ),
-				);
-			}
-		}
-		foreach ( $sizes as $index => $value ) {
-			if ( 'default' === $index ) {
-				$field['choices'][$index] = $index;
-			} else {
-				$field['choices'][$index] = sprintf( '%s (%s x %s)', $index, $value['width'], $value['height'] );
-			}
-		}
-
-		return $field;
-	}
-
-	function load_image_position( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			return $field;
-		}
-
-		$field['choices'] = array(
-			'full'   => __( 'Full', 'mai-grid' ),
-			'left'   => __( 'Left', 'mai-grid' ),
-			'center' => __( 'Center', 'mai-grid' ),
-			'right'  => __( 'Right', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_align_columns( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			return $field;
-		}
-
-		$field['choices'] = array(
-			''       => __( 'Clear', 'mai-grid' ),
-			'left'   => __( 'Left', 'mai-grid' ),
-			'center' => __( 'Center', 'mai-grid' ),
-			'right'  => __( 'Right', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_align_columns_vertical( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			return $field;
-		}
-
-		$field['choices'] = array(
-			''       => __( 'Clear', 'mai-grid' ),
-			'top'    => __( 'Top', 'mai-grid' ),
-			'middle' => __( 'Middle', 'mai-grid' ),
-			'bottom' => __( 'Bottom', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_align_text( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			return $field;
-		}
-
-		$field['choices'] = array(
-			''       => __( 'Clear', 'mai-grid' ),
-			'start'  => __( 'Start', 'mai-grid' ),
-			'center' => __( 'Center', 'mai-grid' ),
-			'end'    => __( 'End', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_align_text_vertical( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			return $field;
-		}
-
-		$field['choices'] = array(
-			''       => __( 'Clear', 'mai-grid' ),
-			'top'    => __( 'Top', 'mai-grid' ),
-			'middle' => __( 'Middle', 'mai-grid' ),
-			'bottom' => __( 'Bottom', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_columns( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		$field['choices'] = array(
-			1 => __( '1', 'mai-grid' ),
-			2 => __( '2', 'mai-grid' ),
-			3 => __( '3', 'mai-grid' ),
-			4 => __( '4', 'mai-grid' ),
-			5 => __( '5', 'mai-grid' ),
-			6 => __( '6', 'mai-grid' ),
-			0 => __( 'Auto', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-
-	function load_columns_responsive( $field ) {
-
-		// Start empty.
-		$field['choices'] = array();
-
-		// Keep admin clean.
-		// if ( is_admin() && ( 'acf-field-group' === get_post_type() ) ) {
-			// return $field;
-		// }
-
-		$field['choices'] = array(
-			'' => __( 'Clear', 'mai-grid' ),
-			1  => __( '1', 'mai-grid' ),
-			2  => __( '2', 'mai-grid' ),
-			3  => __( '3', 'mai-grid' ),
-			4  => __( '4', 'mai-grid' ),
-			5  => __( '5', 'mai-grid' ),
-			6  => __( '6', 'mai-grid' ),
-			0  => __( 'Auto', 'mai-grid' ),
-		);
-
-		return $field;
-	}
-
-	function load_more_link_text( $field ) {
-		$field['placeholder'] = __( 'Read More', 'mai-grid' );
-		return $field;
 	}
 
 }
