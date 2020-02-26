@@ -761,20 +761,20 @@ class Mai_Settings_Config {
 			'bottom' => esc_html__( 'Bottom', 'mai-engine' ),
 		];
 	}
-	function columns_responsive() {
-		return $this->get_columns_choices( true );
-	}
+	// function columns_responsive() {
+	// 	return $this->get_columns_choices( true );
+	// }
 	function columns() {
 		return $this->get_columns_choices();
 	}
 	function columns_md() {
-		return $this->get_columns_choices();
+		return $this->get_columns_choices( true );
 	}
 	function columns_sm() {
-		return $this->get_columns_choices();
+		return $this->get_columns_choices( true );
 	}
 	function columns_xs() {
-		return $this->get_columns_choices();
+		return $this->get_columns_choices( true );
 	}
 	function align_columns() {
 		return [
