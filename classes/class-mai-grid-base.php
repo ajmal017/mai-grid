@@ -30,7 +30,7 @@ class Mai_Grid_Base {
 			'show'                   => $this->fields['show']['default'],
 			'image_orientation'      => $this->fields['image_orientation']['default'],
 			'image_size'             => $this->fields['image_size']['default'],
-			'image_position'            => $this->fields['image_position']['default'],
+			'image_position'         => $this->fields['image_position']['default'],
 			'header_meta'            => $this->fields['header_meta']['default'],
 			'content_limit'          => $this->fields['content_limit']['default'],
 			'more_link_text'         => $this->fields['more_link_text']['default'],
@@ -56,14 +56,13 @@ class Mai_Grid_Base {
 			'post__in'               => $this->fields['post__in']['default'],
 			'post__not_in'           => $this->fields['post__not_in']['default'],
 			'taxonomies'             => $this->fields['taxonomies']['default'],
-			'taxonomy'               => $this->fields['taxonomy']['default'],
-			'terms'                  => $this->fields['terms']['default'],
-			'relation'               => $this->fields['relation']['default'],
-			'operator'               => $this->fields['operator']['default'],
-			'relation'               => $this->fields['relation']['default'],
+			'taxonomy'               => $this->fields['taxonomies']['acf']['sub_fields']['taxonomy']['default'],
+			'terms'                  => $this->fields['taxonomies']['acf']['sub_fields']['terms']['default'],
+			'operator'               => $this->fields['taxonomies']['acf']['sub_fields']['operator']['default'],
+			'taxonomies_relation'    => $this->fields['taxonomies_relation']['default'],
 			'post_parent__in'        => $this->fields['post_parent__in']['default'],
 			'orderby'                => $this->fields['orderby']['default'],
-			'meta_key'               => $this->fields['meta_key']['default'],
+			// 'meta_key'               => $this->fields['meta_key']['default'],
 			'order'                  => $this->fields['order']['default'],
 			'exclude'                => $this->fields['exclude']['default'],
 		), $args, 'mai_grid' );
@@ -77,7 +76,7 @@ class Mai_Grid_Base {
 			'show'                   => $this->sanitize( $args['show'], 'esc_html' ),
 			'image_orientation'      => $this->sanitize( $args['image_orientation'], 'esc_html' ),
 			'image_size'             => $this->sanitize( $args['image_size'], 'esc_html' ),
-			'image_position'            => $this->sanitize( $args['image_position'], 'esc_html' ),
+			'image_position'         => $this->sanitize( $args['image_position'], 'esc_html' ),
 			'header_meta'            => $this->sanitize( $args['header_meta'], 'esc_html' ),
 			'content_limit'          => $this->sanitize( $args['content_limit'], 'esc_html' ),
 			'more_link_text'         => $this->sanitize( $args['more_link_text'], 'esc_html' ),
@@ -105,12 +104,11 @@ class Mai_Grid_Base {
 			'taxonomies'             => $this->sanitize( $args['taxonomies'], 'esc_html' ),
 			'taxonomy'               => $this->sanitize( $args['taxonomy'], 'esc_html' ),
 			'terms'                  => $this->sanitize( $args['terms'], 'esc_html' ),
-			'relation'               => $this->sanitize( $args['relation'], 'esc_html' ),
 			'operator'               => $this->sanitize( $args['operator'], 'esc_html' ),
-			'relation'               => $this->sanitize( $args['relation'], 'esc_html' ),
+			'taxonomies_relation'    => $this->sanitize( $args['taxonomies_relation'], 'esc_html' ),
 			'post_parent__in'        => $this->sanitize( $args['post_parent__in'], 'esc_html' ),
 			'orderby'                => $this->sanitize( $args['orderby'], 'esc_html' ),
-			'meta_key'               => $this->sanitize( $args['meta_key'], 'esc_html' ),
+			// 'meta_key'               => $this->sanitize( $args['meta_key'], 'esc_html' ),
 			'order'                  => $this->sanitize( $args['order'], 'esc_html' ),
 			'exclude'                => (array) $this->sanitize( $args['exclude'], 'esc_html' ),
 		);
@@ -194,7 +192,7 @@ class Mai_Grid_Base {
 			break;
 			case 'taxonomy':
 				$query_args['tax_query'] = array(
-					'relation' => $this->args['relation'],
+					'relation' => $this->args['taxonomies'],
 				);
 				foreach( $this->args['taxonomies'] as $taxo ) {
 					$query_args['tax_query'][] = array(

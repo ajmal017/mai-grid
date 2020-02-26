@@ -1,11 +1,11 @@
 <?php
 
-add_action( 'genesis_before', function() {
+// add_action( 'genesis_before', function() {
 
-	$settings = get_option( 'maiengine' );
-	vd( $settings );
+// 	$settings = get_option( 'maiengine' );
+// 	vd( $settings );
 
-});
+// });
 
 add_filter( 'kirki_config', function( $config ) {
 	$config['url_path'] = MAI_GRID_PLUGIN_URL . 'vendor/aristath/kirki';
@@ -21,7 +21,7 @@ function maiengine_kirki_settings() {
 	}
 
 	// Settings config.
-	$config = new Mai_Settings_Config;
+	$config = new Mai_Settings_Config( $acf = false );
 	$fields = $config->get_fields();
 
 	// IDs.
@@ -70,33 +70,11 @@ function maiengine_kirki_settings() {
 		}
 
 		// Skip if not string (temporary for testing/dev).
-		if ( ! is_string( $field['archive'] ) ) {
-			continue;
-		}
+		// if ( ! is_string( $field['archive'] ) ) {
+		// 	continue;
+		// }
 
-		// Build Kirki data.
-		$data = [
-			'type'     => $field['archive'],
-			'label'    => $field['label'],
-			'default'  => $field['default'],
-			'settings' => $name,
-			'section'  => $section_id,
-			'priority' => 10,
-		];
-		// Maybe add description.
-		if ( isset( $field['desc'] ) ) {
-			$data['description'] = $field['desc'];
-		}
-		// Maybe add choices.
-		if ( method_exists( $config, $name ) ) {
-			$data['choices'] = $config->get_choices( $name );
-		}
-		// Maybe add conditional logic.
-		if ( isset( $field['conditions'] ) ) {
-			$data['active_callback'] = mai_get_setting_conditions( 'kirki', $field );
-		}
-
-		Kirki::add_field( $config_id, $data );
+		Kirki::add_field( $config_id, $config->get_data( $name, $field, $section_id ) );
 	}
 
 	// Kirki::add_field( $config_id, [

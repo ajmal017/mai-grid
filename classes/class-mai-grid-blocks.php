@@ -201,63 +201,63 @@ final class Mai_Grid_Blocks  {
 
 			// Conditional Show.
 			if ( in_array( $field['key'], array(
-				$this->fields['image_orientation']['acf'],
-				$this->fields['image_size']['acf'],
-				$this->fields['image_position']['acf'],
-				$this->fields['header_meta']['acf'],
-				$this->fields['content_limit']['acf'],
-				$this->fields['more_link_text']['acf'],
-				$this->fields['footer_meta']['acf'],
+				$this->fields['image_orientation']['key'],
+				$this->fields['image_size']['key'],
+				$this->fields['image_position']['key'],
+				$this->fields['header_meta']['key'],
+				$this->fields['content_limit']['key'],
+				$this->fields['more_link_text']['key'],
+				$this->fields['footer_meta']['key'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-show-conditional' : 'mai-grid-show-conditional';
 			}
 
 			// Button Group.
 			if ( in_array( $field['key'], array(
-				$this->fields['align_text']['acf'],
-				$this->fields['align_text_vertical']['acf'],
-				$this->fields['columns']['acf'],
-				$this->fields['columns_md']['acf'],
-				$this->fields['columns_sm']['acf'],
-				$this->fields['columns_xs']['acf'],
-				$this->fields['align_columns']['acf'],
-				$this->fields['align_columns_vertical']['acf'],
+				$this->fields['align_text']['key'],
+				$this->fields['align_text_vertical']['key'],
+				$this->fields['columns']['key'],
+				$this->fields['columns_md']['key'],
+				$this->fields['columns_sm']['key'],
+				$this->fields['columns_xs']['key'],
+				$this->fields['align_columns']['key'],
+				$this->fields['align_columns_vertical']['key'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-button-group' : 'mai-grid-button-group';
 			}
 
 			// Button Group.
 			if ( in_array( $field['key'], array(
-				$this->fields['align_text']['acf'],
-				$this->fields['align_text_vertical']['acf'],
-				$this->fields['columns_md']['acf'],
-				$this->fields['columns_sm']['acf'],
-				$this->fields['columns_xs']['acf'],
-				$this->fields['align_columns']['acf'],
-				$this->fields['align_columns_vertical']['acf'],
+				$this->fields['align_text']['key'],
+				$this->fields['align_text_vertical']['key'],
+				$this->fields['columns_md']['key'],
+				$this->fields['columns_sm']['key'],
+				$this->fields['columns_xs']['key'],
+				$this->fields['align_columns']['key'],
+				$this->fields['align_columns_vertical']['key'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-button-group-clear' : 'mai-grid-button-group-clear';
 			}
 
 			// Nested Columns.
 			if ( in_array( $field['key'], array(
-				$this->fields['columns_md']['acf'],
-				$this->fields['columns_sm']['acf'],
-				$this->fields['columns_xs']['acf'],
+				$this->fields['columns_md']['key'],
+				$this->fields['columns_sm']['key'],
+				$this->fields['columns_xs']['key'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-nested-columns' : 'mai-grid-nested-columns';
 			}
 
 			// Nested Columns First.
 			if ( in_array( $field['key'], array(
-				$this->fields['columns_md']['acf'],
+				$this->fields['columns_md']['key'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-nested-columns-first' : 'mai-grid-nested-columns-first';
 			}
 
 			// Nested Columns Last.
 			if ( in_array( $field['key'], array(
-				$this->fields['columns_xs']['acf'],
+				$this->fields['columns_xs']['key'],
 			) ) ) {
 				$wrapper['class'] = isset( $wrapper['class'] ) && ! empty( $wrapper['class'] ) ? $wrapper['class'] . ' mai-grid-nested-columns-last' : 'mai-grid-nested-columns-last';
 			}
@@ -268,36 +268,49 @@ final class Mai_Grid_Blocks  {
 
 		// Add filters.
 		foreach( $this->fields as $name => $values ) {
-			// If an ACF field.
-			if ( $values['block'] && isset( $values['acf'] ) ) {
-				// Defaults.
-				add_filter( "acf/load_field/key={$values['acf']}", function( $field ) use ( $name ) {
-					// Set default from our config function.
-					$field['default'] = $this->fields[ $field['name'] ]['default'];
+			// Skip if not an ACF field.
+			if ( ! $values['block'] ) {
+				return;
+			}
+			// Defaults.
+			// add_filter( "acf/load_field/key={$values['key']}", function( $field ) use ( $name ) {
+			// 	// Set default from our config function.
+			// 	$field['default'] = $this->fields[ $field['name'] ]['default'];
+			// 	return $field;
+			// });
+			// Choices.
+			if ( method_exists( $this->config, $name ) ) {
+				add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
+					// Set choices from our config function.
+					$field['choices'] = $this->config->get_choices( $field['name'] );
 					return $field;
 				});
-				// Choices.
-				if ( method_exists( $this->config, $name ) ) {
-					add_filter( "acf/load_field/key={$values['acf']}", function( $field ) {
-						// Set choices from our config function.
-						// $field['choices'] = $this->config[ $field['name'] ]['choices'];
-						$field['choices'] = $this->config->get_choices( $field['name'] );
-						return $field;
-					});
+			}
+			// Sub fields.
+			if ( isset( $values['sub_field'] ) ) {
+				foreach( $values['sub_field'] as $sub_name => $sub_values ) {
+					// Choices.
+					if ( method_exists( $this->config, $sub_name ) ) {
+						add_filter( "acf/load_field/key={$sub_values['key']}", function( $field ) {
+							// Set choices from our config function.
+							$field['choices'] = $this->config->get_choices( $field['name'] );
+							return $field;
+						});
+					}
 				}
 			}
 		}
 
 		// Show.
-		add_filter( "acf/load_field/key={$this->fields['show']['acf']}",                          array( $this, 'load_show' ) );
+		add_filter( "acf/load_field/key={$this->fields['show']['key']}",                                                array( $this, 'load_show' ) );
 		// More Link Text.
-		add_filter( "acf/load_field/key={$this->fields['more_link_text']['acf']}",                array( $this, 'load_more_link_text' ) );
+		// add_filter( "acf/load_field/key={$this->fields['more_link_text']['key']}",                                      array( $this, 'load_more_link_text' ) );
 		// Posts.
-		add_filter( "acf/fields/post_object/query/key={$this->fields['post__in']['acf']}",        array( $this, 'get_posts' ), 10, 1 );
+		add_filter( "acf/fields/post_object/query/key={$this->fields['post__in']['key']}",                              array( $this, 'get_posts' ), 10, 1 );
 		// Terms.
-		add_filter( "acf/fields/taxonomy/query/key={$this->fields['terms']['acf']}",              array( $this, 'get_terms' ), 10, 1 );
+		add_filter( "acf/fields/taxonomy/query/key={$this->fields['taxonomies']['acf']['sub_fields']['terms']['key']}", array( $this, 'get_terms' ), 10, 1 );
 		// Parent.
-		add_filter( "acf/fields/post_object/query/key={$this->fields['post_parent__in']['acf']}", array( $this, 'get_parents' ), 10, 1 );
+		add_filter( "acf/fields/post_object/query/key={$this->fields['post_parent__in']['key']}",                       array( $this, 'get_parents' ), 10, 1 );
 	}
 
 	function load_show( $field ) {
@@ -306,10 +319,10 @@ final class Mai_Grid_Blocks  {
 		$field['choices'] = $this->config->get_choices( 'show' );
 
 		// Get existing values, which are sorted correctly, without infinite loop.
-		remove_filter( "acf/load_field/key={$this->fields['show']['acf']}", array( $this, 'load_show' ) );
+		remove_filter( "acf/load_field/key={$this->fields['show']['key']}", array( $this, 'load_show' ) );
 		$existing = get_field( 'show' );
 		$defaults = $field['choices'];
-		add_filter( "acf/load_field/key={$this->fields['show']['acf']}", array( $this, 'load_show' ) );
+		add_filter( "acf/load_field/key={$this->fields['show']['key']}", array( $this, 'load_show' ) );
 
 		// If we have existing values, reorder them.
 		$field['choices'] = $existing ? array_merge( array_flip( $existing ), $defaults ) : $field['choices'];
@@ -320,10 +333,10 @@ final class Mai_Grid_Blocks  {
 	/**
 	 * KEEEP THIS FOR PLACEHOLDER, BUT USE THE DEFAULT!
 	 */
-	function load_more_link_text( $field ) {
-		$field['placeholder'] = __( 'Read More', 'mai-grid' );
-		return $field;
-	}
+	// function load_more_link_text( $field ) {
+	// 	$field['placeholder'] = __( 'Read More', 'mai-grid' );
+	// 	return $field;
+	// }
 
 	function get_posts( $args ) {
 		if ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) {
