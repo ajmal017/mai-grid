@@ -271,7 +271,7 @@ class Mai_Settings_Config {
 					[
 						'setting'  => 'columns_responsive',
 						'operator' => '==',
-						'value'    => '1',
+						'value'    => 1,
 					],
 				],
 			],
@@ -288,7 +288,7 @@ class Mai_Settings_Config {
 					[
 						'setting'  => 'columns_responsive',
 						'operator' => '==',
-						'value'    => true,
+						'value'    => 1,
 					],
 				],
 			],
@@ -305,7 +305,7 @@ class Mai_Settings_Config {
 					[
 						'setting'  => 'columns_responsive',
 						'operator' => '==',
-						'value'    => true,
+						'value'    => 1,
 					],
 				],
 			],
@@ -389,9 +389,9 @@ class Mai_Settings_Config {
 				'group'    => [ 'mai_post_grid' ],
 				'default'  => [ 'post' ],
 				'acf'      => [
-					'multiple' => true, // ACF has 1.
-					'ui'       => true, // ACF has 1.
-					'ajax'     => true, // ACF has 1.
+					'multiple' => 1,
+					'ui'       => 1,
+					'ajax'     => 1,
 				]
 			],
 			'query_by' => [
