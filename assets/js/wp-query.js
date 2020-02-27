@@ -23,59 +23,60 @@ jQuery(document).ready(function($) {
 	// 	}
 	// });
 
-	var fields = maiGridWPQueryVars.fields;
+	// var fields = maiGridWPQueryVars.fields;
+	var keys = maiGridWPQueryVars.keys;
 
 	acf.addFilter( 'select2_ajax_data', function( data, args, $input, field, instance ) {
 
 		// Bail if not our fields.
-		if ( -1 === $.inArray( data.field_key, maiGridWPQueryVars.keys ) ) {
+		if ( -1 === $.inArray( data.field_key, Object.values( keys ) ) ) {
 			return data;
 		}
 
 		// Bail if the post_type field.
-		if ( fields.post_type === data.field_key ) {
+		if ( keys.post_type === data.field_key ) {
 			return data;
 		}
 
-		// var currentTaxonomy = $taxonomy.val();
-
 		// If Posts/Entries field.
-		if ( fields.post__in === data.field_key ) {
+		if ( keys.post__in === data.field_key ) {
 			data.post_type = getPostType( $input );
 		}
 
 		// Exclude Entries.
-		if ( fields.post__not_in === data.field_key ) {
+		if ( keys.post__not_in === data.field_key ) {
 			data.post_type = getPostType( $input );
 		}
 
 		// If Taxonomy field.
-		if ( fields.taxonomy === data.field_key ) {
+		if ( keys.taxonomy === data.field_key ) {
 			data.post_type = getPostType( $input );
 		}
 
 		// If Terms field.
-		if ( fields.terms === data.field_key ) {
+		if ( keys.terms === data.field_key ) {
 			data.taxonomy = getTaxonomy( $input );
 		}
 
 		// If Parent field
-		if ( fields.parent === data.field_key ) {
+		if ( keys.parent === data.field_key ) {
 			data.post_type = getPostType( $input );
 		}
 
 		return data;
+
 	});
 
 	function getPostType( $input ) {
+		console.log( keys.post_type );
 		var $wrapper  = $input.parents( '.acf-block-fields' );
-		var $postType = $wrapper.find( '.acf-field[data-key="' + fields.post_type + '"] select' );
+		var $postType = $wrapper.find( '.acf-field[data-key="' + keys.post_type + '"] select' );
 		return $postType.val();
 	}
 
 	function getTaxonomy( $input ) {
 		var $wrapper  = $input.parents( '.acf-row' );
-		var $taxonomy = $wrapper.find( '.acf-field[data-key="' + fields.taxonomy + '"] select' );
+		var $taxonomy = $wrapper.find( '.acf-field[data-key="' + keys.taxonomy + '"] select' );
 		return $taxonomy.val();
 	}
 

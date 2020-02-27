@@ -15,6 +15,7 @@ class Mai_Grid_Base {
 
 		$config          = new Mai_Settings_Config;
 		$this->fields    = $config->get_fields();
+		$this->keys      = $config->get_keys();
 		$this->args      = $this->get_args( $args );
 		$this->version   = MAI_GRID_VERSION;
 	}
@@ -22,7 +23,7 @@ class Mai_Grid_Base {
 	function get_args( $args ) {
 
 		// Parse args.
-		$args = shortcode_atts( array(
+		$args = shortcode_atts( [
 			'type'                   => 'post',  // post, term, user.
 			'context'                => 'block', // block, singular, archive.
 			'class'                  => '',
@@ -56,19 +57,19 @@ class Mai_Grid_Base {
 			'post__in'               => $this->fields['post__in']['default'],
 			'post__not_in'           => $this->fields['post__not_in']['default'],
 			'taxonomies'             => $this->fields['taxonomies']['default'],
-			'taxonomy'               => $this->fields['taxonomies']['acf']['sub_fields']['taxonomy']['default'],
-			'terms'                  => $this->fields['taxonomies']['acf']['sub_fields']['terms']['default'],
-			'operator'               => $this->fields['taxonomies']['acf']['sub_fields']['operator']['default'],
+			// 'taxonomy'               => $this->fields['taxonomies']['acf']['sub_fields']['taxonomy']['default'],
+			// 'terms'                  => $this->fields['taxonomies']['acf']['sub_fields']['terms']['default'],
+			// 'operator'               => $this->fields['taxonomies']['acf']['sub_fields']['operator']['default'],
 			'taxonomies_relation'    => $this->fields['taxonomies_relation']['default'],
 			'post_parent__in'        => $this->fields['post_parent__in']['default'],
 			'orderby'                => $this->fields['orderby']['default'],
-			// 'meta_key'               => $this->fields['meta_key']['default'],
+			'orderby_meta_key'       => $this->fields['orderby_meta_key']['default'],
 			'order'                  => $this->fields['order']['default'],
 			'exclude'                => $this->fields['exclude']['default'],
-		), $args, 'mai_grid' );
+		], $args, 'mai_grid' );
 
 		// Sanitize.
-		$args = array(
+		$args = [
 			'type'                   => $this->sanitize( $args['type'], 'esc_html' ),
 			'context'                => $this->sanitize( $args['context'], 'esc_html' ),
 			'class'                  => $this->sanitize( $args['class'], 'esc_html' ),
@@ -96,22 +97,22 @@ class Mai_Grid_Base {
 			'row_gap'                => $this->sanitize( $args['row_gap'], 'esc_html' ),
 			// WP_Query.
 			'post_type'              => (array) $this->sanitize( $args['post_type'], 'esc_html' ),
-			'number'                 => $this->sanitize( $args['number'], 'esc_html' ),
-			'offset'                 => $this->sanitize( $args['offset'], 'esc_html' ),
+			'number'                 => $this->sanitize( $args['number'], 'absint' ),
+			'offset'                 => $this->sanitize( $args['offset'], 'absint' ),
 			'query_by'               => $this->sanitize( $args['query_by'], 'esc_html' ),
-			'post__in'               => (array) $this->sanitize( $args['post__in'], 'esc_html' ),
-			'post__not_in'           => (array) $this->sanitize( $args['post__not_in'], 'esc_html' ),
+			'post__in'               => (array) $this->sanitize( $args['post__in'], 'absint' ),
+			'post__not_in'           => (array) $this->sanitize( $args['post__not_in'], 'absint' ),
 			'taxonomies'             => $this->sanitize( $args['taxonomies'], 'esc_html' ),
-			'taxonomy'               => $this->sanitize( $args['taxonomy'], 'esc_html' ),
-			'terms'                  => $this->sanitize( $args['terms'], 'esc_html' ),
-			'operator'               => $this->sanitize( $args['operator'], 'esc_html' ),
+			// 'taxonomy'               => $this->sanitize( $args['taxonomy'], 'esc_html' ),
+			// 'terms'                  => $this->sanitize( $args['terms'], 'esc_html' ),
+			// 'operator'               => $this->sanitize( $args['operator'], 'esc_html' ),
 			'taxonomies_relation'    => $this->sanitize( $args['taxonomies_relation'], 'esc_html' ),
-			'post_parent__in'        => $this->sanitize( $args['post_parent__in'], 'esc_html' ),
+			'post_parent__in'        => $this->sanitize( $args['post_parent__in'], 'absint' ),
 			'orderby'                => $this->sanitize( $args['orderby'], 'esc_html' ),
-			// 'meta_key'               => $this->sanitize( $args['meta_key'], 'esc_html' ),
+			'orderby_meta_key'       => $this->sanitize( $args['orderby_meta_key'], 'esc_html' ),
 			'order'                  => $this->sanitize( $args['order'], 'esc_html' ),
 			'exclude'                => (array) $this->sanitize( $args['exclude'], 'esc_html' ),
-		);
+		];
 
 		return apply_filters( 'mai_grid_args', $args );
 	}
@@ -171,13 +172,13 @@ class Mai_Grid_Base {
 
 	function get_post_query_args() {
 
-		$query_args = array(
+		$query_args = [
 			'post_type'           => $this->args['post_type'],
 			'posts_per_page'      => $this->args['number'],
 			'post_status'         => 'publish',
-			'offset'              => $this->args['offset'],
+			'offset'              => absint( $this->args['offset'] ),
 			'ignore_sticky_posts' => true,
-		);
+		];
 
 		// Handle query_by.
 		switch ( $this->args['query_by'] ) {
@@ -191,16 +192,28 @@ class Mai_Grid_Base {
 				}
 			break;
 			case 'taxonomy':
-				$query_args['tax_query'] = array(
-					'relation' => $this->args['taxonomies'],
-				);
+				$tax_query = [];
 				foreach( $this->args['taxonomies'] as $taxo ) {
-					$query_args['tax_query'][] = array(
+					// Skip if we don't have all the tax query args.
+					if ( ! ( $taxo['taxonomy'] && $taxo['taxonomy'] && $taxo['taxonomy'] ) ) {
+						continue;
+					}
+					// Set the value.
+					$tax_query[] = [
 						'taxonomy' => $taxo['taxonomy'],
 						'field'    => 'id',
 						'terms'    => $taxo['terms'],
 						'operator' => $taxo['operator'],
-					);
+					];
+				}
+				// If we have tax query values.
+				if ( $tax_query ) {
+					$query_args['tax_query'] = $tax_query;
+					if ( $this->args['taxonomies_relation'] ) {
+						$query_args['tax_query'][] = [
+							'relation' => $this->args['taxonomies_relation'],
+						];
+					}
 				}
 			break;
 		}
@@ -208,6 +221,19 @@ class Mai_Grid_Base {
 		// Exclude entries.
 		if ( ( 'title' !== $this->args['query_by'] ) && $this->args['post__not_in'] ) {
 			$query_args['post__not_in'] = $this->args['post__not_in'];
+		}
+
+		// Orderby.
+		if ( $this->args['orderby'] ) {
+			$query_args['orderby'] = $this->args['orderby'];
+			if ( 'meta_value_num' === $this->args['orderby'] ) {
+				$query_args['meta_key'] = $this->args['orderby_meta_key'];
+			}
+		}
+
+		// Order.
+		if ( $this->args['order'] ) {
+			$query_args['order'] = $this->args['order'];
 		}
 
 		return apply_filters( 'mai_post_grid_query_args', $query_args );
@@ -231,10 +257,14 @@ class Mai_Grid_Base {
 
 		// If array, escape and return it.
 		if ( is_array( $value ) ) {
-			$escaped = array();
+			$escaped = [];
 			foreach( $value as $index => $item ) {
-				$item = trim( $item );
-				$escaped[ $index ] = $function( $item );
+				if ( is_array( $item ) ) {
+					$escaped[ $index ] = $this->sanitize( $item, $function );
+				} else {
+					$item = trim( $item );
+					$escaped[ $index ] = $function( $item );
+				}
 			}
 			return $escaped;
 		}
@@ -260,18 +290,26 @@ class Mai_Grid_Base {
 			switch ( $this->args['type'] ) {
 				case 'post':
 					$this->enqueue_asset( 'wp-query', 'js' );
-					$fields = $keys = [];
-					foreach( $this->fields as $name => $field ) {
-						if ( ! $field['block'] ) {
-							continue;
-						}
-						$fields[ $name ] = $field['acf'];
-						$keys[]          = $field['acf'];
-					}
-					wp_localize_script( 'mai-grid-wp-query', 'maiGridWPQueryVars', array(
-						'fields' => $fields,
-						'keys'   => $keys,
-					) );
+					// $fields = $keys = [];
+					// foreach( $this->fields as $name => $field ) {
+					// 	if ( ! $field['block'] ) {
+					// 		continue;
+					// 	}
+					// 	$fields[ $name ] = $field['key'];
+					// 	$keys[]          = $field['key'];
+					// 	// Add sub_fields.
+					// 	if ( isset( $field['acf']['sub_fields'] ) ) {
+					// 		foreach( $field['acf']['sub_fields'] as $sub_name => $sub_field ) {
+					// 			$fields[ $sub_name ] = $sub_field['key'];
+					// 			$keys[]              = $sub_field['key'];
+					// 		}
+					// 	}
+					// }
+					// vdd( $this->keys );
+					wp_localize_script( 'mai-grid-wp-query', 'maiGridWPQueryVars', [
+						'fields' => $this->fields,
+						'keys'   => $this->keys,
+					] );
 				break;
 				case 'term':
 				break;

@@ -287,11 +287,12 @@ final class Mai_Grid_Blocks  {
 				});
 			}
 			// Sub fields.
-			if ( isset( $values['sub_field'] ) ) {
-				foreach( $values['sub_field'] as $sub_name => $sub_values ) {
+			if ( isset( $values['acf']['sub_fields'] ) ) {
+				foreach( $values['acf']['sub_fields'] as $sub_name => $sub_values ) {
 					// Choices.
 					if ( method_exists( $this->config, $sub_name ) ) {
 						add_filter( "acf/load_field/key={$sub_values['key']}", function( $field ) {
+
 							// Set choices from our config function.
 							$field['choices'] = $this->config->get_choices( $field['name'] );
 							return $field;

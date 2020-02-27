@@ -4,11 +4,13 @@ class Mai_Settings_Config {
 
 	public $acf;
 	public $fields;
+	public $keys;
 	public $field_groups;
 
 	function __construct( $acf = true ) {
 		$this->acf          = (bool) $acf;
 		$this->fields       = $this->get_fields();
+		$this->keys         = $this->get_keys();
 		$this->field_groups = [
 			'mai_post_grid' => 'group_5de9b54440a2f',
 			'mai_term_grid' => 'group_5de9b54440a2g',
@@ -17,6 +19,8 @@ class Mai_Settings_Config {
 
 	/**
 	 * Get field configs.
+	 *
+	 * TODO: Add sanitize, and loop through that to sanitize when outputting the fields/grid?
 	 */
 	function get_fields() {
 		return [
@@ -394,24 +398,9 @@ class Mai_Settings_Config {
 					'ajax'     => 1,
 				]
 			],
-			'query_by' => [
-				'label'    => esc_html__( 'Get Entries By', 'mai-engine' ),
-				'block'    => true,
-				'archive'  => false,
-				'singular' => false,
-				'type'     => 'button_group',
-				'key'      => 'field_5df1053632cad',
-				'group'    => [ 'mai_post_grid' ],
-				'default'  => 'date',
-				'conditions' => [
-					[
-						'setting'  => 'post_type',
-						'operator' => '!=empty',
-					],
-				],
-			],
 			'number' => [
 				'label'      => esc_html__( 'Number of Entries', 'mai-engine' ),
+				'desc'       => esc_html__( 'Use 0 to show all.', 'mai-engine' ),
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
@@ -431,11 +420,13 @@ class Mai_Settings_Config {
 					],
 				],
 				'acf' => [
-					'min' => 0,
+					'placeholder' => 12,
+					'min'         => 0,
 				],
 			],
 			'offset' => [
 				'label'      => esc_html__( 'Offset', 'mai-engine' ),
+				'desc'       => esc_html__( 'Skip this number of entries.', 'mai-engine' ),
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
@@ -455,7 +446,25 @@ class Mai_Settings_Config {
 					],
 				],
 				'acf' => [
-					'min' => 0,
+					'placeholder' => 0,
+					'min'         => 0,
+				],
+			],
+			'query_by' => [
+				'label'    => esc_html__( 'Get Entries By', 'mai-engine' ),
+				'block'    => true,
+				'archive'  => false,
+				'singular' => false,
+				// 'type'     => 'button_group',
+				'type'     => 'select',
+				'key'      => 'field_5df1053632cad',
+				'group'    => [ 'mai_post_grid' ],
+				'default'  => 'date',
+				'conditions' => [
+					[
+						'setting'  => 'post_type',
+						'operator' => '!=empty',
+					],
 				],
 			],
 			'post__in' => [
@@ -529,30 +538,31 @@ class Mai_Settings_Config {
 					[
 						'setting'  => 'query_by',
 						'operator' => '==',
-						'value'    => 'taxonomy',
+						'value'    => 'tax_meta',
 					],
 				],
 				'acf' => [
 					'collapsed'    => 'field_5df1398916271',
-					'min'          => 1,
-					'max'          => 0,
+					// 'min'          => 1,
+					// 'max'          => 0,
 					'layout'       => 'block',
-					'button_label' => esc_html__( 'Add Taxonomy', 'mai-engine' ),
+					'button_label' => esc_html__( 'Add Condition', 'mai-engine' ),
 					'sub_fields'   => [
 						'taxonomy' => [
-							'key'     => 'field_5df1398916271',
 							'label'   => esc_html__( 'Taxonomy', 'mai-engine' ),
 							'type'    => 'select',
+							'key'     => 'field_5df1398916271',
 							'default' => [],
 							'acf'     => [
 								'ui'   => 1,
 								'ajax' => 1,
+
 							],
 						],
 						'terms' => [
-							'key'      => 'field_5df139a216272',
 							'label'    => esc_html__( 'Terms', 'mai-engine' ),
 							'type'     => 'taxonomy',
+							'key'      => 'field_5df139a216272',
 							'default'  => [],
 							'acf'      => [
 								'field_type' => 'multi_select',
@@ -561,19 +571,31 @@ class Mai_Settings_Config {
 								'save_terms' => 0,
 								'load_terms' => 0,
 								'multiple'   => 0,
+								'conditions' => [
+									[
+										'setting'  => 'taxonomy',
+										'operator' => '!=empty',
+									],
+								]
 							]
 						],
 						'operator' => [
-							'key'     => 'field_5df18f2305c2c',
-							'label'   => esc_html__( 'Operator', 'mai-engine' ),
-							'type'    => 'select',
-							'default' => [],
+							'key'        => 'field_5df18f2305c2c',
+							'label'      => esc_html__( 'Operator', 'mai-engine' ),
+							'type'       => 'select',
+							'default'    => [],
+							'conditions' => [
+								[
+									'setting'  => 'taxonomy',
+									'operator' => '!=empty',
+								],
+							]
 						],
 					],
 				]
 			],
 			'taxonomies_relation' => [
-				'label'      => esc_html__( 'Relation', 'mai-engine' ),
+				'label'      => esc_html__( 'Taxonomies Relation', 'mai-engine' ),
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
@@ -589,7 +611,103 @@ class Mai_Settings_Config {
 					[
 						'setting'  => 'query_by',
 						'operator' => '==',
-						'value'    => 'taxonomy',
+						'value'    => 'tax_meta',
+					],
+					[
+						'setting'  => 'taxonomies',
+						'operator' => '>',
+						'value'    => '1', // More than 1 row.
+					],
+				],
+			],
+			'meta_keys' => [
+				'label'    => esc_html__( 'Meta Keys', 'mai-engine' ),
+				'block'    => true,
+				'archive'  => false,
+				'singular' => false,
+				'type'     => 'repeater',
+				'key'      => 'field_5df2053632dg5',
+				'group'    => [ 'mai_post_grid' ],
+				'default'  => '',
+				'conditions' => [
+					[
+						'setting'  => 'post_type',
+						'operator' => '!=empty',
+					],
+					[
+						'setting'  => 'query_by',
+						'operator' => '==',
+						'value'    => 'tax_meta',
+					],
+				],
+				'acf' => [
+					'collapsed'    => 'field_5df3398916382',
+					// 'min'          => 1,
+					// 'max'          => 0,
+					'layout'       => 'block',
+					'button_label' => esc_html__( 'Add Condition', 'mai-engine' ),
+					'sub_fields'   => [
+						'meta_key' => [
+							'label'   => esc_html__( 'Meta Key', 'mai-engine' ),
+							'type'    => 'text',
+							'key'     => 'field_5df3398916382',
+							'default' => [],
+						],
+						'meta_compare' => [
+							'label'      => esc_html__( 'Compare', 'mai-engine' ),
+							'type'       => 'select',
+							'key'        => 'field_5df29f2315d3d',
+							'default'    => [],
+							'conditions' => [
+								[
+									'setting'  => 'meta_key',
+									'operator' => '!=empty',
+								],
+							]
+						],
+						'meta_value' => [
+							'label'      => esc_html__( 'Meta Value', 'mai-engine' ),
+							'type'       => 'text',
+							'key'        => 'field_5df239a217383',
+							'default'    => [],
+							'conditions' => [
+								[
+									'setting'  => 'meta_key',
+									'operator' => '!=empty',
+								],
+								[
+									'setting'  => 'meta_compare',
+									'operator' => '!=',
+									'value'    => 'EXISTS',
+								],
+							],
+						],
+					],
+				]
+			],
+			'meta_keys_relation' => [
+				'label'      => esc_html__( 'Meta Keys Relation', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => false,
+				'singular'   => false,
+				'type'       => 'select',
+				'key'        => 'field_5df239282737g',
+				'group'      => [ 'mai_post_grid' ],
+				'default'    => 'AND',
+				'conditions' => [
+					[
+						'setting'  => 'post_type',
+						'operator' => '!=empty',
+					],
+					[
+						'setting'  => 'query_by',
+						'operator' => '==',
+						'value'    => 'tax_meta',
+					],
+					[
+						'setting'  => 'meta_keys',
+						'operator' => '>',
+						'value'    => '1', // More than 1 row.
 					],
 				],
 			],
@@ -639,28 +757,27 @@ class Mai_Settings_Config {
 					'ajax' => 1,
 				],
 			],
-			// TODO: meta_query, like tax_query. Allow both?
-			// 'meta_key' => [
-			// 	'label'    => esc_html__( 'Meta key', 'mai-engine' ),
-			// 	'block'    => true,
-			// 	'archive'  => false,
-			// 	'singular' => false,
-			// 	'type'     => 'text',
-			// 	'key'      => 'field_5df1053632cf4',
-			// 	'group'    => [ 'mai_post_grid' ],
-			// 	'default'  => '',
-			// 	'conditions' => [
-			// 		[
-			// 			'setting'  => 'post_type',
-			// 			'operator' => '!=empty',
-			// 		],
-			// 		[
-			// 			'setting'  => 'orderby',
-			// 			'operator' => '==',
-			// 			'value'    => 'meta_value_num',
-			// 		],
-			// 	],
-			// ],
+			'orderby_meta_key' => [
+				'label'    => esc_html__( 'Meta key', 'mai-engine' ),
+				'block'    => true,
+				'archive'  => false,
+				'singular' => false,
+				'type'     => 'text',
+				'key'      => 'field_5df1053632cf4',
+				'group'    => [ 'mai_post_grid' ],
+				'default'  => '',
+				'conditions' => [
+					[
+						'setting'  => 'post_type',
+						'operator' => '!=empty',
+					],
+					[
+						'setting'  => 'orderby',
+						'operator' => '==',
+						'value'    => 'meta_value_num',
+					],
+				],
+			],
 			'order' => [
 				'label'      => esc_html__( 'Order', 'mai-engine' ),
 				'block'      => true,
@@ -697,6 +814,24 @@ class Mai_Settings_Config {
 			 * WP_Term_Query *
 			 *****************/
 		];
+	}
+
+	function get_keys() {
+		$keys = [];
+		foreach( $this->fields as $name => $field ) {
+			// Set key.
+			$keys[ $name ] = $field['key'];
+			// Skip if no sub fields.
+			if ( ! isset( $field['acf']['sub_fields'] ) ) {
+				continue;
+			}
+			// Add sub fields to top level keys array.
+			foreach( $field['acf']['sub_fields'] as $sub_name => $sub_field ) {
+				// Set key.
+				$keys[ $sub_name ] = $sub_field['key'];
+			}
+		}
+		return $keys;
 	}
 
 	function get_choices( $field ) {
@@ -761,9 +896,6 @@ class Mai_Settings_Config {
 			'bottom' => esc_html__( 'Bottom', 'mai-engine' ),
 		];
 	}
-	// function columns_responsive() {
-	// 	return $this->get_columns_choices( true );
-	// }
 	function columns() {
 		return $this->get_columns_choices();
 	}
@@ -794,10 +926,10 @@ class Mai_Settings_Config {
 	}
 	function post_type() {
 		$choices    = [];
-		$post_types = get_post_types( array(
+		$post_types = get_post_types( [
 			'public'             => true,
 			'publicly_queryable' => true,
-		), 'objects', 'or' );
+		], 'objects', 'or' );
 		if ( $post_types ) {
 			foreach ( $post_types as $name => $post_type ) {
 				$choices[ $name ] = $post_type->label;
@@ -809,11 +941,11 @@ class Mai_Settings_Config {
 		return [
 			'date'     => esc_html__( 'Date', 'mai-engine' ),
 			'title'    => esc_html__( 'Title', 'mai-engine' ),
-			'taxonomy' => esc_html__( 'Taxonomy', 'mai-engine' ),
+			'tax_meta' => esc_html__( 'Taxonomy/Meta', 'mai-engine' ),
 			'parent'   => esc_html__( 'Parent', 'mai-engine' ),
 		];
 	}
-	function taxonomies() {
+	function taxonomy() {
 		$choices = [];
 		if ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) {
 			$taxonomies = get_object_taxonomies( $_REQUEST['post_type'], 'objects' );
@@ -831,15 +963,39 @@ class Mai_Settings_Config {
 			'NOT IN' => esc_html__( 'Not In', 'mai-engine' ),
 		];
 	}
+	function taxonomies_relation() {
+		return [
+			'AND' => esc_html__( 'And', 'mai-engine' ),
+			'OR'  => esc_html__( 'Or', 'mai-engine' ),
+		];
+	}
+	function meta_compare() {
+		return [
+			'='           => __( 'Is equal to', 'mai-engine' ),
+			'!='          => __( 'Is not equal to', 'mai-engine' ),
+			'>'           => __( 'Is greater than', 'mai-engine' ),
+			'>='          => __( 'Is great than or equal to', 'mai-engine' ),
+			'<'           => __( 'Is less than', 'mai-engine' ),
+			'<='          => __( 'Is less than or equal to', 'mai-engine' ),
+			'EXISTS'      => __( 'Exists', 'mai-engine' ),
+			'NOT EXISTS'  => __( 'Does not exist', 'mai-engine' ),
+			// 'LIKE'        => __( 'LIKE', 'mai-engine' ),
+			// 'NOT LIKE'    => __( 'NOT LIKE', 'mai-engine' ),
+			// 'IN'          => __( 'IN', 'mai-engine' ),
+			// 'NOT IN'      => __( 'NOT IN', 'mai-engine' ),
+			// 'BETWEEN'     => __( 'BETWEEN', 'mai-engine' ),
+			// 'NOT BETWEEN' => __( 'NOT BETWEEN', 'mai-engine' ),
+		];
+	}
 	function post_parent__in() {
 		$choices = [];
 		if ( ! ( isset( $_REQUEST['post_type'] ) && ! empty( $_REQUEST['post_type'] ) ) ) {
 			return $choices;
 		}
-		$posts = acf_get_grouped_posts( array(
+		$posts = acf_get_grouped_posts( [
 			'post_type'   => $_REQUEST['post_type'],
 			'post_status' => 'publish',
-		) );
+		] );
 		if ( ! $posts ) {
 			return $choices;
 		}
@@ -911,7 +1067,7 @@ class Mai_Settings_Config {
 					if ( 'sub_fields' === $key ) {
 						$data['sub_fields'] = [];
 						foreach( $value as $sub_key => $sub_value ) {
-							// $data['sub_fields'][] = $this->get_data( $sub_key, $field );
+							$data['sub_fields'][] = $this->get_data( $sub_key, $sub_value );
 						}
 					}
 					// Standard field data.
@@ -999,7 +1155,7 @@ class Mai_Settings_Config {
 		$array = [];
 		if ( $this->acf ) {
 			$array = [
-				'field'    => $this->fields[ $condition['setting'] ]['key'],
+				'field'    => $this->keys[ $condition['setting'] ],
 				'operator' => $condition['operator'],
 			];
 			// ACF doesn't have a value for operators like '!=empty'.
