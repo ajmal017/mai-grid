@@ -22,12 +22,12 @@ jQuery(document).ready(function($) {
 	*/
 	function initialize_sortable_field( $field ) {
 
-		if ( ! $field.hasClass( 'mai-acf-sortable-checkboxes' ) ) {
+		if ( ! $field.hasClass( 'mai-sortable' ) ) {
 			return;
 		}
 
 		// Get sortable checkboxes.
-		// $field_wrap = $( '.mai-acf-sortable-checkboxes' );
+		// $field_wrap = $( '.mai-sortable' );
 
 		// // Bail if no sortable checkboxes.
 		// if ( ! $field_wrap.length ) {

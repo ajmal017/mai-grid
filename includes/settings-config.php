@@ -47,7 +47,7 @@ class Mai_Settings_Config {
 				'type'     => ( 'block' === $this->context ) ? 'checkbox': 'sortable',
 				'key'      => 'field_5e441d93d6236',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'  => [ 'image', 'title' ],
+				'default'  => $this->get_show_default(),
 				'acf'      => [
 					'wrapper' => [
 						'width' => '',
@@ -889,10 +889,53 @@ class Mai_Settings_Config {
 		return $keys;
 	}
 
+	// TODO: Check post type supports? Needs to match the choices too.
+	function get_show_default() {
+		switch ( $this->context ) {
+			case 'block':
+				$default = [ 'image', 'title' ];
+				break;
+			case 'archive':
+				$default = [
+					'image',
+					'genesis_entry_header',
+					'title',
+					'header_meta',
+					'genesis_before_entry_content',
+					'excerpt',
+					'genesis_entry_content',
+					'more_link',
+					'genesis_after_entry_content',
+					'genesis_entry_footer',
+				];
+				break;
+			case 'singular':
+				$default = [
+					'image',
+					'genesis_entry_header',
+					'title',
+					'header_meta',
+					'genesis_before_entry_content',
+					'excerpt',
+					'content',
+					'genesis_entry_content',
+					'more_link',
+					'genesis_after_entry_content',
+					'footer_meta',
+					'genesis_entry_footer',
+				];
+				break;
+			default:
+				$default = [];
+		}
+		return $default;
+	}
+
 	function get_choices( $field ) {
 		return $this->$field();
 	}
 
+	// TODO: Check post type supports? Needs to match the choices too.
 	function show() {
 		// All elements.
 		$show = [
@@ -1191,6 +1234,10 @@ class Mai_Settings_Config {
 			// Maybe add default.
 			if ( isset( $field['default'] ) ) {
 				$data['default'] = $field['default'];
+			}
+			// Maybe add choices.
+			if ( method_exists( $this, $name ) ) {
+				$data['choices'] = $this->get_choices( $name );
 			}
 		}
 

@@ -594,7 +594,7 @@ class Mai_Entry {
 		// Content.
 		switch ( $this->type ) {
 			case 'post':
-				$content = strip_shortcodes( get_the_content( null, false, $entry ) );
+				$content = strip_shortcodes( get_the_content( null, false, $this->entry ) );
 				break;
 			case 'term':
 				$content = term_description( $this->id );

@@ -1,6 +1,6 @@
 /* sortable */
 
-.mai-acf-sortable-checkboxes ul.acf-checkbox-list > li {
+.mai-sortable ul.acf-checkbox-list > li {
 	display: grid;
 	grid-template-columns: 1fr 40px;
 	align-items: center;
@@ -10,27 +10,27 @@
 	border-radius: 2px;
 }
 
-.mai-acf-sortable-checkboxes ul.acf-checkbox-list > li + li {
+.mai-sortable ul.acf-checkbox-list > li + li {
 	margin-top: 6px;
 }
 
-.mai-acf-sortable-checkboxes ul.acf-checkbox-list > li label {
+.mai-sortable ul.acf-checkbox-list > li label {
 	display: flex;
 	align-items: center;
 	padding: 4px 16px;
 }
 
-.mai-acf-sortable-checkboxes ul.acf-checkbox-list > li label input {
+.mai-sortable ul.acf-checkbox-list > li label input {
 	margin-right: 12px;
 }
 
-.mai-acf-sortable-checkboxes ul.acf-checkbox-list > li.sortable-checkbox-placeholder {
+.mai-sortable ul.acf-checkbox-list > li.sortable-checkbox-placeholder {
 	height: 34px;
 	background: #f1f1f1;
 	border: 1px solid #ccd0d4;
 }
 
-.mai-acf-sortable-checkboxes ul.acf-checkbox-list .mai-acf-sortable-handle {
+.mai-sortable ul.acf-checkbox-list .mai-acf-sortable-handle {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -39,7 +39,7 @@
 	cursor: move;
 }
 
-.mai-acf-sortable-checkboxes ul.acf-checkbox-list > li svg {
+.mai-sortable ul.acf-checkbox-list > li svg {
 	width: 16px;
 	fill: currentColor;
 }
@@ -76,7 +76,7 @@
 	border-bottom: 1px solid #ccd0d4;
 }
 
-.acf-block-component .acf-block-fields div.acf-field.mai-acf-sortable-checkboxes ~ div.acf-field.mai-grid-show-conditional::after {
+.acf-block-component .acf-block-fields div.acf-field.mai-sortable ~ div.acf-field.mai-grid-show-conditional::after {
 	content: '';
 	position: absolute;
 	top: 0;
@@ -85,11 +85,11 @@
 	border-left: 1px solid #ccd0d4;
 }
 
-/* .acf-block-component .acf-block-fields div.acf-field.mai-acf-sortable-checkboxes ~ div.acf-field.mai-grid-show-conditional:nth-last-of-type(1) {
+/* .acf-block-component .acf-block-fields div.acf-field.mai-sortable ~ div.acf-field.mai-grid-show-conditional:nth-last-of-type(1) {
 	background-color: violet;
 }
 
-.acf-block-component .acf-block-fields div.acf-field.mai-acf-sortable-checkboxes ~ div.acf-field.mai-grid-show-conditional:last-of-type::after {
+.acf-block-component .acf-block-fields div.acf-field.mai-sortable ~ div.acf-field.mai-grid-show-conditional:last-of-type::after {
 	display: none;
 } */
 
