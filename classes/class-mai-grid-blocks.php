@@ -78,7 +78,7 @@ final class Mai_Grid_Blocks  {
 
 	function blocks_init() {
 		// $this->config = mai_get_settings_config();
-		$this->config = new Mai_Settings_Config( 'block' );
+		$this->config = new Mai_Entry_Settings( 'block' );
 		$this->fields = $this->config->get_fields();
 		$this->run_filters();
 	}

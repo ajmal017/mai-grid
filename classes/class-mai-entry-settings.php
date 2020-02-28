@@ -1,23 +1,19 @@
 <?php
 
-class Mai_Settings_Config {
+class Mai_Entry_Settings {
 
 	public $context;
+	public $type;
 	public $fields;
+	public $defaults;
 	public $keys;
-	public $field_groups;
 
-	function __construct( $context ) {
-		if ( ! $context ) {
-			return;
-		}
-		$this->context      = $context;
-		$this->fields       = $this->get_fields();
-		$this->keys         = $this->get_keys();
-		$this->field_groups = [
-			'mai_post_grid' => 'group_5de9b54440a2f',
-			'mai_term_grid' => 'group_5de9b54440a2g',
-		];
+	function __construct( $context, $type = 'post' ) {
+		$this->context  = $context;
+		$this->type     = $type;
+		$this->fields   = $this->get_fields();
+		$this->defaults = $this->get_defaults();
+		$this->keys     = $this->get_keys();
 	}
 
 	/**
@@ -227,16 +223,31 @@ class Mai_Settings_Config {
 				'default'  => '',
 			],
 			'align_text_vertical' => [
-				'label'    => esc_html__( 'Align Text (vertical)', 'mai-engine' ),
-				'block'    => true,
-				'archive'  => true,
-				'singular' => false,
-				'sanitize' => 'esc_html',
-				'type'     => ( 'block' === $this->context ) ? 'button_group' : 'radio-buttonset',
-				'key'      => 'field_5e2f519edc912',
-				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'  => '',
-				// TODO: Conditions to hide unless image position is where need to use this setting.
+				'label'      => esc_html__( 'Align Text (vertical)', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => true,
+				'singular'   => false,
+				'sanitize'   => 'esc_html',
+				'type'       => ( 'block' === $this->context ) ? 'button_group' : 'radio-buttonset',
+				'key'        => 'field_5e2f519edc912',
+				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
+				'default'    => '',
+				'conditions' => [
+					[
+						[
+							'setting'  => 'image_position',
+							'operator' => '==',
+							'value'    => 'left',
+						],
+					],
+					[
+						[
+							'setting'  => 'image_position',
+							'operator' => '==',
+							'value'    => 'background',
+						],
+					],
+				],
 			],
 			/**********
 			 * Layout *
@@ -375,7 +386,7 @@ class Mai_Settings_Config {
 				'type'     => 'text',
 				'key'      => 'field_5c8542d6a67c5',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'  => '24px',
+				'default'  => ( 'block' === $this->context ) ? '24px' : '36px',
 			],
 			'row_gap' => [
 				'label'    => esc_html__( 'Row Gap', 'mai-engine' ),
@@ -386,7 +397,7 @@ class Mai_Settings_Config {
 				'type'     => 'text',
 				'key'      => 'field_5e29f1785bcb6',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'  => '24px',
+				'default'  => ( 'block' === $this->context ) ? '24px' : '64px',
 			],
 			/***********
 			 * Entries *
@@ -871,8 +882,25 @@ class Mai_Settings_Config {
 		];
 	}
 
+	function get_defaults() {
+		static $defaults = [];
+		if ( $defaults ) {
+			return;
+		}
+		return array_merge(
+			[
+				'context' => $this->context,
+				'type'    => $this->type,
+			],
+			wp_list_pluck( $this->fields, 'default' )
+		);
+	}
+
 	function get_keys() {
-		$keys = [];
+		static $keys = [];
+		if ( $keys ) {
+			return;
+		}
 		foreach( $this->fields as $name => $field ) {
 			// Set key.
 			$keys[ $name ] = $field['key'];
@@ -911,9 +939,9 @@ class Mai_Settings_Config {
 				break;
 			case 'singular':
 				$default = [
-					'image',
 					'genesis_entry_header',
 					'title',
+					'image',
 					'header_meta',
 					'genesis_before_entry_content',
 					'excerpt',
@@ -1024,6 +1052,21 @@ class Mai_Settings_Config {
 	}
 	function columns_xs() {
 		return $this->get_columns_choices( true );
+	}
+	function get_columns_choices( $clear = false ) {
+		$choices = [
+			1 => esc_html__( '1', 'mai-engine' ),
+			2 => esc_html__( '2', 'mai-engine' ),
+			3 => esc_html__( '3', 'mai-engine' ),
+			4 => esc_html__( '4', 'mai-engine' ),
+			5 => esc_html__( '5', 'mai-engine' ),
+			6 => esc_html__( '6', 'mai-engine' ),
+			0 => esc_html__( 'Auto', 'mai-engine' ),
+		];
+		if ( $clear ) {
+			$choices = array_merge( [ '' => esc_html__( 'Clear', 'mai-engine' ) ], $choices );
+		}
+		return $choices;
 	}
 	function align_columns() {
 		return [
@@ -1145,22 +1188,6 @@ class Mai_Settings_Config {
 		];
 	}
 
-	function get_columns_choices( $clear = false ) {
-		$choices = [
-			1 => esc_html__( '1', 'mai-engine' ),
-			2 => esc_html__( '2', 'mai-engine' ),
-			3 => esc_html__( '3', 'mai-engine' ),
-			4 => esc_html__( '4', 'mai-engine' ),
-			5 => esc_html__( '5', 'mai-engine' ),
-			6 => esc_html__( '6', 'mai-engine' ),
-			0 => esc_html__( 'Auto', 'mai-engine' ),
-		];
-		if ( $clear ) {
-			$choices = array_merge( [ '' => esc_html__( 'Clear', 'mai-engine' ) ], $choices );
-		}
-		return $choices;
-	}
-
 	function get_data( $name, $field, $section_id = '' ) {
 
 		// If an ACF field.
@@ -1241,6 +1268,7 @@ class Mai_Settings_Config {
 			}
 		}
 
+		// acf_log( $data );
 
 		// TODO: Handle message/description for checkbox field (Boxed).
 

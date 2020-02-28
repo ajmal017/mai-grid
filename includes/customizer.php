@@ -12,6 +12,19 @@ add_filter( 'kirki_config', function( $config ) {
 	return $config;
 });
 
+// add_filter( 'kirki_config', function( $config ) {
+// 	return wp_parse_args( array(
+// 		'logo_image'   => 'https://kirki.org/images/logo.png',
+// 		'description'  => esc_html__( 'The theme description.', 'kirki' ),
+// 		'color_accent' => '#0091ea',
+// 		'color_back'   => '#ffffff',
+// 	), $config );
+// });
+
+add_action( 'customize_controls_enqueue_scripts', function() {
+	mai_enqueue_asset( 'fields', 'css' );
+});
+
 add_action( 'init', 'maiengine_kirki_settings' );
 function maiengine_kirki_settings() {
 
@@ -21,7 +34,7 @@ function maiengine_kirki_settings() {
 	}
 
 	// Settings config.
-	$config = new Mai_Settings_Config( 'archive' );
+	$config = new Mai_Entry_Settings( 'archive' );
 	$fields = $config->get_fields();
 
 	// IDs.

@@ -7,24 +7,22 @@
  */
 class Mai_Grid_Base {
 
+	protected $context;
+	protected $type;
 	protected $fields;
+	protected $keys;
 	protected $args;
-	protected $version;
 
 	function __construct( $args ) {
-		$config        = new Mai_Settings_Config( 'block' );
+		$config        = new Mai_Entry_Settings( 'block' );
+		$this->context = 'block';
+		$this->type    = $config->type;
 		$this->fields  = $config->get_fields();
 		$this->keys    = $config->get_keys();
 		$this->args    = $this->get_args( $args );
-		$this->version = MAI_GRID_VERSION;
 	}
 
 	function get_args( $args ) {
-
-		// Bail if no type & context.
-		if ( ! isset( $args['type'], $args['context'] ) ) {
-			return;
-		}
 
 		/**
 		 * Get defaults and parse args.
@@ -33,8 +31,8 @@ class Mai_Grid_Base {
 		 * Check for sub fields first.
 		 */
 		$defaults = [
-			'type'    => 'post',  // post, term, user.
-			'context' => 'block', // block, singular, archive.
+			'context' => $this->context,
+			'type'    => $this->type,  // post, term, user.
 			'class'   => '',
 		];
 		foreach( $this->fields as $name => $field ) {
@@ -256,35 +254,18 @@ class Mai_Grid_Base {
 	function enqueue_assets() {
 
 		// Default layout CSS.
-		$this->enqueue_asset( 'entries', 'css' );
+		mai_enqueue_asset( 'entries', 'css' );
 
 		if ( is_admin() ) {
 
 			// Default admin scripts.
-			$this->enqueue_asset( 'admin', 'css' );
-			// $this->enqueue_asset( 'admin', 'js' );
+			mai_enqueue_asset( 'fields', 'css' );
 
 			// Query JS.
 			switch ( $this->args['type'] ) {
 				case 'post':
-					$this->enqueue_asset( 'wp-query', 'js' );
-					// $fields = $keys = [];
-					// foreach( $this->fields as $name => $field ) {
-					// 	if ( ! $field['block'] ) {
-					// 		continue;
-					// 	}
-					// 	$fields[ $name ] = $field['key'];
-					// 	$keys[]          = $field['key'];
-					// 	// Add sub_fields.
-					// 	if ( isset( $field['acf']['sub_fields'] ) ) {
-					// 		foreach( $field['acf']['sub_fields'] as $sub_name => $sub_field ) {
-					// 			$fields[ $sub_name ] = $sub_field['key'];
-					// 			$keys[]              = $sub_field['key'];
-					// 		}
-					// 	}
-					// }
-					// vdd( $this->keys );
-					wp_localize_script( 'mai-grid-wp-query', 'maiGridWPQueryVars', [
+					mai_enqueue_asset( 'wp-query', 'js' );
+					wp_localize_script( 'mai-wp-query', 'maiGridWPQueryVars', [
 						'fields' => $this->fields,
 						'keys'   => $this->keys,
 					] );
@@ -292,42 +273,6 @@ class Mai_Grid_Base {
 				case 'term':
 				break;
 			}
-		}
-	}
-
-	/**
-	 * Enqueue an asset.
-	 *
-	 * @param   string  $name          The asset name.
-	 * @param   string  $type          The type. Typically js or css.
-	 * @param   array   $dependencies  Script dependencies.
-	 *
-	 * @return  void
-	 */
-	function enqueue_asset( $name, $type, $dependencies = [] ) {
-		// TODO: These should get cleaned up once in the engine.
-		$base_url = trailingslashit( MAI_GRID_PLUGIN_URL ) . 'assets/' . $type;
-		$base_dir = trailingslashit( MAI_GRID_PLUGIN_DIR ) . 'assets/' . $type;
-		$suffix   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
-		if ( ! file_exists( "{$base_dir}/{$name}{$suffix}.{$type}" ) ) {
-			// Fallback if someone overrides the CSS/JS in a theme and doesn't proved .min version.
-			if ( '.min' === $suffix ) {
-				if ( file_exists( "{$base_dir}/{$name}.{$type}" ) ) {
-					$suffix = '';
-				} else {
-					return;
-				}
-			}
-		}
-		$url     = sprintf( '%s/%s%s.%s', $base_url, $name, $suffix, $type );
-		$version = $this->version . '.' . date ( 'njYHi', filemtime( "{$base_dir}/{$name}{$suffix}.{$type}" ) );
-		switch ( $type ) {
-			case 'css':
-				wp_enqueue_style( "mai-grid-{$name}", $url, $dependencies, $version );
-			break;
-			case 'js':
-				wp_enqueue_script( "mai-grid-{$name}", $url, $dependencies, $version, true );
-			break;
 		}
 	}
 

@@ -52,8 +52,12 @@
 
 /* Elements */
 
-.entry > * + *,
+/* .entry > * + *,
 .entries-wrap > * + * {
+	margin-top: 12px;
+} */
+
+.entry > * + * {
 	margin-top: 12px;
 }
 

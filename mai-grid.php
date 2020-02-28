@@ -151,6 +151,7 @@ final class Mai_Grid_Plugin {
 		// Classes.
 		// foreach ( glob( MAI_GRID_CLASSES_DIR . '*.php' ) as $file ) { include $file; }
 		// include_once __DIR__ . '/classes/class-template-loader.php';
+		include_once __DIR__ . '/classes/class-mai-entry-settings.php';
 		include_once __DIR__ . '/classes/class-mai-entry.php';
 		include_once __DIR__ . '/classes/class-mai-grid-base.php';
 		include_once __DIR__ . '/classes/class-mai-grid-blocks.php';
@@ -197,16 +198,6 @@ final class Mai_Grid_Plugin {
 		// Setup the updater.
 		// $updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-grid-entries/', __FILE__, 'mai-grid' );
 	}
-
-	// function register_admin_scripts() {
-	// }
-
-	// function register_assets() {
-		// $base   = MAI_GRID_PLUGIN_URL . 'assets';
-		// $suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		// wp_register_script( 'mai-grid-entries-admin', "{$base}/js/mai-grid-admin{$suffix}.js", array(), MAI_GRID_VERSION, true );
-		// wp_register_style( 'mai-grid', "{$base}/css/mai-grid-entries{$suffix}.css", array(), MAI_GRID_VERSION );
-	// }
 
 	/**
 	 * Add path to load acf json files.

@@ -7,7 +7,7 @@ function mai_register_grid_field_groups() {
 	$post_grid = $term_grid = $user_grid = [];
 
 	// Settings config.
-	$config = new Mai_Settings_Config( 'block' );
+	$config = new Mai_Entry_Settings( 'block' );
 	$fields = $config->get_fields();
 
 	// Setup fields.
@@ -38,7 +38,7 @@ function mai_register_grid_field_groups() {
 	}
 
 	acf_add_local_field_group( array(
-		'key'      => $config->field_groups['mai_post_grid'],
+		'key'      => 'group_5de9b54440a2p',
 		'title'    => __( 'Mai Post Grid', 'mai-engine' ),
 		'fields'   => $post_grid,
 		'location' => array(
@@ -54,7 +54,7 @@ function mai_register_grid_field_groups() {
 	));
 
 	acf_add_local_field_group( array(
-		'key'      => $config->field_groups['mai_term_grid'],
+		'key'      => 'group_5de9b54440a2t',
 		'title'    => __( 'Mai Term Grid', 'mai-engine' ),
 		'fields'   => $term_grid,
 		'location' => array(
@@ -68,5 +68,21 @@ function mai_register_grid_field_groups() {
 		),
 		'active' => true,
 	));
+
+	// acf_add_local_field_group( array(
+	// 	'key'      => 'group_5de9b54440a2u',
+	// 	'title'    => __( 'Mai Term Grid', 'mai-engine' ),
+	// 	'fields'   => $user_grid,
+	// 	'location' => array(
+	// 		array(
+	// 			array(
+	// 				'param'    => 'block',
+	// 				'operator' => '==',
+	// 				'value'    => 'acf/mai-user-grid',
+	// 			),
+	// 		),
+	// 	),
+	// 	'active' => true,
+	// ));
 
 }
