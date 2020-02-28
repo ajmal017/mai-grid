@@ -12,107 +12,79 @@ class Mai_Grid_Base {
 	protected $version;
 
 	function __construct( $args ) {
-
-		$config          = new Mai_Settings_Config;
-		$this->fields    = $config->get_fields();
-		$this->keys      = $config->get_keys();
-		$this->args      = $this->get_args( $args );
-		$this->version   = MAI_GRID_VERSION;
+		$config        = new Mai_Settings_Config( 'block' );
+		$this->fields  = $config->get_fields();
+		$this->keys    = $config->get_keys();
+		$this->args    = $this->get_args( $args );
+		$this->version = MAI_GRID_VERSION;
 	}
 
 	function get_args( $args ) {
 
+		// Bail if no type & context.
+		if ( ! isset( $args['type'], $args['context'] ) ) {
+			return;
+		}
+
+		/**
+		 * Get defaults and parse args.
+		 * Skip tabs.
+		 * Skip if not the type/context we need.
+		 * Check for sub fields first.
+		 */
+		$defaults = [
+			'type'    => 'post',  // post, term, user.
+			'context' => 'block', // block, singular, archive.
+			'class'   => '',
+		];
+		foreach( $this->fields as $name => $field ) {
+			// Skip if not the context we want.
+			if ( ! ( isset( $field[ $args['context'] ] ) && $field[ $args['context'] ] ) ) {
+				continue;
+			}
+			// Skip if field type is a tab.
+			if ( 'tab' === $field['type'] ) {
+				continue;
+			}
+			// Skip if block and not the block we need.
+			if ( 'block' === $args['context'] ) {
+				/**
+				 * Skip if not in the grid we need.
+				 * Nested conditionals so we don't do in_array() for no reason if not a block.
+				 */
+				if ( ! in_array( sprintf( 'mai_%s_grid', $args['type'] ), $field['group'] ) ) {
+					continue;
+				}
+			}
+			// Add to our defaults.
+			$defaults[ $name ] = $field;
+		}
+
 		// Parse args.
-		$args = shortcode_atts( [
-			'type'                   => 'post',  // post, term, user.
-			'context'                => 'block', // block, singular, archive.
-			'class'                  => '',
-			// Display.
-			'show'                   => $this->fields['show']['default'],
-			'image_orientation'      => $this->fields['image_orientation']['default'],
-			'image_size'             => $this->fields['image_size']['default'],
-			'image_position'         => $this->fields['image_position']['default'],
-			'header_meta'            => $this->fields['header_meta']['default'],
-			'content_limit'          => $this->fields['content_limit']['default'],
-			'more_link_text'         => $this->fields['more_link_text']['default'],
-			'footer_meta'            => $this->fields['footer_meta']['default'],
-			'boxed'                  => $this->fields['boxed']['default'],
-			'align_text'             => $this->fields['align_text']['default'],
-			'align_text_vertical'    => $this->fields['align_text_vertical']['default'],
-			// Layout.
-			'columns_responsive'     => $this->fields['columns_responsive']['default'],
-			'columns'                => $this->fields['columns']['default'],
-			'columns_md'             => $this->fields['columns_md']['default'],
-			'columns_sm'             => $this->fields['columns_sm']['default'],
-			'columns_xs'             => $this->fields['columns_xs']['default'],
-			'align_columns'          => $this->fields['align_columns']['default'],
-			'align_columns_vertical' => $this->fields['align_columns_vertical']['default'],
-			'column_gap'             => $this->fields['column_gap']['default'],
-			'row_gap'                => $this->fields['row_gap']['default'],
-			// WP_Query.
-			'post_type'              => $this->fields['post_type']['default'],
-			'number'                 => $this->fields['number']['default'],
-			'offset'                 => $this->fields['offset']['default'],
-			'query_by'               => $this->fields['query_by']['default'],
-			'post__in'               => $this->fields['post__in']['default'],
-			'post__not_in'           => $this->fields['post__not_in']['default'],
-			'taxonomies'             => $this->fields['taxonomies']['default'],
-			// 'taxonomy'               => $this->fields['taxonomies']['acf']['sub_fields']['taxonomy']['default'],
-			// 'terms'                  => $this->fields['taxonomies']['acf']['sub_fields']['terms']['default'],
-			// 'operator'               => $this->fields['taxonomies']['acf']['sub_fields']['operator']['default'],
-			'taxonomies_relation'    => $this->fields['taxonomies_relation']['default'],
-			'post_parent__in'        => $this->fields['post_parent__in']['default'],
-			'orderby'                => $this->fields['orderby']['default'],
-			'orderby_meta_key'       => $this->fields['orderby_meta_key']['default'],
-			'order'                  => $this->fields['order']['default'],
-			'exclude'                => $this->fields['exclude']['default'],
-		], $args, 'mai_grid' );
+		$args = wp_parse_args( $args, $defaults );
 
 		// Sanitize.
-		$args = [
-			'type'                   => $this->sanitize( $args['type'], 'esc_html' ),
-			'context'                => $this->sanitize( $args['context'], 'esc_html' ),
-			'class'                  => $this->sanitize( $args['class'], 'esc_html' ),
-			// Display.
-			'show'                   => $this->sanitize( $args['show'], 'esc_html' ),
-			'image_orientation'      => $this->sanitize( $args['image_orientation'], 'esc_html' ),
-			'image_size'             => $this->sanitize( $args['image_size'], 'esc_html' ),
-			'image_position'         => $this->sanitize( $args['image_position'], 'esc_html' ),
-			'header_meta'            => $this->sanitize( $args['header_meta'], 'esc_html' ),
-			'content_limit'          => $this->sanitize( $args['content_limit'], 'esc_html' ),
-			'more_link_text'         => $this->sanitize( $args['more_link_text'], 'esc_html' ),
-			'footer_meta'            => $this->sanitize( $args['footer_meta'], 'esc_html' ),
-			'boxed'                  => $this->sanitize( $args['boxed'], 'esc_html' ),
-			'align_text'             => $this->sanitize( $args['align_text'], 'esc_html' ),
-			'align_text_vertical'    => $this->sanitize( $args['align_text_vertical'], 'esc_html' ),
-			// Layout.
-			'columns_responsive'     => $this->sanitize( $args['columns_responsive'], 'esc_html' ),
-			'columns'                => $this->sanitize( $args['columns'], 'esc_html' ),
-			'columns_md'             => $this->sanitize( $args['columns_md'], 'esc_html' ),
-			'columns_sm'             => $this->sanitize( $args['columns_sm'], 'esc_html' ),
-			'columns_xs'             => $this->sanitize( $args['columns_xs'], 'esc_html' ),
-			'align_columns'          => $this->sanitize( $args['align_columns'], 'esc_html' ),
-			'align_columns_vertical' => $this->sanitize( $args['align_columns_vertical'], 'esc_html' ),
-			'column_gap'             => $this->sanitize( $args['column_gap'], 'esc_html' ),
-			'row_gap'                => $this->sanitize( $args['row_gap'], 'esc_html' ),
-			// WP_Query.
-			'post_type'              => (array) $this->sanitize( $args['post_type'], 'esc_html' ),
-			'number'                 => $this->sanitize( $args['number'], 'absint' ),
-			'offset'                 => $this->sanitize( $args['offset'], 'absint' ),
-			'query_by'               => $this->sanitize( $args['query_by'], 'esc_html' ),
-			'post__in'               => (array) $this->sanitize( $args['post__in'], 'absint' ),
-			'post__not_in'           => (array) $this->sanitize( $args['post__not_in'], 'absint' ),
-			'taxonomies'             => $this->sanitize( $args['taxonomies'], 'esc_html' ),
-			// 'taxonomy'               => $this->sanitize( $args['taxonomy'], 'esc_html' ),
-			// 'terms'                  => $this->sanitize( $args['terms'], 'esc_html' ),
-			// 'operator'               => $this->sanitize( $args['operator'], 'esc_html' ),
-			'taxonomies_relation'    => $this->sanitize( $args['taxonomies_relation'], 'esc_html' ),
-			'post_parent__in'        => $this->sanitize( $args['post_parent__in'], 'absint' ),
-			'orderby'                => $this->sanitize( $args['orderby'], 'esc_html' ),
-			'orderby_meta_key'       => $this->sanitize( $args['orderby_meta_key'], 'esc_html' ),
-			'order'                  => $this->sanitize( $args['order'], 'esc_html' ),
-			'exclude'                => (array) $this->sanitize( $args['exclude'], 'esc_html' ),
-		];
+		foreach( $args as $name => $value ) {
+			// Has sub fields.
+			if ( isset( $this->fields[ $name ]['acf']['sub_fields'] ) ) {
+				if ( $value ) {
+					$sub_values = [];
+					foreach( $value as $index => $group ) {
+						foreach( $group as $sub_name => $sub_value ) {
+							$field = $this->fields[ $name ]['acf']['sub_fields'][ $sub_name ];
+							$sub_values[ $index ][ $sub_name ] = $this->sanitize( $sub_value, $field['sanitize'] );
+						}
+					}
+					$args[ $name ] = $sub_values;
+				}
+			}
+			// Standard field.
+			else {
+				// Get the sanitization function, as type/context aren't actual fields.
+				$sanitize = isset( $this->fields[ $name ] ) ? $this->fields[ $name ]['sanitize'] : 'esc_html';
+				$args[ $name ] = $this->sanitize( $value, $sanitize );
+			}
+		}
 
 		return apply_filters( 'mai_grid_args', $args );
 	}
@@ -191,29 +163,35 @@ class Mai_Grid_Base {
 					$query_args['post__in'] = $this->args['post__in'];
 				}
 			break;
-			case 'taxonomy':
-				$tax_query = [];
-				foreach( $this->args['taxonomies'] as $taxo ) {
-					// Skip if we don't have all the tax query args.
-					if ( ! ( $taxo['taxonomy'] && $taxo['taxonomy'] && $taxo['taxonomy'] ) ) {
-						continue;
-					}
-					// Set the value.
-					$tax_query[] = [
-						'taxonomy' => $taxo['taxonomy'],
-						'field'    => 'id',
-						'terms'    => $taxo['terms'],
-						'operator' => $taxo['operator'],
-					];
-				}
-				// If we have tax query values.
-				if ( $tax_query ) {
-					$query_args['tax_query'] = $tax_query;
-					if ( $this->args['taxonomies_relation'] ) {
-						$query_args['tax_query'][] = [
-							'relation' => $this->args['taxonomies_relation'],
+			case 'tax_meta':
+				$tax_query = $meta_query = [];
+				if ( $this->args['taxonomies'] ) {
+					foreach( $this->args['taxonomies'] as $taxo ) {
+						// Skip if we don't have all the tax query args.
+						if ( ! ( $taxo['taxonomy'] && $taxo['taxonomy'] && $taxo['taxonomy'] ) ) {
+							continue;
+						}
+						// Set the value.
+						$tax_query[] = [
+							'taxonomy' => $taxo['taxonomy'],
+							'field'    => 'id',
+							'terms'    => $taxo['terms'],
+							'operator' => $taxo['operator'],
 						];
 					}
+					// If we have tax query values.
+					if ( $tax_query ) {
+						$query_args['tax_query'] = $tax_query;
+						if ( $this->args['taxonomies_relation'] ) {
+							$query_args['tax_query'][] = [
+								'relation' => $this->args['taxonomies_relation'],
+							];
+						}
+					}
+				}
+				// TODO: Add meta_query.
+				if ( $this->args['meta_keys'] ) {
+
 				}
 			break;
 		}

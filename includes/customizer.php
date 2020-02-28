@@ -21,7 +21,7 @@ function maiengine_kirki_settings() {
 	}
 
 	// Settings config.
-	$config = new Mai_Settings_Config( $acf = false );
+	$config = new Mai_Settings_Config( 'archive' );
 	$fields = $config->get_fields();
 
 	// IDs.

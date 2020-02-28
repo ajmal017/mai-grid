@@ -2,13 +2,16 @@
 
 class Mai_Settings_Config {
 
-	public $acf;
+	public $context;
 	public $fields;
 	public $keys;
 	public $field_groups;
 
-	function __construct( $acf = true ) {
-		$this->acf          = (bool) $acf;
+	function __construct( $context ) {
+		if ( ! $context ) {
+			return;
+		}
+		$this->context      = $context;
 		$this->fields       = $this->get_fields();
 		$this->keys         = $this->get_keys();
 		$this->field_groups = [
@@ -19,8 +22,6 @@ class Mai_Settings_Config {
 
 	/**
 	 * Get field configs.
-	 *
-	 * TODO: Add sanitize, and loop through that to sanitize when outputting the fields/grid?
 	 */
 	function get_fields() {
 		return [
@@ -42,7 +43,8 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => true,
 				'singular' => true,
-				'type'     => $this->acf ? 'checkbox': 'sortable',
+				'sanitize' => 'esc_html',
+				'type'     => ( 'block' === $this->context ) ? 'checkbox': 'sortable',
 				'key'      => 'field_5e441d93d6236',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'  => [ 'image', 'title' ],
@@ -59,6 +61,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => true,
+				'sanitize'   => 'esc_html',
 				'type'       => 'select',
 				'key'        => 'field_5e4d4efe99279',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -66,7 +69,7 @@ class Mai_Settings_Config {
 				'conditions' => [
 					[
 						'setting'  => 'show',
-						'operator' => $this->acf ? '==': 'contains',
+						'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 						'value'    => 'image',
 					],
 				],
@@ -76,6 +79,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => true,
+				'sanitize'   => 'esc_html',
 				'type'       => 'select',
 				'key'        => 'field_5bd50e580d1e9',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -83,7 +87,7 @@ class Mai_Settings_Config {
 				'conditions' => [
 					[
 						'setting'  => 'show',
-						'operator' => $this->acf ? '==': 'contains',
+						'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 						'value'    => 'image',
 					],
 					[
@@ -98,6 +102,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
+				'sanitize'   => 'esc_html',
 				'type'       => 'select',
 				'key'        => 'field_5e2f3adf82130',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -105,7 +110,7 @@ class Mai_Settings_Config {
 				'conditions' => [
 					[
 						'setting'  => 'show',
-						'operator' => $this->acf ? '==': 'contains',
+						'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 						'value'    => 'image',
 					],
 				],
@@ -115,6 +120,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => true,
+				'sanitize'   => 'wp_kses_post',
 				'type'       => 'text',
 				'key'        => 'field_5e2b563a7c6cf',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -122,7 +128,7 @@ class Mai_Settings_Config {
 				'conditions' => [
 					[
 						'setting'  => 'show',
-						'operator' => $this->acf ? '==': 'contains',
+						'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 						'value'    => 'header_meta',
 					],
 				],
@@ -133,6 +139,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
+				'sanitize'   => 'absint',
 				'type'       => 'text',
 				'key'        => 'field_5bd51ac107244',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -141,14 +148,14 @@ class Mai_Settings_Config {
 					[
 						[
 							'setting'  => 'show',
-							'operator' => $this->acf ? '==': 'contains',
+							'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 							'value'    => 'excerpt',
 						],
 					],
 					[
 						[
 							'setting'  => 'show',
-							'operator' => $this->acf ? '==': 'contains',
+							'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 							'value'    => 'content',
 						],
 					],
@@ -159,6 +166,7 @@ class Mai_Settings_Config {
 				'block'       => true,
 				'archive'     => true,
 				'singular'    => false,
+				'sanitize'    => 'esc_html',
 				'type'        => 'text',
 				'key'         => 'field_5c85465018395',
 				'group'       => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -167,7 +175,7 @@ class Mai_Settings_Config {
 				'conditions'  => [
 					[
 						'setting'  => 'show',
-						'operator' => $this->acf ? '==': 'contains',
+						'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 						'value'    => 'more_link',
 					],
 				],
@@ -180,6 +188,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => true,
+				'sanitize'   => 'wp_kses_post',
 				'type'       => 'text',
 				'key'        => 'field_5e2b567e7c6d0',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -187,7 +196,7 @@ class Mai_Settings_Config {
 				'conditions' => [
 					[
 						'setting'  => 'show',
-						'operator' => $this->acf ? '==': 'contains',
+						'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 						'value'    => 'footer_meta',
 					],
 				],
@@ -197,7 +206,8 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => true,
 				'singular' => false,
-				'type'     => $this->acf ? 'true_false' : 'checkbox', // Could try 'switch' in Kirki.
+				'sanitize' => 'esc_html',
+				'type'     => ( 'block' === $this->context ) ? 'true_false' : 'checkbox', // Could try 'switch' in Kirki.
 				'key'      => 'field_5e2a08a182c2c',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'  => true, // ACF has 1,
@@ -210,7 +220,8 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => true,
 				'singular' => false,
-				'type'     => $this->acf ? 'button_group' : 'radio-buttonset',
+				'sanitize' => 'esc_html',
+				'type'     => ( 'block' === $this->context ) ? 'button_group' : 'radio-buttonset',
 				'key'      => 'field_5c853f84eacd6',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'  => '',
@@ -220,7 +231,8 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => true,
 				'singular' => false,
-				'type'     => $this->acf ? 'button_group' : 'radio-buttonset',
+				'sanitize' => 'esc_html',
+				'type'     => ( 'block' === $this->context ) ? 'button_group' : 'radio-buttonset',
 				'key'      => 'field_5e2f519edc912',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'  => '',
@@ -244,17 +256,19 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => true,
 				'singular' => false,
-				'type'     => $this->acf ? 'button_group' : 'radio-buttonset',
+				'sanitize' => 'absint',
+				'type'     => ( 'block' === $this->context ) ? 'button_group' : 'radio-buttonset',
 				'key'      => 'field_5c854069d358c',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'  => 3,
 			],
 			'columns_responsive' => [
-				'label'    => ! $this->acf ? esc_html__( 'Custom responsive columns', 'mai-engine' ) : '',
+				'label'    => ( 'block' !== $this->context ) ? esc_html__( 'Custom responsive columns', 'mai-engine' ) : '',
 				'block'    => true,
 				'archive'  => true,
 				'singular' => false,
-				'type'     => $this->acf ? 'true_false' : 'checkbox', // Could try 'switch' in Kirki.
+				'sanitize' => 'esc_html',
+				'type'     => ( 'block' === $this->context ) ? 'true_false' : 'checkbox', // Could try 'switch' in Kirki.
 				'key'      => 'field_5e334124b905d',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'  => '',
@@ -267,7 +281,8 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
-				'type'       => $this->acf ? 'button_group': 'radio-buttonset',
+				'sanitize'   => 'esc_html', // absint later cause these may be ''.
+				'type'       => ( 'block' === $this->context ) ? 'button_group': 'radio-buttonset',
 				'key'        => 'field_5e3305dff9d8b',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'    => '',
@@ -284,7 +299,8 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
-				'type'       => $this->acf ? 'button_group': 'radio-buttonset',
+				'sanitize'   => 'esc_html', // absint later cause these may be ''.
+				'type'       => ( 'block' === $this->context ) ? 'button_group': 'radio-buttonset',
 				'key'        => 'field_5e3305f1f9d8c',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'    => '',
@@ -301,7 +317,8 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
-				'type'       => $this->acf ? 'button_group': 'radio-buttonset',
+				'sanitize'   => 'esc_html', // absint later cause these may be ''.
+				'type'       => ( 'block' === $this->context ) ? 'button_group': 'radio-buttonset',
 				'key'        => 'field_5e332a5f7fe08',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'    => '',
@@ -318,7 +335,8 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
-				'type'       => $this->acf ? 'button_group': 'radio-buttonset',
+				'sanitize'   => 'esc_html',
+				'type'       => ( 'block' === $this->context ) ? 'button_group': 'radio-buttonset',
 				'key'        => 'field_5c853e6672972',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'    => '',
@@ -335,7 +353,8 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
-				'type'       => $this->acf ? 'button_group': 'radio-buttonset',
+				'sanitize'   => 'esc_html',
+				'type'       => ( 'block' === $this->context ) ? 'button_group': 'radio-buttonset',
 				'key'        => 'field_5e31d5f0e2867',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'    => '',
@@ -352,6 +371,7 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => true,
 				'singular' => false,
+				'sanitize' => 'esc_html',
 				'type'     => 'text',
 				'key'      => 'field_5c8542d6a67c5',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -362,6 +382,7 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => true,
 				'singular' => false,
+				'sanitize' => 'esc_html',
 				'type'     => 'text',
 				'key'      => 'field_5e29f1785bcb6',
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
@@ -388,6 +409,7 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => false,
 				'singular' => false,
+				'sanitize' => 'esc_html',
 				'type'     => 'select',
 				'key'      => 'field_5df1053632ca2',
 				'group'    => [ 'mai_post_grid' ],
@@ -395,7 +417,7 @@ class Mai_Settings_Config {
 				'acf'      => [
 					'multiple' => 1,
 					'ui'       => 1,
-					'ajax'     => 1,
+					'ajax'     => 0,
 				]
 			],
 			'number' => [
@@ -404,6 +426,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
+				'sanitize'   => 'absint',
 				'type'       => 'number',
 				'key'        => 'field_5df1053632ca8',
 				'group'      => [ 'mai_post_grid' ],
@@ -424,37 +447,12 @@ class Mai_Settings_Config {
 					'min'         => 0,
 				],
 			],
-			'offset' => [
-				'label'      => esc_html__( 'Offset', 'mai-engine' ),
-				'desc'       => esc_html__( 'Skip this number of entries.', 'mai-engine' ),
-				'block'      => true,
-				'archive'    => false,
-				'singular'   => false,
-				'type'       => 'number',
-				'key'        => 'field_5df1bf01ea1de',
-				'group'      => [ 'mai_post_grid' ],
-				'default'    => 0,
-				'conditions' => [
-					[
-						'setting'  => 'post_type',
-						'operator' => '!=empty',
-					],
-					[
-						'setting'  => 'query_by',
-						'operator' => '!=',
-						'value'    => 'title',
-					],
-				],
-				'acf' => [
-					'placeholder' => 0,
-					'min'         => 0,
-				],
-			],
 			'query_by' => [
 				'label'    => esc_html__( 'Get Entries By', 'mai-engine' ),
 				'block'    => true,
 				'archive'  => false,
 				'singular' => false,
+				'sanitize' => 'esc_html',
 				// 'type'     => 'button_group',
 				'type'     => 'select',
 				'key'      => 'field_5df1053632cad',
@@ -473,37 +471,11 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
+				'sanitize'   => 'absint',
 				'type'       => 'post_object',
 				'key'        => 'field_5df1053632cbc',
 				'group'      => [ 'mai_post_grid' ],
-				'default'    => '',
-				'conditions' => [
-					[
-						'setting'  => 'post_type',
-						'operator' => '!=empty',
-					],
-					[
-						'setting'  => 'query_by',
-						'operator' => '==',
-						'value'    => 'title',
-					],
-				],
-				'acf' => [
-					'multiple'      => 1,
-					'return_format' => 'id',
-					'ui'            => 1,
-				],
-			],
-			'post__not_in' => [
-				'label'      => esc_html__( 'Exclude Entries', 'mai-engine' ),
-				'desc'       => esc_html__( 'Hide specific entries. Choose all that apply.', 'mai-engine' ),
-				'block'      => true,
-				'archive'    => false,
-				'singular'   => false,
-				'type'       => 'post_object',
-				'key'        => 'field_5e349237e1c01',
-				'group'      => [ 'mai_post_grid' ],
-				'default'    => '',
+				'default'    => '', // Can't be empty array
 				'conditions' => [
 					[
 						'setting'  => 'post_type',
@@ -526,6 +498,7 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => false,
 				'singular' => false,
+				// 'sanitize' => 'esc_html', // Skip and do sub fields.
 				'type'     => 'repeater',
 				'key'      => 'field_5df1397316270',
 				'group'    => [ 'mai_post_grid' ],
@@ -549,11 +522,12 @@ class Mai_Settings_Config {
 					'button_label' => esc_html__( 'Add Condition', 'mai-engine' ),
 					'sub_fields'   => [
 						'taxonomy' => [
-							'label'   => esc_html__( 'Taxonomy', 'mai-engine' ),
-							'type'    => 'select',
-							'key'     => 'field_5df1398916271',
-							'default' => [],
-							'acf'     => [
+							'label'    => esc_html__( 'Taxonomy', 'mai-engine' ),
+							'sanitize' => 'esc_html',
+							'type'     => 'select',
+							'key'      => 'field_5df1398916271',
+							'default'  => '',
+							'acf'      => [
 								'ui'   => 1,
 								'ajax' => 1,
 
@@ -561,6 +535,7 @@ class Mai_Settings_Config {
 						],
 						'terms' => [
 							'label'    => esc_html__( 'Terms', 'mai-engine' ),
+							'sanitize' => 'absint',
 							'type'     => 'taxonomy',
 							'key'      => 'field_5df139a216272',
 							'default'  => [],
@@ -582,8 +557,9 @@ class Mai_Settings_Config {
 						'operator' => [
 							'key'        => 'field_5df18f2305c2c',
 							'label'      => esc_html__( 'Operator', 'mai-engine' ),
+							'sanitize'   => 'esc_html',
 							'type'       => 'select',
-							'default'    => [],
+							'default'    => '',
 							'conditions' => [
 								[
 									'setting'  => 'taxonomy',
@@ -599,6 +575,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
+				'sanitize'   => 'esc_html',
 				'type'       => 'select',
 				'key'        => 'field_5df139281626f',
 				'group'      => [ 'mai_post_grid' ],
@@ -625,6 +602,7 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => false,
 				'singular' => false,
+				// 'sanitize' => 'esc_html',
 				'type'     => 'repeater',
 				'key'      => 'field_5df2053632dg5',
 				'group'    => [ 'mai_post_grid' ],
@@ -648,16 +626,18 @@ class Mai_Settings_Config {
 					'button_label' => esc_html__( 'Add Condition', 'mai-engine' ),
 					'sub_fields'   => [
 						'meta_key' => [
-							'label'   => esc_html__( 'Meta Key', 'mai-engine' ),
-							'type'    => 'text',
-							'key'     => 'field_5df3398916382',
-							'default' => [],
+							'label'    => esc_html__( 'Meta Key', 'mai-engine' ),
+							'sanitize' => 'esc_html',
+							'type'     => 'text',
+							'key'      => 'field_5df3398916382',
+							'default'  => '',
 						],
 						'meta_compare' => [
 							'label'      => esc_html__( 'Compare', 'mai-engine' ),
+							'sanitize'   => 'esc_html',
 							'type'       => 'select',
 							'key'        => 'field_5df29f2315d3d',
-							'default'    => [],
+							'default'    => '',
 							'conditions' => [
 								[
 									'setting'  => 'meta_key',
@@ -667,9 +647,10 @@ class Mai_Settings_Config {
 						],
 						'meta_value' => [
 							'label'      => esc_html__( 'Meta Value', 'mai-engine' ),
+							'sanitize'   => 'esc_html',
 							'type'       => 'text',
 							'key'        => 'field_5df239a217383',
-							'default'    => [],
+							'default'    => '',
 							'conditions' => [
 								[
 									'setting'  => 'meta_key',
@@ -690,6 +671,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
+				'sanitize'   => 'esc_html',
 				'type'       => 'select',
 				'key'        => 'field_5df239282737g',
 				'group'      => [ 'mai_post_grid' ],
@@ -716,6 +698,7 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => false,
 				'singular' => false,
+				'sanitize' => 'absint',
 				'type'     => 'post_object',
 				'key'      => 'field_5df1053632ce4',
 				'group'    => [ 'mai_post_grid' ],
@@ -737,11 +720,39 @@ class Mai_Settings_Config {
 					'ajax'     => 1,
 				],
 			],
+			'offset' => [
+				'label'      => esc_html__( 'Offset', 'mai-engine' ),
+				'desc'       => esc_html__( 'Skip this number of entries.', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => false,
+				'singular'   => false,
+				'sanitize'   => 'absint',
+				'type'       => 'number',
+				'key'        => 'field_5df1bf01ea1de',
+				'group'      => [ 'mai_post_grid' ],
+				'default'    => 0,
+				'conditions' => [
+					[
+						'setting'  => 'post_type',
+						'operator' => '!=empty',
+					],
+					[
+						'setting'  => 'query_by',
+						'operator' => '!=',
+						'value'    => 'title',
+					],
+				],
+				'acf' => [
+					'placeholder' => 0,
+					'min'         => 0,
+				],
+			],
 			'orderby' => [
 				'label'      => esc_html__( 'Order By', 'mai-engine' ),
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
+				'sanitize'   => 'esc_html',
 				'type'       => 'select',
 				'key'        => 'field_5df1053632cec',
 				'group'      => [ 'mai_post_grid' ],
@@ -762,6 +773,7 @@ class Mai_Settings_Config {
 				'block'    => true,
 				'archive'  => false,
 				'singular' => false,
+				'sanitize' => 'esc_html',
 				'type'     => 'text',
 				'key'      => 'field_5df1053632cf4',
 				'group'    => [ 'mai_post_grid' ],
@@ -783,6 +795,7 @@ class Mai_Settings_Config {
 				'block'      => true,
 				'archive'    => false,
 				'singular'   => false,
+				'sanitize'   => 'esc_html',
 				'type'       => 'select',
 				'key'        => 'field_5df1053632cfb',
 				'group'      => [ 'mai_post_grid' ],
@@ -794,15 +807,44 @@ class Mai_Settings_Config {
 					],
 				],
 			],
+			'post__not_in' => [
+				'label'      => esc_html__( 'Exclude Entries', 'mai-engine' ),
+				'desc'       => esc_html__( 'Hide specific entries. Choose all that apply.', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => false,
+				'singular'   => false,
+				'sanitize'   => 'absint',
+				'type'       => 'post_object',
+				'key'        => 'field_5e349237e1c01',
+				'group'      => [ 'mai_post_grid' ],
+				'default'    => '',
+				'conditions' => [
+					[
+						'setting'  => 'post_type',
+						'operator' => '!=empty',
+					],
+					[
+						'setting'  => 'query_by',
+						'operator' => '!=',
+						'value'    => 'title',
+					],
+				],
+				'acf' => [
+					'multiple'      => 1,
+					'return_format' => 'id',
+					'ui'            => 1,
+				],
+			],
 			'exclude' => [
-				'label'    => esc_html__( 'Exclude', 'mai-engine' ),
-				'block'    => true,
-				'archive'  => false,
-				'singular' => false,
-				'type'     => 'checkbox',
-				'key'      => 'field_5df1053632d03',
-				'group'    => [ 'mai_post_grid' ],
-				'default'  => '',
+				'label'      => esc_html__( 'Exclude', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => false,
+				'singular'   => false,
+				'sanitize'   => 'esc_html',
+				'type'       => 'checkbox',
+				'key'        => 'field_5df1053632d03',
+				'group'      => [ 'mai_post_grid' ],
+				'default'    => '',
 				'conditions' => [
 					[
 						'setting'  => 'post_type',
@@ -813,6 +855,19 @@ class Mai_Settings_Config {
 			/*****************
 			 * WP_Term_Query *
 			 *****************/
+
+			// Test field just to try to blow things up.
+			'test_field' => [
+				'label'      => esc_html__( 'Test Field', 'mai-engine' ),
+				'block'      => false,
+				'archive'    => false,
+				'singular'   => false,
+				'sanitize'   => 'esc_html',
+				'type'       => 'checkbox',
+				'key'        => 'field_5df2153632e14',
+				'group'      => [],
+				'default'    => '',
+			],
 		];
 	}
 
@@ -837,21 +892,40 @@ class Mai_Settings_Config {
 	function get_choices( $field ) {
 		return $this->$field();
 	}
-	/**
-	 * TODO: On singular, add after_entry (widget_area), author_box, adjacent_entry_nav.
-	 * TODO: On archive and singular, add genesis hooks.
-	 */
+
 	function show() {
-		return [
-			'image'       => esc_html__( 'Image', 'mai-engine' ),
-			'title'       => esc_html__( 'Title', 'mai-engine' ),
-			'header_meta' => esc_html__( 'Header Meta', 'mai-engine' ),
-			'excerpt'     => esc_html__( 'Excerpt', 'mai-engine' ),
-			'content'     => esc_html__( 'Content', 'mai-engine' ),
-			'more_link'   => esc_html__( 'Read More link', 'mai-engine' ),
-			'footer_meta' => esc_html__( 'Footer Meta', 'mai-engine' ),
+		// All elements.
+		$show = [
+			'image'                        => esc_html__( 'Image', 'mai-engine' ),
+			'genesis_entry_header'         => 'genesis_entry_header',
+			'title'                        => esc_html__( 'Title', 'mai-engine' ),
+			'header_meta'                  => esc_html__( 'Header Meta', 'mai-engine' ),
+			'genesis_before_entry_content' => 'genesis_before_entry_content',
+			'excerpt'                      => esc_html__( 'Excerpt', 'mai-engine' ),
+			'content'                      => esc_html__( 'Content', 'mai-engine' ),
+			'genesis_entry_content'        => 'genesis_entry_content',
+			'more_link'                    => esc_html__( 'Read More link', 'mai-engine' ),
+			'genesis_after_entry_content'  => 'genesis_after_entry_content',
+			'footer_meta'                  => esc_html__( 'Footer Meta', 'mai-engine' ),
+			'genesis_entry_footer'         => 'genesis_entry_footer',
 		];
+		// Remove hooks if block.
+		if ( 'block' === $this->context ) {
+			unset( $show['genesis_entry_header'] );
+			unset( $show['genesis_before_entry_content'] );
+			unset( $show['genesis_entry_content'] );
+			unset( $show['genesis_after_entry_content'] );
+			unset( $show['genesis_entry_footer'] );
+		}
+		// Add singular only elements.
+		if ( 'singular' === $this->context ) {
+			$show['author_box']         = 'author_box';
+			$show['after_entry']        = 'after_entry';
+			$show['adjacent_entry_nav'] = 'adjacent_entry_nav';
+		}
+		return $show;
 	}
+
 	/**
 	 * TODO: Conditionally check if image sizes are supported.
 	 */
@@ -1046,8 +1120,8 @@ class Mai_Settings_Config {
 
 	function get_data( $name, $field, $section_id = '' ) {
 
-		// If ACF field.
-		if ( $this->acf ) {
+		// If an ACF field.
+		if ( 'block' === $this->context ) {
 
 			// Build ACF data.
 			$data = [
@@ -1080,6 +1154,14 @@ class Mai_Settings_Config {
 			if ( isset( $field['conditions'] ) ) {
 				$data['conditional_logic'] = $this->get_conditions( $field );
 			}
+			// Maybe add default.
+			if ( isset( $field['default'] ) ) {
+				/**
+				 * This needs default_value instead of default.
+				 * @link  https://www.advancedcustomfields.com/resources/register-fields-via-php/
+				 */
+				$data['default_value'] = $field['default'];
+			}
 		}
 		// Kirki.
 		else {
@@ -1106,12 +1188,12 @@ class Mai_Settings_Config {
 			if ( isset( $field['conditions'] ) ) {
 				$data['active_callback'] = $this->get_conditions( $field );
 			}
+			// Maybe add default.
+			if ( isset( $field['default'] ) ) {
+				$data['default'] = $field['default'];
+			}
 		}
 
-		// Maybe add default.
-		if ( isset( $field['default'] ) ) {
-			$data['default'] = $field['default'];
-		}
 
 		// TODO: Handle message/description for checkbox field (Boxed).
 
@@ -1135,7 +1217,7 @@ class Mai_Settings_Config {
 				}
 				// 'OR' relation - nested one level further.
 				else {
-					if ( $this->acf ) {
+					if ( 'block' === $this->context ) {
 						foreach( $condition as $child_condition ) {
 							$conditions[ $index ][] = $this->get_condition( $child_condition, $field );
 						}
@@ -1153,7 +1235,7 @@ class Mai_Settings_Config {
 
 	function get_condition( $condition, $field ) {
 		$array = [];
-		if ( $this->acf ) {
+		if ( 'block' === $this->context ) {
 			$array = [
 				'field'    => $this->keys[ $condition['setting'] ],
 				'operator' => $condition['operator'],

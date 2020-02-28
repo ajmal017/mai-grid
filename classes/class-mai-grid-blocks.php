@@ -78,7 +78,7 @@ final class Mai_Grid_Blocks  {
 
 	function blocks_init() {
 		// $this->config = mai_get_settings_config();
-		$this->config = new Mai_Settings_Config;
+		$this->config = new Mai_Settings_Config( 'block' );
 		$this->fields = $this->config->get_fields();
 		$this->run_filters();
 	}
@@ -172,7 +172,10 @@ final class Mai_Grid_Blocks  {
 	}
 
 	function do_grid( $type, $block, $content = '', $is_preview = false ) {
-		$args = array( 'type' => $type );
+		$args = [
+			'type'    => $type,
+			'context' => 'block',
+		];
 		$args = array_merge( $args, $this->get_fields() );
 		if ( ! empty( $block['className'] ) ) {
 			$args['class'] = ( isset( $args['class'] ) && ! empty( $args['class'] ) ) ? ' ' . $block['className'] : $block['className'];
@@ -183,12 +186,22 @@ final class Mai_Grid_Blocks  {
 
 	function get_fields() {
 		$fields = [];
-		foreach( $this->fields as $name => $values ) {
+		foreach( $this->fields as $name => $field ) {
+			// Skip if not a block field.
+			if ( ! $field['block'] ) {
+				continue;
+			}
+			// Skip tabs.
+			if ( 'tab' === $field['type'] ) {
+				continue;
+			}
 			$fields[ $name ] = $this->get_field( $name );
 		}
 		return $fields;
 	}
 
+	// TODO: Can we get defaults better from settings config?
+	// TODO: What if we want null? Will we ever?
 	function get_field( $name ) {
 		$value = get_field( $name );
 		return is_null( $value ) ? $this->fields[ $name ]['default'] : $value;
@@ -272,12 +285,6 @@ final class Mai_Grid_Blocks  {
 			if ( ! $values['block'] ) {
 				return;
 			}
-			// Defaults.
-			// add_filter( "acf/load_field/key={$values['key']}", function( $field ) use ( $name ) {
-			// 	// Set default from our config function.
-			// 	$field['default'] = $this->fields[ $field['name'] ]['default'];
-			// 	return $field;
-			// });
 			// Choices.
 			if ( method_exists( $this->config, $name ) ) {
 				add_filter( "acf/load_field/key={$values['key']}", function( $field ) {
@@ -292,14 +299,28 @@ final class Mai_Grid_Blocks  {
 					// Choices.
 					if ( method_exists( $this->config, $sub_name ) ) {
 						add_filter( "acf/load_field/key={$sub_values['key']}", function( $field ) {
-
 							// Set choices from our config function.
 							$field['choices'] = $this->config->get_choices( $field['name'] );
 							return $field;
 						});
 					}
+					// // Defaults.
+					// add_filter( "acf/load_field/key={$values['key']}", function( $field ) use ( $name ) {
+					// 	// Set default from our config function.
+					// 	$field['default'] = $this->fields[ $field['name'] ]['default'];
+					// 	return $field;
+					// });
 				}
 			}
+			// // Standard fields.
+			// else {
+			// 	// Defaults.
+			// 	add_filter( "acf/load_field/key={$values['key']}", function( $field ) use ( $name ) {
+			// 		// Set default from our config function.
+			// 		$field['default'] = $this->fields[ $field['name'] ]['default'];
+			// 		return $field;
+			// 	});
+			// }
 		}
 
 		// Show.

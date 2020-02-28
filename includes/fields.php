@@ -7,7 +7,7 @@ function mai_register_grid_field_groups() {
 	$post_grid = $term_grid = $user_grid = [];
 
 	// Settings config.
-	$config = new Mai_Settings_Config( $acf = true );
+	$config = new Mai_Settings_Config( 'block' );
 	$fields = $config->get_fields();
 
 	// Setup fields.
