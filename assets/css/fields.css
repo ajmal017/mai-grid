@@ -1,8 +1,24 @@
 /* sortable */
 
 .customize-control-kirki-sortable ul.ui-sortable li {
-	background: #fff !important;
 	border-radius: 3px !important;
+}
+
+.customize-control-kirki-sortable ul.ui-sortable li:not(.invisible) {
+	border: 1px solid #7e8993 !important;
+}
+
+.customize-control-kirki-sortable ul.ui-sortable li:not([data-value^="genesis_"]):not(.invisible) {
+	background: #fff !important;
+}
+
+.customize-control-kirki-sortable ul.ui-sortable li[data-value^="genesis_"]:not(.invisible) {
+	background: rgba(0, 0, 0, 0.06) !important;
+}
+
+.customize-control-kirki-sortable ul.ui-sortable li[data-value^="genesis_"] {
+	font-family: "Courier New", Courier, monospace !important;
+	font-size: 11px !important;
 }
 
 .customize-control-kirki-sortable ul.ui-sortable li:not(.invisible) .dashicons.visibility {
@@ -20,7 +36,7 @@
 	line-height: 0;
 	width: 14px;
 	height: 14px;
-	margin: -3px 0 0 2px;
+	margin: -3px 6px 0 0 !important;
 	outline: 0;
 	padding: 0;
 	text-align: center;
@@ -35,6 +51,7 @@
 	display: none !important;
 }
 
+/* this is to match ACF's checkbox styling. */
 .customize-control-kirki-sortable ul.ui-sortable li:not(.invisible) .dashicons.visibility::before {
 	display: flex;
 	content: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27%231e8cbe%27%2F%3E%3C%2Fsvg%3E");

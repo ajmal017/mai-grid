@@ -1188,7 +1188,7 @@ class Mai_Entry_Settings {
 		];
 	}
 
-	function get_data( $name, $field, $section_id = '' ) {
+	function get_data( $name, $field, $section_id = '', $prefix = '' ) {
 
 		// If an ACF field.
 		if ( 'block' === $this->context ) {
@@ -1240,7 +1240,7 @@ class Mai_Entry_Settings {
 			$data = [
 				'type'     => $field['type'],
 				'label'    => $field['label'],
-				'settings' => $name,
+				'settings' => sprintf( '%s%s', $prefix, $name ), // Kirki settings must be prefixed.
 				'section'  => $section_id,
 				'priority' => 10,
 			];
@@ -1248,7 +1248,7 @@ class Mai_Entry_Settings {
 			if ( isset( $field['desc'] ) ) {
 				$data['description'] = $field['desc'];
 			}
-			// Kikri-specific fields.
+			// Kirki-specific fields.
 			if ( isset( $field['kirki'] ) ) {
 				foreach( $field['kirki'] as $key => $value ) {
 					$data[ $key ] = $value;
@@ -1256,7 +1256,7 @@ class Mai_Entry_Settings {
 			}
 			// Maybe add conditional logic.
 			if ( isset( $field['conditions'] ) ) {
-				$data['active_callback'] = $this->get_conditions( $field );
+				$data['active_callback'] = $this->get_conditions( $field, $prefix );
 			}
 			// Maybe add default.
 			if ( isset( $field['default'] ) ) {
@@ -1266,6 +1266,7 @@ class Mai_Entry_Settings {
 			if ( method_exists( $this, $name ) ) {
 				$data['choices'] = $this->get_choices( $name );
 			}
+
 		}
 
 		// acf_log( $data );
@@ -1280,14 +1281,14 @@ class Mai_Entry_Settings {
 	 * ACF uses field => {key} and kirki uses setting => {name}.
 	 * ACF uses == for checkbox, and kirki uses 'contains'.
 	 */
-	function get_conditions( $field ) {
+	function get_conditions( $field, $prefix = '' ) {
 		if ( is_array( $field['conditions'] ) ) {
 			$count      = 0; // Kirki's nesting is different than ACF, so we need this.
 			$conditions = [];
 			foreach( $field['conditions'] as $index => $condition ) {
 				// If 'AND' relation.
 				if ( isset( $condition['setting'] ) ) {
-					$conditions[] = $this->get_condition( $condition, $field );
+					$conditions[] = $this->get_condition( $condition, $field, $prefix );
 					$count++; // For Kirki's nesting.
 				}
 				// 'OR' relation - nested one level further.
@@ -1298,7 +1299,7 @@ class Mai_Entry_Settings {
 						}
 					} else {
 						foreach( $condition as $child_condition ) {
-							$conditions[ $count ][] = $this->get_condition( $child_condition, $field );
+							$conditions[ $count ][] = $this->get_condition( $child_condition, $field, $prefix );
 						}
 					}
 				}
@@ -1308,7 +1309,7 @@ class Mai_Entry_Settings {
 		return $field['conditions'];
 	}
 
-	function get_condition( $condition, $field ) {
+	function get_condition( $condition, $field, $prefix = '' ) {
 		$array = [];
 		if ( 'block' === $this->context ) {
 			$array = [
@@ -1321,7 +1322,8 @@ class Mai_Entry_Settings {
 			}
 		} else {
 			$array = [
-				'setting'  => $condition['setting'],
+				// 'setting'  => $condition['setting'],
+				'setting'  => sprintf( '%s%s', $prefix, $condition['setting'] ), // Kirki settings must be prefixed.
 				'operator' => $condition['operator'],
 				'value'    => $condition['value'],
 			];

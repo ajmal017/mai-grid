@@ -25,20 +25,15 @@ add_action( 'customize_controls_enqueue_scripts', function() {
 	mai_enqueue_asset( 'fields', 'css' );
 });
 
-add_action( 'init', 'maiengine_kirki_settings' );
-function maiengine_kirki_settings() {
 
-	// Bail if no Kirki.
-	if ( ! class_exists( 'Kirki' ) ) {
-		return;
-	}
+function mai_kirki_config_id() {
+	return 'maitheme';
+}
 
-	// Settings config.
-	$config = new Mai_Entry_Settings( 'archive' );
-	$fields = $config->get_fields();
+add_action( 'init', 'mai_kirki_config' );
+function mai_kirki_config() {
 
-	// IDs.
-	$config_id = $panel_id = $settings_field = 'maiengine';
+	$config_id = mai_kirki_config_id();
 
 	/**
 	 * Kirki Config.
@@ -46,69 +41,93 @@ function maiengine_kirki_settings() {
 	Kirki::add_config( $config_id, array(
 		'capability'  => 'edit_theme_options',
 		'option_type' => 'option',
-		'option_name' => $settings_field,
+		'option_name' => $config_id,
 	) );
-
-	$panel_id = 'maiengine_maitheme';
 
 	/**
 	 * Mai Theme.
 	 */
-	Kirki::add_panel( $panel_id, array(
+	Kirki::add_panel( $config_id, array(
 		'title'       => esc_attr__( '!!!! Mai Theme', 'mai-engine' ),
 		'description' => esc_attr__( 'Nice description.', 'mai-engine' ),
 		'priority'    => 55,
 	) );
 
+}
 
+add_action( 'init', 'mai_kirki_post_archive_settings' );
+function mai_kirki_post_archive_settings() {
 
+	$post_types = [ 'post' ];
 
+	foreach( $post_types as $post_type ) {
+		mai_add_archive_customizer_settings( $post_type, 'post_type' );
+	}
 
-	/********************************************************************
-	 * Archives                                                         *
-	 ********************************************************************/
-	$section_id = 'maiengine_archives';
+}
 
+add_action( 'init', 'mai_kirki_category_archive_settings' );
+function mai_kirki_category_archive_settings() {
+	mai_add_archive_customizer_settings( 'category', $type = 'taxonomy' );
+}
+
+/**
+ *
+ * @param  string  $name  The registered content type name.
+ * @param  string  $type  The object type. Either 'taxonomy' or 'post_type'.
+ */
+function mai_add_archive_customizer_settings( $name, $type = 'post_type' ) {
+
+	// Bail if no Kirki.
+	if ( ! class_exists( 'Kirki' ) ) {
+		return;
+	}
+
+	// Get label.
+	switch ( $type ) {
+		case 'post_type':
+			$post_type = get_post_type_object( $name );
+			$label     = $post_type->labels->singular_name;
+			$label     = trim( $label . ' ' . esc_attr__( 'Archives', 'mai-engine' ) );
+		break;
+		case 'taxonomy':
+			$taxonomy  = get_taxonomy( $name );
+			$label     = $taxonomy->labels->singular_name;
+			$label     = trim( $label . ' ' . esc_attr__( 'Archives', 'mai-engine' ) );
+		break;
+		case 'search':
+			$label     = esc_attr__( 'Search Results', 'mai-engine' );
+		break;
+		case 'author':
+			$label     = esc_attr__( 'Author Archives', 'mai-engine' );
+		break;
+		default:
+			$label = '';
+	}
+
+	// Get data.
+	$section_id = sprintf( '%s_archives', $name );
+	$config_id  = mai_kirki_config_id();
+	$settings   = new Mai_Entry_Settings( 'archive' );
+	$fields     = $settings->get_fields();
+	$prefix     = sprintf( '%s_', $name );
+
+	// Section.
 	Kirki::add_section( $section_id, [
-		'title' => esc_attr__( 'Archives', 'mai-engine' ),
-		'panel' => $panel_id,
+		'title' => $label,
+		'panel' => $config_id,
 	] );
 
-	// Setup fields.
-	foreach( $fields as $name => $field ) {
+	// Loop through fields.
+	foreach( $fields as $field_name => $field ) {
 
 		// Bail if not an archive field.
 		if ( ! $field['archive'] ) {
 			continue;
 		}
 
-		// Skip if not string (temporary for testing/dev).
-		// if ( ! is_string( $field['archive'] ) ) {
-		// 	continue;
-		// }
-
-		Kirki::add_field( $config_id, $config->get_data( $name, $field, $section_id ) );
+		// Add field.
+		Kirki::add_field( $config_id, $settings->get_data( $field_name, $field, $section_id, $prefix ) );
 	}
 
-	// Kirki::add_field( $config_id, [
-	// 	'type'     => 'sortable',
-	// 	'settings' => 'show',
-	// 	'label'    => esc_html__( 'Show', 'mai-engine' ),
-	// 	'section'  => $section_id,
-	// 	'priority' => 10,
-	// 	'choices'  => $config->get_choices( 'show' ),
-	// 	'default'  => $fields['show']['default'],
-	// ] );
-
-	// Kirki::add_field( $config_id, [
-	// 	'type'        => 'select',
-	// 	'settings'    => 'image_orientation',
-	// 	'label'       => esc_html__( 'This is the label', 'mai-engine' ),
-	// 	'section'     => $section_id,
-	// 	'default'     => 'landscape',
-	// 	'priority'    => 10,
-	// 	'multiple'    => 1,
-	// 	'choices'  => $config->get_choices( 'image_orientation'  ),
-	// 	'default'  => $fields['show']['default'],
-	// ] );
 }
