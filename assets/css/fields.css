@@ -1,3 +1,10 @@
+/* kirki default spacing */
+
+.customize-control[class*="customize-control-kirki-"] + .customize-control[class*="customize-control-kirki-"] {
+	margin-top: 12px;
+}
+
+
 /* sortable */
 
 .customize-control-kirki-sortable ul.ui-sortable li {
@@ -60,6 +67,8 @@
 	width: 100%;
 	transform: scale(1.4);
 }
+
+/* acf sortable checkbox */
 
 .mai-sortable ul.acf-checkbox-list > li {
 	display: grid;
@@ -238,6 +247,8 @@
 	border-radius: 0 0 0 3px;
 } */
 
+/* ACF button group. */
+
 .acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group .acf-button-group {
 	display: -webkit-box;
 	display: flex;
@@ -264,7 +275,6 @@
 	font-size: 10px;
 	text-transform: uppercase;
 	border: transparent;
-	border-radius: 3px;
 }
 
 .acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear .acf-button-group label:first-child:hover,
@@ -276,4 +286,57 @@
 
 .acf-block-component.acf-block-panel .acf-block-fields div.acf-field.mai-grid-button-group-clear .acf-button-group label:nth-child(2) {
 	border-radius: 3px 0 0 3px;
+}
+
+/* kirki buttonset */
+
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_text"],
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_columns"],
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_columns_vertical"],
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_md"],
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_sm"],
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_xs"] {
+	position: relative;
+}
+
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_text"] .switch-label:first-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_columns"] .switch-label:first-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_columns_vertical"] .switch-label:first-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_md"] .switch-label:last-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_sm"] .switch-label:last-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_xs"] .switch-label:last-of-type {
+	position: absolute;
+	top: -1px;
+	right: 0;
+	background: transparent !important;
+	color: #008dd4 !important;
+	font-size: 11px;
+	text-transform: uppercase;
+	padding: 6px 12px;
+	border: transparent;
+}
+
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns"] .switch-label:first-of-type {
+	order: 99;
+	border-radius: 0 3px 3px 0;
+}
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns"] .switch-label:nth-of-type(2) {
+	border-radius: 3px 0 0 3px;
+}
+
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_md"] .switch-label:first-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_sm"] .switch-label:first-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_xs"] .switch-label:first-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_text"] .switch-label:nth-of-type(2),
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_columns"] .switch-label:nth-of-type(2),
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_columns_vertical"] .switch-label:nth-of-type(2) {
+	border-radius: 3px 0 0 3px;
+}
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_md"] .switch-label:nth-of-type(7),
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_sm"] .switch-label:nth-of-type(7),
+.customize-control.customize-control-kirki-radio-buttonset[id$="_columns_xs"] .switch-label:nth-of-type(7),
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_text"] .switch-label:last-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_columns"] .switch-label:last-of-type,
+.customize-control.customize-control-kirki-radio-buttonset[id$="_align_columns_vertical"] .switch-label:last-of-type {
+	border-radius: 0 3px 3px 0;
 }
