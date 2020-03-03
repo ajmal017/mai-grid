@@ -36,6 +36,7 @@ class Mai_Entry_Settings {
 			],
 			 'show' => [
 				'label'    => esc_html__( 'Show', 'mai-engine' ),
+				'desc'     => ( 'archive' === $this->context ) ? esc_html__( 'Show/hide and re-order entry elements. Click "Toggle Hooks" to show Genesis hooks.', 'mai-engine' ) : '',
 				'block'    => true,
 				'archive'  => true,
 				'singular' => true,
@@ -1240,7 +1241,8 @@ class Mai_Entry_Settings {
 			$data = [
 				'type'     => $field['type'],
 				'label'    => $field['label'],
-				'settings' => sprintf( '%s%s', $prefix, $name ), // Kirki settings must be prefixed.
+				// 'settings' => sprintf( '%s%s', $prefix, $name ), // Kirki settings must be prefixed.
+				'settings'  => $name,
 				'section'  => $section_id,
 				'priority' => 10,
 			];
@@ -1322,8 +1324,8 @@ class Mai_Entry_Settings {
 			}
 		} else {
 			$array = [
-				// 'setting'  => $condition['setting'],
-				'setting'  => sprintf( '%s%s', $prefix, $condition['setting'] ), // Kirki settings must be prefixed.
+				// 'setting'  => sprintf( '%s%s', $prefix, $condition['setting'] ), // Kirki settings must be prefixed.
+				'setting'  => $condition['setting'],
 				'operator' => $condition['operator'],
 				'value'    => $condition['value'],
 			];
