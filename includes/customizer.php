@@ -85,7 +85,7 @@ function mai_add_archive_customizer_settings( $name, $type = 'post_type' ) {
 		return;
 	}
 
-	$config_id = sprintf( 'mai_%s_archives', $name );
+	$config_id = 'mai_archive_' . $name;
 
 	/**
 	 * Kirki Config.

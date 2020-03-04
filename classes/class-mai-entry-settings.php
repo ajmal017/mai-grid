@@ -103,7 +103,7 @@ class Mai_Entry_Settings {
 				'type'       => 'select',
 				'key'        => 'field_5e2f3adf82130',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'    => '',
+				'default'    => 'full',
 				'conditions' => [
 					[
 						'setting'  => 'show',
@@ -121,7 +121,8 @@ class Mai_Entry_Settings {
 				'type'       => 'text',
 				'key'        => 'field_5e2b563a7c6cf',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'    => '[post_date][post_author]',
+				// TODO: this should be different, or empty depending on the post type?
+				'default'    => '[post_date] [post_author_posts_link before="by "]',
 				'conditions' => [
 					[
 						'setting'  => 'show',
@@ -159,26 +160,31 @@ class Mai_Entry_Settings {
 				]
 			],
 			'more_link_text' => [
-				'label'       => esc_html__( 'More Link Text', 'mai-engine' ),
-				'block'       => true,
-				'archive'     => true,
-				'singular'    => false,
-				'sanitize'    => 'esc_html',
-				'type'        => 'text',
-				'key'         => 'field_5c85465018395',
-				'group'       => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				// TODO: This text should be filtered, same as the template that outputs it.
-				'default'     => esc_html__( 'Read More', 'mai-engine' ),
-				'conditions'  => [
+				'label'      => esc_html__( 'More Link Text', 'mai-engine' ),
+				'block'      => true,
+				'archive'    => true,
+				'singular'   => false,
+				'sanitize'   => 'esc_attr', // We may want to add icons/spans and HTML in here.
+				'type'       => 'text',
+				'key'        => 'field_5c85465018395',
+				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
+				'default'    => '',
+				'conditions' => [
 					[
 						'setting'  => 'show',
 						'operator' => ( 'block' === $this->context ) ? '==': 'contains',
 						'value'    => 'more_link',
 					],
 				],
+				// TODO: These text should be filtered, same as the template that outputs it.
 				'acf' => [
 					'placeholder' => esc_html__( 'Read More', 'mai-engine' ),
-				]
+				],
+				'kirki' => [
+					'input_attrs' => [
+						'placeholder' => esc_html__( 'Read More', 'mai-engine' ),
+					],
+				],
 			],
 			'footer_meta' => [
 				'label'      => esc_html__( 'Footer Meta', 'mai-engine' ),
@@ -189,6 +195,7 @@ class Mai_Entry_Settings {
 				'type'       => 'text',
 				'key'        => 'field_5e2b567e7c6d0',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
+				// TODO: this should be different, or empty depending on the post type?
 				'default'    => '[post_categories]',
 				'conditions' => [
 					[
@@ -293,11 +300,11 @@ class Mai_Entry_Settings {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
-				'sanitize'   => 'esc_html', // absint later cause these may be ''.
+				'sanitize'   => 'absint',
 				'type'       => ( 'block' === $this->context ) ? 'button_group': 'radio-buttonset',
 				'key'        => 'field_5e3305dff9d8b',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'    => '',
+				'default'    => 1,
 				'conditions' => [
 					[
 						'setting'  => 'columns_responsive',
@@ -311,11 +318,11 @@ class Mai_Entry_Settings {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
-				'sanitize'   => 'esc_html', // absint later cause these may be ''.
+				'sanitize'   => 'absint',
 				'type'       => ( 'block' === $this->context ) ? 'button_group': 'radio-buttonset',
 				'key'        => 'field_5e3305f1f9d8c',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'    => '',
+				'default'    => 1,
 				'conditions' => [
 					[
 						'setting'  => 'columns_responsive',
@@ -329,11 +336,11 @@ class Mai_Entry_Settings {
 				'block'      => true,
 				'archive'    => true,
 				'singular'   => false,
-				'sanitize'   => 'esc_html', // absint later cause these may be ''.
+				'sanitize'   => 'absint',
 				'type'       => ( 'block' === $this->context ) ? 'button_group': 'radio-buttonset',
 				'key'        => 'field_5e332a5f7fe08',
 				'group'      => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
-				'default'    => '',
+				'default'    => 1,
 				'conditions' => [
 					[
 						'setting'  => 'columns_responsive',
@@ -872,7 +879,7 @@ class Mai_Entry_Settings {
 			'test_field' => [
 				'label'      => esc_html__( 'Test Field', 'mai-engine' ),
 				'block'      => false,
-				'archive'    => false,
+				'archive'    => true,
 				'singular'   => false,
 				'sanitize'   => 'esc_html',
 				'type'       => 'checkbox',
@@ -945,7 +952,7 @@ class Mai_Entry_Settings {
 					'image',
 					'header_meta',
 					'genesis_before_entry_content',
-					'excerpt',
+					// 'excerpt',
 					'content',
 					'genesis_entry_content',
 					'more_link',
@@ -1046,15 +1053,18 @@ class Mai_Entry_Settings {
 		return $this->get_columns_choices();
 	}
 	function columns_md() {
-		return $this->get_columns_choices( true );
+		return $this->get_columns_choices();
 	}
 	function columns_sm() {
-		return $this->get_columns_choices( true );
+		return $this->get_columns_choices();
 	}
 	function columns_xs() {
-		return $this->get_columns_choices( true );
+		return $this->get_columns_choices();
 	}
-	function get_columns_choices( $clear = false ) {
+	/**
+	 * Get the column choices.
+	 */
+	function get_columns_choices() {
 		$choices = [
 			1 => esc_html__( '1', 'mai-engine' ),
 			2 => esc_html__( '2', 'mai-engine' ),
@@ -1064,9 +1074,6 @@ class Mai_Entry_Settings {
 			6 => esc_html__( '6', 'mai-engine' ),
 			0 => esc_html__( 'Auto', 'mai-engine' ),
 		];
-		if ( $clear ) {
-			$choices = array_merge( [ '' => esc_html__( 'Clear', 'mai-engine' ) ], $choices );
-		}
 		return $choices;
 	}
 	function align_columns() {
@@ -1241,8 +1248,7 @@ class Mai_Entry_Settings {
 			$data = [
 				'type'     => $field['type'],
 				'label'    => $field['label'],
-				// 'settings' => sprintf( '%s%s', $prefix, $name ), // Kirki settings must be prefixed.
-				'settings'  => $name,
+				'settings' => $name,
 				'section'  => $section_id,
 				'priority' => 10,
 			];
@@ -1268,7 +1274,6 @@ class Mai_Entry_Settings {
 			if ( method_exists( $this, $name ) ) {
 				$data['choices'] = $this->get_choices( $name );
 			}
-
 		}
 
 		// acf_log( $data );

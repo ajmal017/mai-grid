@@ -80,8 +80,11 @@ class Mai_Entry {
 				continue;
 			}
 
+			// Output the element if a method exists.
 			$method = "do_{$element}";
-			$this->$method();
+			if ( method_exists( $this, $method ) ) {
+				$this->$method();
+			}
 		}
 
 		// If we have inner wrap.
@@ -249,15 +252,15 @@ class Mai_Entry {
 	function get_breakpoint_columns() {
 
 		$columns = [
-			'lg' => $this->args['columns'],
+			'lg' => (int) $this->args['columns'],
 		];
 
 		if ( $this->args['columns_responsive'] ) {
-			$columns['md'] = $this->args['columns_md'];
-			$columns['sm'] = $this->args['columns_sm'];
-			$columns['xs'] = $this->args['columns_xs'];
+			$columns['md'] = (int) $this->args['columns_md'];
+			$columns['sm'] = (int) $this->args['columns_sm'];
+			$columns['xs'] = (int) $this->args['columns_xs'];
 		} else {
-			switch ( $this->args['columns'] ) {
+			switch ( (int) $this->args['columns'] ) {
 				case 6:
 					$columns['md'] = 4;
 					$columns['sm'] = 3;
@@ -562,6 +565,7 @@ class Mai_Entry {
 
 		// Limit.
 		if ( $this->args['content_limit'] > 0 ) {
+			// TODO: Add [...] or whatever the read more thing is?
 			$excerpt = mai_get_content_limit( $excerpt, $this->args['content_limit'] );
 		}
 
@@ -608,6 +612,7 @@ class Mai_Entry {
 
 		// Limit.
 		if ( $content && ( $this->args['content_limit'] > 0 ) ) {
+			// TODO: Add [...] or whatever the read more thing is?
 			$content = mai_get_content_limit( $content, $this->args['content_limit'] );
 		}
 
@@ -635,49 +640,19 @@ class Mai_Entry {
 	 */
 	function do_header_meta() {
 
-		$header_meta = '';
-
-		// Header meta.
-		switch ( $this->type ) {
-			case 'post':
-				// Not a block.
-				if ( 'block' !== $this->context ) {
-					if ( post_type_supports( get_post_type(), 'genesis-entry-meta-before-content' ) ) {
-						// TODO: Once other post types use our settings we'll need to account for it here.
-						$header_meta = genesis_get_option( 'entry_meta_before_content' );
-						$header_meta = apply_filters( 'genesis_post_info', $header_meta );
-						$header_meta = wp_kses_post( $header_meta );
-						$header_meta = trim( $header_meta );
-					}
-				}
-				// A block.
-				else {
-					$header_meta = $this->args['header_meta'];
-				}
-			break;
-			case 'term':
-				$header_meta = ''; // TODO.
-			break;
-			case 'user':
-				$header_meta = ''; // TODO.
-			break;
-			default:
-				$header_meta = '';
-		}
-
 		// Bail if none.
-		if ( ! $header_meta ) {
+		if ( ! $this->args['header_meta'] ) {
 			return;
 		}
 
 		// Run shortcodes.
-		$header_meta = do_shortcode( $header_meta );
+		$this->args['header_meta'] = do_shortcode( $this->args['header_meta'] );
 
 		genesis_markup(
 			[
 				'open'    => '<p %s>',
 				'close'   => '</p>',
-				'content' => genesis_strip_p_tags( $header_meta ),
+				'content' => genesis_strip_p_tags( $this->args['header_meta'] ),
 				'context' => 'entry-meta-before-content',
 				'echo'    => true,
 				'params'  => [
@@ -696,49 +671,19 @@ class Mai_Entry {
 	 */
 	function do_footer_meta() {
 
-		$footer_meta = '';
-
-		// Footer meta.
-		switch ( $this->type ) {
-			case 'post':
-				// Not a block.
-				if ( 'block' !== $this->context ) {
-					if ( post_type_supports( get_post_type(), 'genesis-entry-meta-after-content' ) ) {
-						// TODO: Once other post types use our settings we'll need to account for it here.
-						$footer_meta = genesis_get_option( 'entry_meta_after_content' );
-						$footer_meta = apply_filters( 'genesis_post_info', $footer_meta );
-						$footer_meta = wp_kses_post( $footer_meta );
-						$footer_meta = trim( $footer_meta );
-					}
-				}
-				// A block.
-				else {
-					$footer_meta = $this->args['footer_meta'];
-				}
-			break;
-			case 'term':
-				$footer_meta = ''; // TODO.
-			break;
-			case 'user':
-				$footer_meta = ''; // TODO.
-			break;
-			default:
-				$footer_meta = '';
-		}
-
 		// Bail if none.
-		if ( ! $footer_meta ) {
+		if ( ! $this->args['header_meta'] ) {
 			return;
 		}
 
 		// Run shortcodes.
-		$footer_meta = do_shortcode( $footer_meta );
+		$this->args['header_meta'] = do_shortcode( $this->args['header_meta'] );
 
 		genesis_markup(
 			[
 				'open'    => '<p %s>',
 				'close'   => '</p>',
-				'content' => genesis_strip_p_tags( $footer_meta ),
+				'content' => genesis_strip_p_tags( $this->args['header_meta'] ),
 				'context' => 'entry-meta-after-content',
 				'echo'    => true,
 				'params'  => [
@@ -772,11 +717,13 @@ class Mai_Entry {
 			return;
 		}
 
+		$more_link_text = $this->args['more_link_text'] ? $this->args['more_link_text'] : __( 'Read More', 'mai-engine' );
+
 		genesis_markup(
 			[
 				'open'    => '<a %s>',
 				'close'   => '</a>',
-				'content' => esc_html( __( 'Read More', 'mai-engine' ) ),
+				'content' => $more_link_text,
 				'context' => 'entry-read-more',
 				'atts'    => [
 					'href' => $more_link,
@@ -801,7 +748,6 @@ class Mai_Entry {
 	}
 
 	function do_author_box() {
-		// TODO. genesis_do_author_box_single() has checks if post type supports. Do we want that?
 		echo genesis_get_author_box( 'single' );
 	}
 

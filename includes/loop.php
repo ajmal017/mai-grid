@@ -9,28 +9,25 @@ add_action( 'genesis_before_loop', function() {
 		return;
 	}
 
-	// Remove loop and entry elements.
+	// Remove entry elements.
+	remove_action( 'genesis_entry_header', 'genesis_do_post_format_image', 4 );
+	remove_action( 'genesis_entry_header', 'genesis_entry_header_markup_open', 5 );
+	remove_action( 'genesis_entry_header', 'genesis_entry_header_markup_close', 15 );
+	remove_action( 'genesis_entry_header', 'genesis_do_post_title' );
+	remove_action( 'genesis_entry_header', 'genesis_post_info', 12 );
+
+	remove_action( 'genesis_entry_content', 'genesis_do_post_image', 8 );
+	remove_action( 'genesis_entry_content', 'genesis_do_post_content' );
+	remove_action( 'genesis_entry_content', 'genesis_do_post_content_nav', 12 );
+	remove_action( 'genesis_entry_content', 'genesis_do_post_permalink', 14 );
+
+	remove_action( 'genesis_entry_footer', 'genesis_entry_footer_markup_open', 5 );
+	remove_action( 'genesis_entry_footer', 'genesis_entry_footer_markup_close', 15 );
+	remove_action( 'genesis_entry_footer', 'genesis_post_meta' );
+
+	// Swap loop
 	remove_action( 'genesis_loop', 'genesis_do_loop' );
 	add_action( 'genesis_loop', 'mai_do_archive_loop' );
-
-	// $config   = new Mai_Settings_Config( 'archive' );
-	// $defaults = $config->get_defaults();
-	// $args     = wp_parse_args( (array) get_option( 'maiengine' ), $defaults );
-
-	// // Archive loop open.
-	// add_action( 'genesis_before_while', function() use ( $args ) {
-
-	// 	mai_do_entries_open( $args );
-
-	// }, 100 );
-
-	// // Archive loop close.
-	// add_action( 'genesis_after_endwhile', function() use ( $args ) {
-
-	// 	mai_do_entries_close( $args );
-
-	// }, 0 );
-
 });
 
 function mai_do_archive_loop() {
@@ -93,7 +90,7 @@ function mai_get_template_args() {
 
 	$settings = new Mai_Entry_Settings( 'archive' );
 	$name     = mai_get_archive_args_name();
-	$key      = $name ? sprintf( 'mai_%s_archive', $name ): 'mai_post_archive';
+	$key      = $name ? 'mai_archive_' . $name : 'mai_archive_post';
 	$args     = wp_parse_args( get_option( $key, [] ), $settings->defaults );
 
 	return apply_filters( 'mai_template_args', $args );

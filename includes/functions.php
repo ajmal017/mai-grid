@@ -251,18 +251,21 @@ function mai_get_gap( $value ) {
 	return trim( $value );
 }
 
+/**
+ * Get the columns at different breakpoints.
+ * We use strings because the clear option is just an empty string.
+ */
 function mai_get_breakpoint_columns( $args ) {
 
 	$columns = [
-		'lg' => $args['columns'],
+		'lg' => (int) $args['columns'],
 	];
-
 	if ( $args['columns_responsive'] ) {
-		$columns['md'] = $args['columns_md'];
-		$columns['sm'] = $args['columns_sm'];
-		$columns['xs'] = $args['columns_xs'];
+		$columns['md'] = (int) $args['columns_md'];
+		$columns['sm'] = (int) $args['columns_sm'];
+		$columns['xs'] = (int) $args['columns_xs'];
 	} else {
-		switch ( $args['columns'] ) {
+		switch ( (int) $args['columns'] ) {
 			case 6:
 				$columns['md'] = 4;
 				$columns['sm'] = 3;
