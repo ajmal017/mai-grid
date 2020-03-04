@@ -77,9 +77,8 @@ final class Mai_Grid_Blocks  {
 	}
 
 	function blocks_init() {
-		// $this->config = mai_get_settings_config();
 		$this->config = new Mai_Entry_Settings( 'block' );
-		$this->fields = $this->config->get_fields();
+		$this->fields = $this->config->fields;
 		$this->run_filters();
 	}
 
@@ -130,35 +129,8 @@ final class Mai_Grid_Blocks  {
 		if ( ! is_admin() ) {
 			return;
 		}
-		$this->enqueue_asset( 'admin', 'css' );
-		$this->enqueue_asset( 'admin', 'js' );
-	}
-
-	function enqueue_asset( $name, $type ) {
-		// TODO: These should get cleaned up once in the engine.
-		$base_url = trailingslashit( MAI_GRID_PLUGIN_URL ) . 'assets/' . $type;
-		$base_dir = trailingslashit( MAI_GRID_PLUGIN_DIR ) . 'assets/' . $type;
-		$suffix   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '': '.min';
-		if ( ! file_exists( "{$base_dir}/{$name}{$suffix}.{$type}" ) ) {
-			// Fallback if someone overrides the CSS/JS in a theme and doesn't proved .min version.
-			if ( '.min' === $suffix ) {
-				if ( file_exists( "{$base_dir}/{$name}.{$type}" ) ) {
-					$suffix = '';
-				} else {
-					return;
-				}
-			}
-		}
-		$url     = sprintf( '%s/%s%s.%s', $base_url, $name, $suffix, $type );
-		$version = $this->version . '.' . date ( 'njYHi', filemtime( "{$base_dir}/{$name}{$suffix}.{$type}" ) );
-		switch ( $type ) {
-			case 'css':
-				wp_enqueue_style( "mai-grid-{$name}", $url, $dependencies, $version );
-			break;
-			case 'js':
-				wp_enqueue_script( "mai-grid-{$name}", $url, $dependencies, $version, true );
-			break;
-		}
+		// mai_enqueue_asset( 'fields', 'css' );
+		mai_enqueue_asset( 'mai-grid-sortable', 'sortable', 'js' );
 	}
 
 	function do_post_grid( $block, $content = '', $is_preview = false ) {

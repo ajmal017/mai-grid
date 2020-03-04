@@ -672,18 +672,18 @@ class Mai_Entry {
 	function do_footer_meta() {
 
 		// Bail if none.
-		if ( ! $this->args['header_meta'] ) {
+		if ( ! $this->args['footer_meta'] ) {
 			return;
 		}
 
 		// Run shortcodes.
-		$this->args['header_meta'] = do_shortcode( $this->args['header_meta'] );
+		$this->args['footer_meta'] = do_shortcode( $this->args['footer_meta'] );
 
 		genesis_markup(
 			[
 				'open'    => '<p %s>',
 				'close'   => '</p>',
-				'content' => genesis_strip_p_tags( $this->args['header_meta'] ),
+				'content' => genesis_strip_p_tags( $this->args['footer_meta'] ),
 				'context' => 'entry-meta-after-content',
 				'echo'    => true,
 				'params'  => [

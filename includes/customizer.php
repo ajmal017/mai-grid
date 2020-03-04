@@ -22,8 +22,8 @@ add_filter( 'kirki_config', function( $config ) {
 // });
 
 add_action( 'customize_controls_enqueue_scripts', function() {
-	mai_enqueue_asset( 'customizer', 'js' );
-	mai_enqueue_asset( 'fields', 'css' );
+	mai_enqueue_asset( 'mai-customizer', 'customizer', 'js' );
+	mai_enqueue_asset( 'mai-fields', 'fields', 'css' );
 });
 
 function mai_kirki_panel_id() {

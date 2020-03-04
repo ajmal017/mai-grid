@@ -1,5 +1,39 @@
 <?php
 
+/**
+ * Show only posts in 1 or more categories on the main blog.
+ * Only targets the main blog page set as the static Page for Posts
+ * in Dashboard > Settings > Reading.
+ *
+ * @return  void
+ */
+add_filter( 'pre_get_posts', 'mai_archive_posts_per_page' );
+function mai_archive_posts_per_page( $query ) {
+	// Bail if in the Dashboard.
+	if ( is_admin() ) {
+		return;
+	}
+	// Bail if not the main query.
+	if ( ! $query->is_main_query() ) {
+		return;
+	}
+	// Bail if not an archive.
+	// TODO: This is the archive helper function in mai-engine.
+	if ( ! ( is_home() || is_archive() || is_tax() || is_search() || is_date() || is_author() ) ) {
+		return;
+	}
+	// Get the template args.
+	$args = mai_get_template_args();
+	// Bail if no posts_per_page.
+	if ( ! isset( $args['posts_per_page'] ) || ( empty( $args['posts_per_page'] ) && '0' !== $args['posts_per_page'] ) ) {
+		return;
+	}
+	// TODO: Hide posts if posts_per_page is 0?
+	// Set posts per page.
+	$query->set( 'posts_per_page', $args['posts_per_page'] );
+}
+
+
 // Mai loop.
 add_action( 'genesis_before_loop', function() {
 
@@ -37,7 +71,7 @@ function mai_do_archive_loop() {
 	if ( have_posts() ) {
 
 		// Enqueue entries CSS.
-		mai_enqueue_asset( 'entries', 'css' );
+		mai_enqueue_asset( 'mai-entries', 'entries', 'css' );
 
 		/**
 		 * Fires inside the standard loop, before the while() block.
@@ -82,10 +116,17 @@ function mai_do_archive_loop() {
 // TODO: Make this work for singular too.
 function mai_get_template_args() {
 
+	// Setup cache.
+	static $args = null;
+	if ( null !== $args ) {
+		return $args;
+	}
+
 	// Bail if not an archive.
 	// TODO: This is the archive helper function in mai-engine.
 	if ( ! ( is_home() || is_archive() || is_tax() || is_search() || is_date() || is_author() ) ) {
-		return [];
+		$args = [];
+		return $args;
 	}
 
 	$settings = new Mai_Entry_Settings( 'archive' );
@@ -93,7 +134,39 @@ function mai_get_template_args() {
 	$key      = $name ? 'mai_archive_' . $name : 'mai_archive_post';
 	$args     = wp_parse_args( get_option( $key, [] ), $settings->defaults );
 
-	return apply_filters( 'mai_template_args', $args );
+	// Allow devs to filter.
+	$args = apply_filters( 'mai_template_args', $args );
+
+	// Sanitize.
+	$args = mai_get_sanitized_entry_args( $args );
+
+	return $args;
+}
+
+function mai_get_sanitized_entry_args( $args ) {
+
+	// Get settings.
+	$settings = new Mai_Entry_Settings( $args['context'] );
+
+	// Sanitize.
+	foreach( $args as $name => $value ) {
+		// Skip if not set.
+		if ( ! isset( $settings->fields[ $name ]['sanitize'] ) ) {
+			continue;
+		}
+		$function = $settings->fields[ $name ]['sanitize'];
+		if ( is_array( $value ) ) {
+			$escaped = [];
+			foreach( $value as $key => $val ) {
+				$escaped[ $key ] = $function( $val );
+			}
+			$args[ $name ] = $escaped;
+		} else {
+			$args[ $name ] = $function( $value );
+		}
+	}
+
+	return $args;
 }
 
 function mai_get_archive_args_name() {

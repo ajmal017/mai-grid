@@ -254,18 +254,18 @@ class Mai_Grid_Base {
 	function enqueue_assets() {
 
 		// Default layout CSS.
-		mai_enqueue_asset( 'entries', 'css' );
+		mai_enqueue_asset( 'mai-entries', 'entries', 'css' );
 
 		if ( is_admin() ) {
 
 			// Default admin scripts.
-			mai_enqueue_asset( 'fields', 'css' );
+			mai_enqueue_asset( 'mai-fields', 'fields', 'css' );
 
 			// Query JS.
 			switch ( $this->args['type'] ) {
 				case 'post':
-					mai_enqueue_asset( 'wp-query', 'js' );
-					wp_localize_script( 'mai-wp-query', 'maiGridWPQueryVars', [
+					mai_enqueue_asset( 'mai-grid-wp-query', 'wp-query', 'js' );
+					wp_localize_script( 'mai-grid-wp-query', 'maiGridWPQueryVars', [
 						'fields' => $this->fields,
 						'keys'   => $this->keys,
 					] );

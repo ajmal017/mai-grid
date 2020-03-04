@@ -86,13 +86,14 @@ function mai_is_content_archive_new() {
 /**
  * Enqueue an asset.
  *
+ * @param   string  $handle        The asset handle.
  * @param   string  $name          The asset name.
  * @param   string  $type          The type. Typically js or css.
  * @param   array   $dependencies  Script dependencies.
  *
  * @return  void
  */
-function mai_enqueue_asset( $name, $type, $dependencies = [] ) {
+function mai_enqueue_asset( $handle, $name, $type, $dependencies = [] ) {
 	// TODO: These should get cleaned up once in the engine.
 	// TODO: Static variables?
 	$base_url = trailingslashit( MAI_GRID_PLUGIN_URL ) . 'assets/' . $type;
@@ -102,10 +103,10 @@ function mai_enqueue_asset( $name, $type, $dependencies = [] ) {
 	$version  = MAI_GRID_VERSION . '.' . date ( 'njYHi', filemtime( "{$base_dir}/{$name}{$suffix}.{$type}" ) );
 	switch ( $type ) {
 		case 'css':
-			wp_enqueue_style( "mai-{$name}", $url, $dependencies, $version );
+			wp_enqueue_style( $handle, $url, $dependencies, $version );
 		break;
 		case 'js':
-			wp_enqueue_script( "mai-{$name}", $url, $dependencies, $version, true );
+			wp_enqueue_script( $handle, $url, $dependencies, $version, true );
 		break;
 	}
 }

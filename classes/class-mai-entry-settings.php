@@ -407,6 +407,21 @@ class Mai_Entry_Settings {
 				'group'    => [ 'mai_post_grid', 'mai_term_grid', 'mai_user_grid' ],
 				'default'  => ( 'block' === $this->context ) ? '24px' : '64px',
 			],
+			'posts_per_page' => [
+				'label'    => esc_html__( 'Posts Per Page', 'mai-engine' ),
+				'desc'     => esc_html__( 'Sticky posts are not included in count.', 'mai-engine' ),
+				'block'    => false,
+				'archive'  => true,
+				'singular' => false,
+				'sanitize' => 'esc_html', // Can't absint cause empty string means to use default.
+				'type'     => 'text',
+				'default'  => '',
+				'kirki'    => [
+					'input_attrs' => [
+						'placeholder' => get_option( 'posts_per_page' ),
+					],
+				],
+			],
 			/***********
 			 * Entries *
 			 ***********/
@@ -464,7 +479,7 @@ class Mai_Entry_Settings {
 				'acf' => [
 					'placeholder' => 12,
 					'min'         => 0,
-				],
+				]
 			],
 			'query_by' => [
 				'label'    => esc_html__( 'Get Entries By', 'mai-engine' ),
@@ -910,6 +925,10 @@ class Mai_Entry_Settings {
 			return;
 		}
 		foreach( $this->fields as $name => $field ) {
+			// Skip if no key.
+			if ( ! isset( $field['key'] ) ) {
+				continue;
+			}
 			// Set key.
 			$keys[ $name ] = $field['key'];
 			// Skip if no sub fields.

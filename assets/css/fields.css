@@ -33,6 +33,10 @@
 	border-radius: 3px;
 }
 
+.customize-control.customize-control-kirki-sortable ul.ui-sortable li:hover {
+	cursor: move;
+}
+
 .customize-control.customize-control-kirki-sortable ul.ui-sortable li:not(.invisible) {
 	border: 1px solid #7e8993;
 }
