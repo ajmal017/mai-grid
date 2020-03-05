@@ -31,7 +31,6 @@ jQuery(document).ready(function($) {
 	// Button click event.
 	$wrapper.on( 'click', '.mai-toggle-hooks', function(e) {
 		e.preventDefault();
-		console.log( 'click yo' );
 		$sortables.toggleClass( 'mai-sortable-expanded' );
 	});
 

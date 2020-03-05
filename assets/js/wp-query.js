@@ -68,7 +68,6 @@ jQuery(document).ready(function($) {
 	});
 
 	function getPostType( $input ) {
-		console.log( keys.post_type );
 		var $wrapper  = $input.parents( '.acf-block-fields' );
 		var $postType = $wrapper.find( '.acf-field[data-key="' + keys.post_type + '"] select' );
 		return $postType.val();
